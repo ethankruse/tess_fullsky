@@ -14,9 +14,9 @@ import cartopy.crs as ccrs
 datadir = os.path.join(os.path.split(__file__)[0], 'data')
 figdir = os.path.join(os.path.split(__file__)[0], 'figs')
 
-#files = glob(os.path.join(datadir, '*s0012*fits'))
+files = glob(os.path.join(datadir, '*s0012*fits'))
 #files = glob(os.path.join(datadir, '*4-4*fits'))
-files = glob(os.path.join(datadir, '*fits'))
+#files = glob(os.path.join(datadir, '*fits'))
 files.sort()
 
 # central longitude of the projection
@@ -34,10 +34,10 @@ cmap = 'gray'
 
 test = True
 makefig = True
-doclean = False
+doclean = True
 highres = False
 savefig = False
-
+cleanplot = True
 fname = 'ortho.png'
 savefile = os.path.join(figdir, fname)
 
@@ -45,9 +45,10 @@ savefile = os.path.join(figdir, fname)
 credit = 'By Ethan Kruse\n@ethan_kruse'
 ##################################################################
 
-# XXX: 
-#files[0] = files[-2]
-#files = files[-3:]
+if test:
+    # XXX: for testing
+    #files[0] = files[-2]
+    files = files[-1:]
 
 
 def grab_sector(sector):
@@ -66,22 +67,93 @@ def grab_sector(sector):
     return
 
 
-def clean(data):
+def clean(data, lat, lon, corners=[], cleanplot=False):
     import scipy.ndimage
-    fdata = data * 1
-    fdata[fdata > 1000] = 100
-    fdata[fdata < 0] = 0
-    fdata = scipy.ndimage.uniform_filter(fdata, size=201)
-    # fdata[fdata > 300] = 300
+    from astropy.modeling import models, fitting
     
-    """
-    from mpl_toolkits.mplot3d import Axes3D
-    fig = plt.figure()
-    ax = fig.gca(projection='3d')
-    ax.plot_surface(lat[1:,1:], lon[1:,1:], fdata, cmap='gray',
-                       linewidth=0, antialiased=False)
-    """
-    return data - fdata + 100
+    # a smoother copy of the data
+    fdata = data * 1
+    # remove spiky stars and bad data
+    fdata[fdata > 1000] = np.median(fdata)
+    fdata[fdata < 50] = 50
+    # smooth things out
+    fdata = scipy.ndimage.uniform_filter(fdata, size=201)
+    
+    # make a diagnostic plot to judge bad corners
+    if cleanplot and len(corners) == 0:
+        from mpl_toolkits.mplot3d import Axes3D
+        fig = plt.figure()
+        ax = fig.gca(projection='3d')
+        ax.plot_surface(lat[1:,1:], lon[1:,1:], fdata, cmap='gray',
+                           linewidth=0, antialiased=False, alpha=0.2)
+        ax.text(lat[0,0],lon[0,0],50,'C1',color='red')
+        ax.text(lat[-1,0],lon[-1,0],50,'C2',color='red')
+        ax.text(lat[0,-1],lon[0,-1],50,'C3',color='red')
+        ax.text(lat[-1,-1],lon[-1,-1],50,'C4',color='red')
+
+    # fix the desired corners
+    for corner in corners:
+        p_init = models.Polynomial2D(degree=2)
+        fit_p = fitting.LevMarLSQFitter()
+        
+        xl, yl = fdata.shape
+        
+        # pick the right corner and get views of the data
+        if corner==1:
+            xs = lat[:xl//4,:yl//4]
+            ys = lon[:xl//4,:yl//4]
+            dat = fdata[:xl//4,:yl//4]
+            rdat = data[:xl//4,:yl//4]
+        elif corner==2:
+            xs = lat[-xl//4:,:yl//4]
+            ys = lon[-xl//4:,:yl//4]
+            dat = fdata[-xl//4:,:yl//4]
+            rdat = data[-xl//4:,:yl//4]
+        elif corner==3:
+            xs = lat[:xl//4,-yl//4:]
+            ys = lon[:xl//4,-yl//4:]
+            dat = fdata[:xl//4,-yl//4:]
+            rdat = data[:xl//4,-yl//4:]
+        elif corner==4:
+            xs = lat[-xl//4:,-yl//4:]
+            ys = lon[-xl//4:,-yl//4:]
+            dat = fdata[-xl//4:,-yl//4:]
+            rdat = data[-xl//4:,-yl//4:]
+        else:
+            raise Exception('bad corner')
+
+        # run the fit
+        poly = fit_p(p_init, xs, ys, dat)
+        mod = poly(xs, ys)
+        
+        # diagnostic plots to make sure it's working
+        if cleanplot:
+            from mpl_toolkits.mplot3d import Axes3D
+            fig = plt.figure()
+            ax = fig.gca(projection='3d')
+            ax.plot_surface(lat[1:,1:], lon[1:,1:], fdata, cmap='gray',
+                               linewidth=0, antialiased=False, alpha=0.3)
+            
+            ax.plot_surface(xs, ys, mod, cmap='viridis',
+                            linewidth=0, antialiased=False, alpha=0.2)
+        
+            dat -= mod
+            dat += mod.min()
+            
+            ax.plot_surface(lat[1:,1:], lon[1:,1:], fdata, cmap='gray',
+                               linewidth=0, antialiased=False, alpha=0.6)
+            
+            ax.text(lat[0,0],lon[0,0],50,'C1',color='red')
+            ax.text(lat[-1,0],lon[-1,0],50,'C2',color='red')
+            ax.text(lat[0,-1],lon[0,-1],50,'C3',color='red')
+            ax.text(lat[-1,-1],lon[-1,-1],50,'C4',color='red')
+            plt.title('C{0}'.format(corner))
+        
+        # remove the trend from the actual data
+        rdat -= mod
+        rdat += mod.min()
+        
+    return data
 
 
 plt.close('all')
@@ -120,7 +192,7 @@ for ii, ifile in enumerate(files):
         lon -= 180.
         
         if doclean:
-            data = clean(data)
+            data = clean(data, lat, lon, cleanplot=cleanplot)
         
         print(f'{ii+1} of {len(files)}: {lon.min():.2f}, {lon.max():.2f}, {lat.min():.2f}, {lat.max():.2f}')
         
@@ -161,6 +233,10 @@ if makefig and savefig:
         savefile = os.path.splitext(orig)[0] + f'{inum}' + os.path.splitext(orig)[1]
         inum += 1
     plt.savefig(savefile)
+    
+
+# make bad corners file
+# figure out distribution and black zero level
 
 """
 from mpl_toolkits.mplot3d import Axes3D
@@ -183,5 +259,69 @@ ax = plt.axes([0.01, 0.01, 0.99, 0.99], projection=tr)
 plt.pcolormesh(lon, lat, data, norm=cnorm, alpha=0.3, transform=data_tr, cmap=cmap)
 """
 
+
+"""
+corner = 4
+
+import scipy.ndimage
+from astropy.modeling import models, fitting
+
+for corner in np.arange(4)+1:
+    fdata = data * 1
+    fdata[fdata > 1000] = np.median(fdata)
+    fdata[fdata < 50] = 50
+    fdata = scipy.ndimage.uniform_filter(fdata, size=201)
+    
+    p_init = models.Polynomial2D(degree=2)
+    fit_p = fitting.LevMarLSQFitter()
+    
+    xl, yl = fdata.shape
+    
+    if corner==1:
+        xs = lat[:xl//4,:yl//4]
+        ys = lon[:xl//4,:yl//4]
+        dat = fdata[:xl//4,:yl//4]
+    elif corner==2:
+        xs = lat[-xl//4:,:yl//4]
+        ys = lon[-xl//4:,:yl//4]
+        dat = fdata[-xl//4:,:yl//4]
+    elif corner==3:
+        xs = lat[:xl//4,-yl//4:]
+        ys = lon[:xl//4,-yl//4:]
+        dat = fdata[:xl//4,-yl//4:]
+    elif corner==4:
+        xs = lat[-xl//4:,-yl//4:]
+        ys = lon[-xl//4:,-yl//4:]
+        dat = fdata[-xl//4:,-yl//4:]
+    else:
+        raise Exception('bad corner')
+    
+    poly = fit_p(p_init, xs, ys, dat)
+    
+    
+    from mpl_toolkits.mplot3d import Axes3D
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+    ax.plot_surface(lat[1:,1:], lon[1:,1:], fdata, cmap='gray',
+                       linewidth=0, antialiased=False, alpha=0.2)
+    
+    mod = poly(xs, ys)
+    
+    ax.plot_surface(xs, ys, mod, cmap='viridis',
+                       linewidth=0, antialiased=False, alpha=0.2)
+    
+    dat -= mod
+    dat += mod.min()
+    
+    ax.plot_surface(lat[1:,1:], lon[1:,1:], fdata, cmap='gray',
+                       linewidth=0, antialiased=False, alpha=0.2)
+    
+    ax.text(lat[0,0],lon[0,0],50,'C1',color='red')
+    ax.text(lat[-1,0],lon[-1,0],50,'C2',color='red')
+    ax.text(lat[0,-1],lon[0,-1],50,'C3',color='red')
+    ax.text(lat[-1,-1],lon[-1,-1],50,'C4',color='red')
+    plt.title('C{0}'.format(corner))
+
+"""
 
 
