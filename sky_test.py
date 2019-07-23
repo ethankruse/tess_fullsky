@@ -9,15 +9,17 @@ import matplotlib.pyplot as plt
 import os
 import matplotlib.colors as colors
 import cartopy.crs as ccrs
-
+from scipy.stats import median_absolute_deviation as mad
 
 datadir = os.path.join(os.path.split(__file__)[0], 'data')
 figdir = os.path.join(os.path.split(__file__)[0], 'figs')
 
-files = glob(os.path.join(datadir, '*s0012*fits'))
+#files = glob(os.path.join(datadir, '*s0012*fits'))
+files = glob(os.path.join(datadir, '*s0011-2*fits'))
 #files = glob(os.path.join(datadir, '*4-4*fits'))
 #files = glob(os.path.join(datadir, '*fits'))
 files.sort()
+
 
 # central longitude of the projection
 cenlon = 0.
@@ -27,29 +29,31 @@ tr = ccrs.Orthographic(central_longitude=-89.5, central_latitude=-66.2)
 #tr = ccrs.Mollweide()
 
 # minimum and maximum flux for the colorbar
-vmin = 100
+vmin = 150
 vmax = 1001.
 cnorm = colors.LogNorm(vmin=vmin, vmax=vmax)
 cmap = 'gray'
 
+doclean = True
+cleanplot = True
+badcornerfile = os.path.join(os.path.split(__file__)[0], 'bad_corners.txt')
+noisefile = os.path.join(os.path.split(__file__)[0], 'noise.txt')
+
 test = True
 makefig = True
-doclean = True
 highres = False
 savefig = False
-cleanplot = True
 fname = 'ortho.png'
 savefile = os.path.join(figdir, fname)
-
 
 credit = 'By Ethan Kruse\n@ethan_kruse'
 ##################################################################
 
 if test:
     # XXX: for testing
-    #files[0] = files[-2]
-    files = files[-1:]
-
+    #files = [files[1]]
+    #files = files[:3]
+    pass
 
 def grab_sector(sector):
     file = os.path.join(datadir, 'tesscurl_sector_{0}_ffic.sh'.format(sector))
@@ -67,9 +71,10 @@ def grab_sector(sector):
     return
 
 
-def clean(data, lat, lon, corners=[], cleanplot=False):
+def clean(data, corners=[], cleanplot=False, info=None):
     import scipy.ndimage
     from astropy.modeling import models, fitting
+    import warnings
     
     # a smoother copy of the data
     fdata = data * 1
@@ -79,21 +84,29 @@ def clean(data, lat, lon, corners=[], cleanplot=False):
     # smooth things out
     fdata = scipy.ndimage.uniform_filter(fdata, size=201)
     
+    xinds = np.arange(0.5, data.shape[0]-0.4)
+    yinds = np.arange(0.5, data.shape[1]-0.4)
+    lon, lat = np.meshgrid(xinds, yinds, indexing='ij')
+    
+    if info is not None:
+        sec, cam, ccd = info
+    else:
+        sec, cam, ccd = 0, 0, 0
     # make a diagnostic plot to judge bad corners
     if cleanplot and len(corners) == 0:
         from mpl_toolkits.mplot3d import Axes3D
         fig = plt.figure()
         ax = fig.gca(projection='3d')
-        ax.plot_surface(lat[1:,1:], lon[1:,1:], fdata, cmap='gray',
+        ax.plot_surface(lat, lon, fdata, cmap='gray',
                            linewidth=0, antialiased=False, alpha=0.2)
         ax.text(lat[0,0],lon[0,0],50,'C1',color='red')
         ax.text(lat[-1,0],lon[-1,0],50,'C2',color='red')
         ax.text(lat[0,-1],lon[0,-1],50,'C3',color='red')
         ax.text(lat[-1,-1],lon[-1,-1],50,'C4',color='red')
-
+        plt.title(f'Sec {sec}, Cam {cam}, CCD {ccd}')
     # fix the desired corners
     for corner in corners:
-        p_init = models.Polynomial2D(degree=2)
+        p_init = models.Polynomial2D(degree=3)
         fit_p = fitting.LevMarLSQFitter()
         
         xl, yl = fdata.shape
@@ -122,8 +135,12 @@ def clean(data, lat, lon, corners=[], cleanplot=False):
         else:
             raise Exception('bad corner')
 
-        # run the fit
-        poly = fit_p(p_init, xs, ys, dat)
+        # Ignore model linearity warning from the fitter
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            # run the fit
+            poly = fit_p(p_init, xs, ys, dat)
+
         mod = poly(xs, ys)
         
         # diagnostic plots to make sure it's working
@@ -131,7 +148,7 @@ def clean(data, lat, lon, corners=[], cleanplot=False):
             from mpl_toolkits.mplot3d import Axes3D
             fig = plt.figure()
             ax = fig.gca(projection='3d')
-            ax.plot_surface(lat[1:,1:], lon[1:,1:], fdata, cmap='gray',
+            ax.plot_surface(lat, lon, fdata, cmap='gray',
                                linewidth=0, antialiased=False, alpha=0.3)
             
             ax.plot_surface(xs, ys, mod, cmap='viridis',
@@ -140,14 +157,14 @@ def clean(data, lat, lon, corners=[], cleanplot=False):
             dat -= mod
             dat += mod.min()
             
-            ax.plot_surface(lat[1:,1:], lon[1:,1:], fdata, cmap='gray',
+            ax.plot_surface(lat, lon, fdata, cmap='gray',
                                linewidth=0, antialiased=False, alpha=0.6)
             
             ax.text(lat[0,0],lon[0,0],50,'C1',color='red')
             ax.text(lat[-1,0],lon[-1,0],50,'C2',color='red')
             ax.text(lat[0,-1],lon[0,-1],50,'C3',color='red')
             ax.text(lat[-1,-1],lon[-1,-1],50,'C4',color='red')
-            plt.title('C{0}'.format(corner))
+            plt.title(f'Sec {sec}, Cam {cam}, CCD {ccd}, Corner {corner}')
         
         # remove the trend from the actual data
         rdat -= mod
@@ -157,6 +174,9 @@ def clean(data, lat, lon, corners=[], cleanplot=False):
 
 
 plt.close('all')
+
+bsec, bcam, bccd, bcor = np.loadtxt(badcornerfile, unpack=True, ndmin=2, 
+                                    delimiter=',', dtype=int)
 
 for ii, ifile in enumerate(files):
     with fits.open(ifile) as ff:
@@ -191,10 +211,27 @@ for ii, ifile in enumerate(files):
         # lon must be between -180 and 180 instead of 0 to 360
         lon -= 180.
         
-        if doclean:
-            data = clean(data, lat, lon, cleanplot=cleanplot)
+        icam = ff[1].header['camera']
+        iccd = ff[1].header['ccd']
+        isec = int(ifile.split('-s0')[1][:3])
+        
+        imed = np.median(data)
+        imad = mad(data, axis=None)
         
         print(f'{ii+1} of {len(files)}: {lon.min():.2f}, {lon.max():.2f}, {lat.min():.2f}, {lat.max():.2f}')
+        print(f'median {imed:.2f}, mad {imad:.2f}, 3sigma {imed+3*imad:.2f}, 5sigma {imed+5*imad:.2f}')
+        
+        noises = np.loadtxt(noisefile, unpack=True, ndmin=2, delimiter=',')
+        exists = np.where((noises[0,:]==isec) & (noises[1,:]==icam) & (noises[2,:]==iccd))[0]
+        if len(exists) == 0:
+            noises = np.concatenate((noises.T, [[isec, icam, iccd, imed, imad, imed+3.*imad, imed+5.*imad]]))
+            np.savetxt(noisefile, noises, delimiter=', ', fmt='%.2f')
+            
+        if doclean:
+            tocor = np.where((bsec==isec) & (bcam==icam) & (bccd==iccd))[0]
+            print(f'Correcting corners {bcor[tocor]}')
+            data = clean(data, cleanplot=cleanplot, corners=bcor[tocor],
+                         info=(isec, icam, iccd))
         
         if makefig:
             if ii == 0 or test:
@@ -210,14 +247,14 @@ for ii, ifile in enumerate(files):
                 left = np.where(lon > cenlon + 120)
                 lonleft = lon * 1
                 lonleft[left] = cenlon - 180.
-                plt.pcolormesh(lonleft, lat, data, norm=cnorm, alpha=0.3, transform=data_tr, cmap=cmap)
+                plt.pcolormesh(lonleft, lat, data, norm=cnorm, alpha=1, transform=data_tr, cmap=cmap)
                 
                 right = np.where(lon < cenlon - 120)
                 lonright = lon * 1
                 lonright[right] = cenlon + 180.
-                plt.pcolormesh(lonright, lat, data, norm=cnorm, alpha=0.3, transform=data_tr, cmap=cmap)
+                plt.pcolormesh(lonright, lat, data, norm=cnorm, alpha=1, transform=data_tr, cmap=cmap)
             else:
-                plt.pcolormesh(lon, lat, data, norm=cnorm, alpha=0.3, transform=data_tr, cmap=cmap)
+                plt.pcolormesh(lon, lat, data, norm=cnorm, alpha=1, transform=data_tr, cmap=cmap)
             #plt.text(np.median(lon), np.median(lat), '{0}'.format(ii), transform=data_tr)
             if highres:
                 fsz = 150
@@ -225,7 +262,9 @@ for ii, ifile in enumerate(files):
                 fsz = 14
             plt.text(0.02, 0.02, credit, transform=fig.transFigure, ha='left', 
                      va='bottom', multialignment='left', fontsize=fsz, fontname='Carlito')
-
+            if test:
+                plt.colorbar()
+                
 if makefig and savefig:
     inum = 1
     orig = savefile
@@ -233,10 +272,7 @@ if makefig and savefig:
         savefile = os.path.splitext(orig)[0] + f'{inum}' + os.path.splitext(orig)[1]
         inum += 1
     plt.savefig(savefile)
-    
 
-# make bad corners file
-# figure out distribution and black zero level
 
 """
 from mpl_toolkits.mplot3d import Axes3D
