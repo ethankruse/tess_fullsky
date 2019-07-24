@@ -80,7 +80,9 @@
 5, 4, 2, 3
 5, 4, 3, 1
 5, 4, 4, 3
-6, 1, 1, 1
+# this is the Orion nebula/solar system artifact in the whole sector.
+# don't try to replace, just makes it look worse.
+# 6, 1, 1, 1
 6, 1, 2, 3
 6, 1, 3, 1
 6, 1, 4, 3

@@ -15,9 +15,9 @@ datadir = os.path.join(os.path.split(__file__)[0], 'data')
 figdir = os.path.join(os.path.split(__file__)[0], 'figs')
 
 #files = glob(os.path.join(datadir, '*s0012*fits'))
-files = glob(os.path.join(datadir, '*s0011-2*fits'))
+#files = glob(os.path.join(datadir, '*s0006-1*fits'))
 #files = glob(os.path.join(datadir, '*4-4*fits'))
-#files = glob(os.path.join(datadir, '*fits'))
+files = glob(os.path.join(datadir, '*fits'))
 files.sort()
 
 
@@ -35,14 +35,14 @@ cnorm = colors.LogNorm(vmin=vmin, vmax=vmax)
 cmap = 'gray'
 
 doclean = True
-cleanplot = True
+cleanplot = False
 badcornerfile = os.path.join(os.path.split(__file__)[0], 'bad_corners.txt')
 noisefile = os.path.join(os.path.split(__file__)[0], 'noise.txt')
 
-test = True
+test = False
 makefig = True
-highres = False
-savefig = False
+highres = True
+savefig = True
 fname = 'ortho.png'
 savefile = os.path.join(figdir, fname)
 
@@ -52,7 +52,7 @@ credit = 'By Ethan Kruse\n@ethan_kruse'
 if test:
     # XXX: for testing
     #files = [files[1]]
-    #files = files[:3]
+    # files = files[:1]
     pass
 
 def grab_sector(sector):
@@ -236,7 +236,7 @@ for ii, ifile in enumerate(files):
         if makefig:
             if ii == 0 or test:
                 if highres:
-                    fig = plt.figure(figsize=(80,80))
+                    fig = plt.figure(figsize=(100,100))
                 else:
                     fig = plt.figure()
                 ax = plt.axes([0.01, 0.01, 0.99, 0.99], projection=tr)
@@ -257,7 +257,7 @@ for ii, ifile in enumerate(files):
                 plt.pcolormesh(lon, lat, data, norm=cnorm, alpha=1, transform=data_tr, cmap=cmap)
             #plt.text(np.median(lon), np.median(lat), '{0}'.format(ii), transform=data_tr)
             if highres:
-                fsz = 150
+                fsz = 185
             else:
                 fsz = 14
             plt.text(0.02, 0.02, credit, transform=fig.transFigure, ha='left', 
