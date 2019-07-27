@@ -15,8 +15,10 @@ datadir = os.path.join(os.path.split(__file__)[0], 'data')
 figdir = os.path.join(os.path.split(__file__)[0], 'figs')
 
 #files = glob(os.path.join(datadir, '*s0012*fits'))
-#files = glob(os.path.join(datadir, '*s0006-1*fits'))
+#files = glob(os.path.join(datadir, '*s0011-3*fits'))
 #files = glob(os.path.join(datadir, '*4-4*fits'))
+#files = glob(os.path.join(datadir, '*-1-3*fits')) + glob(os.path.join(datadir, '*-1-4*fits'))
+#files = glob(os.path.join(datadir, '*-1-4*fits'))
 files = glob(os.path.join(datadir, '*fits'))
 files.sort()
 
@@ -38,20 +40,41 @@ doclean = True
 cleanplot = False
 badcornerfile = os.path.join(os.path.split(__file__)[0], 'bad_corners.txt')
 noisefile = os.path.join(os.path.split(__file__)[0], 'noise.txt')
+edgefile = os.path.join(os.path.split(__file__)[0], 'edges.txt')
 
 test = False
 makefig = True
 highres = True
 savefig = True
+makegif = True
 fname = 'ortho.png'
 savefile = os.path.join(figdir, fname)
 
 credit = 'By Ethan Kruse\n@ethan_kruse'
+title = "NASA TESS's View\nof the Southern\nHemisphere"
+
+secstarts = {1: 'Jul 2018', 2: 'Aug 2018', 3: 'Sep 2018', 4: 'Oct 2018', 
+             5: 'Nov 2018', 6: 'Dec 2018', 7: 'Jan 2019', 8: 'Feb 2019',
+             9: 'Feb 2019', 10: 'Mar 2019', 11: 'Apr 2019', 12: 'May 2019',
+             13: 'Jun 2019'}
+secends = {1: 'Aug 2018', 2: 'Sep 2018', 3: 'Oct 2018', 4: 'Nov 2018', 
+           5: 'Dec 2018', 6: 'Jan 2019', 7: 'Feb 2019', 8: 'Feb 2019',
+           9: 'Mar 2019', 10: 'Apr 2019', 11: 'May 2019', 12: 'Jun 2019',
+           13: 'Jul 2019'}
 ##################################################################
+
+if makegif:
+    figdir = os.path.join(figdir, 'gif')
+    prev = glob(os.path.join(figdir, '*png'))
+    for iprev in prev:
+        os.remove(iprev)
+    
+if not os.path.exists(figdir):
+    os.makedirs(figdir, exist_ok=True)
 
 if test:
     # XXX: for testing
-    #files = [files[1]]
+    files = [files[0]]
     # files = files[:1]
     pass
 
@@ -109,6 +132,9 @@ def clean(data, corners=[], cleanplot=False, info=None):
         p_init = models.Polynomial2D(degree=3)
         fit_p = fitting.LevMarLSQFitter()
         
+        bp_init = models.Polynomial2D(degree=1)
+        bfit_p = fitting.LevMarLSQFitter()
+        
         xl, yl = fdata.shape
         
         # pick the right corner and get views of the data
@@ -117,21 +143,62 @@ def clean(data, corners=[], cleanplot=False, info=None):
             ys = lon[:xl//4,:yl//4]
             dat = fdata[:xl//4,:yl//4]
             rdat = data[:xl//4,:yl//4]
+            
+            bxs1 = lat[xl//4:xl*3//8,:yl*3//8]
+            bys1 = lon[xl//4:xl*3//8,:yl*3//8]
+            bdat1 = fdata[xl//4:xl*3//8,:yl*3//8]
+            bxs2 = lat[:xl//4, yl//4:yl*3//8]
+            bys2 = lon[:xl//4, yl//4:yl*3//8]
+            bdat2 = fdata[:xl//4, yl//4:yl*3//8]
+            bxs = np.concatenate((bxs1.flatten(), bxs2.flatten()))
+            bys = np.concatenate((bys1.flatten(), bys2.flatten()))
+            bdat = np.concatenate((bdat1.flatten(), bdat2.flatten()))
+            
         elif corner==2:
             xs = lat[-xl//4:,:yl//4]
             ys = lon[-xl//4:,:yl//4]
             dat = fdata[-xl//4:,:yl//4]
             rdat = data[-xl//4:,:yl//4]
+            
+            bxs1 = lat[-xl*3//8:-xl//4,:yl*3//8]
+            bys1 = lon[-xl*3//8:-xl//4,:yl*3//8]
+            bdat1 = fdata[-xl*3//8:-xl//4,:yl*3//8]
+            bxs2 = lat[-xl//4:, yl//4:yl*3//8]
+            bys2 = lon[-xl//4:, yl//4:yl*3//8]
+            bdat2 = fdata[-xl//4:, yl//4:yl*3//8]
+            bxs = np.concatenate((bxs1.flatten(), bxs2.flatten()))
+            bys = np.concatenate((bys1.flatten(), bys2.flatten()))
+            bdat = np.concatenate((bdat1.flatten(), bdat2.flatten()))
         elif corner==3:
             xs = lat[:xl//4,-yl//4:]
             ys = lon[:xl//4,-yl//4:]
             dat = fdata[:xl//4,-yl//4:]
             rdat = data[:xl//4,-yl//4:]
+            
+            bxs1 = lat[xl//4:xl*3//8,-yl*3//8:]
+            bys1 = lon[xl//4:xl*3//8,-yl*3//8:]
+            bdat1 = fdata[xl//4:xl*3//8,-yl*3//8:]
+            bxs2 = lat[:xl//4, -yl*3//8:-yl//4]
+            bys2 = lon[:xl//4, -yl*3//8:-yl//4]
+            bdat2 = fdata[:xl//4, -yl*3//8:-yl//4]
+            bxs = np.concatenate((bxs1.flatten(), bxs2.flatten()))
+            bys = np.concatenate((bys1.flatten(), bys2.flatten()))
+            bdat = np.concatenate((bdat1.flatten(), bdat2.flatten()))
         elif corner==4:
             xs = lat[-xl//4:,-yl//4:]
             ys = lon[-xl//4:,-yl//4:]
             dat = fdata[-xl//4:,-yl//4:]
             rdat = data[-xl//4:,-yl//4:]
+            
+            bxs1 = lat[-xl*3//8:-xl//4,-yl*3//8:]
+            bys1 = lon[-xl*3//8:-xl//4,-yl*3//8:]
+            bdat1 = fdata[-xl*3//8:-xl//4,-yl*3//8:]
+            bxs2 = lat[-xl//4:, -yl*3//8:-yl//4]
+            bys2 = lon[-xl//4:, -yl*3//8:-yl//4]
+            bdat2 = fdata[-xl//4:, -yl*3//8:-yl//4]
+            bxs = np.concatenate((bxs1.flatten(), bxs2.flatten()))
+            bys = np.concatenate((bys1.flatten(), bys2.flatten()))
+            bdat = np.concatenate((bdat1.flatten(), bdat2.flatten()))
         else:
             raise Exception('bad corner')
 
@@ -140,8 +207,10 @@ def clean(data, corners=[], cleanplot=False, info=None):
             warnings.simplefilter('ignore')
             # run the fit
             poly = fit_p(p_init, xs, ys, dat)
+            bpoly = bfit_p(bp_init, bxs, bys, bdat)
 
         mod = poly(xs, ys)
+        bg = bpoly(xs, ys)
         
         # diagnostic plots to make sure it's working
         if cleanplot:
@@ -155,7 +224,7 @@ def clean(data, corners=[], cleanplot=False, info=None):
                             linewidth=0, antialiased=False, alpha=0.2)
         
             dat -= mod
-            dat += mod.min()
+            dat += bg
             
             ax.plot_surface(lat, lon, fdata, cmap='gray',
                                linewidth=0, antialiased=False, alpha=0.6)
@@ -168,13 +237,21 @@ def clean(data, corners=[], cleanplot=False, info=None):
         
         # remove the trend from the actual data
         rdat -= mod
-        rdat += mod.min()
+        rdat += bg
         
     return data
 
 
 plt.close('all')
 
+if highres:
+    fsz = 160
+    sfsz = 175
+    tfsz = 200
+else:
+    fsz = 12
+    sfsz = 13
+    tfsz = 15
 bsec, bcam, bccd, bcor = np.loadtxt(badcornerfile, unpack=True, ndmin=2, 
                                     delimiter=',', dtype=int)
 
@@ -241,7 +318,19 @@ for ii, ifile in enumerate(files):
                     fig = plt.figure()
                 ax = plt.axes([0.01, 0.01, 0.99, 0.99], projection=tr)
                 data_tr = ccrs.PlateCarree()
-                # ax.coastlines()
+
+                elat, elon = np.loadtxt(edgefile, unpack=True)
+                plt.scatter(elon, elat, c='w', alpha=0.01, zorder=-5, marker='.', s=1, transform=data_tr)
+                
+                plt.text(0.02, 0.02, credit, transform=fig.transFigure, ha='left', 
+                     va='bottom', multialignment='left', fontsize=fsz, fontname='Carlito')
+
+                plt.text(0.02, 0.98, title, transform=fig.transFigure, ha='left', 
+                     va='top', multialignment='left', fontsize=tfsz, fontname='Carlito')
+                sectxt = f'Sector {isec}\n{secstarts[isec]}-{secends[isec]}'
+                text = plt.text(0.98, 0.02, sectxt, transform=fig.transFigure, ha='right', 
+                     va='bottom', multialignment='right', fontsize=sfsz, fontname='Carlito')
+                ssec = isec
             # for wraparounds:
             if lon.max() > cenlon + 120 and lon.min() < cenlon - 120 and mustsplit:
                 left = np.where(lon > cenlon + 120)
@@ -256,16 +345,25 @@ for ii, ifile in enumerate(files):
             else:
                 plt.pcolormesh(lon, lat, data, norm=cnorm, alpha=1, transform=data_tr, cmap=cmap)
             #plt.text(np.median(lon), np.median(lat), '{0}'.format(ii), transform=data_tr)
-            if highres:
-                fsz = 185
-            else:
-                fsz = 14
-            plt.text(0.02, 0.02, credit, transform=fig.transFigure, ha='left', 
-                     va='bottom', multialignment='left', fontsize=fsz, fontname='Carlito')
-            if test:
-                plt.colorbar()
-                
-if makefig and savefig:
+            
+            
+            #if test:
+            #    plt.colorbar()
+
+        if ((ii)%16) == 0 and ii > 0:
+            text.remove()
+            sectxt = f'Sectors {ssec}-{isec}\n{secstarts[ssec]}-{secends[isec]}'
+            text = plt.text(0.98, 0.02, sectxt, transform=fig.transFigure, ha='right', 
+                     va='bottom', multialignment='right', fontsize=sfsz, fontname='Carlito')
+        if makegif and savefig and ii > 0 and ((ii+1)%16) == 0:
+            #elat, elon = np.loadtxt(edgefile, unpack=True)
+            #plt.scatter(elon, elat, c='w', alpha=0.01, zorder=-5, marker='.', s=1, transform=data_tr)
+            
+            outfig = os.path.join(figdir, f'img{(ii+1)//16:04d}.png')
+            plt.savefig(outfig)
+
+
+if makefig and savefig and not makegif:
     inum = 1
     orig = savefile
     while os.path.exists(savefile):
@@ -360,4 +458,26 @@ for corner in np.arange(4)+1:
 
 """
 
+"""
+files = glob(os.path.join(datadir, '*-1-3*fits')) + glob(os.path.join(datadir, '*-1-4*fits'))
 
+latedge, lonedge = [], []
+for ii, ifile in enumerate(files):
+    with fits.open(ifile) as ff:
+        print(ii+1, len(files))
+        wcs = WCS(ff[1].header)
+        
+        data = ff[1].data * 1
+
+        xinds = np.arange(-0.5, data.shape[0]-0.4)
+        yinds = np.arange(-0.5, data.shape[1]-0.4)
+        mesh = np.meshgrid(xinds, yinds, indexing='ij')
+        
+        lon, lat = wcs.all_pix2world(mesh[1].flatten(), mesh[0].flatten(), 0)
+        lon = lon.reshape(mesh[0].shape)
+        lat = lat.reshape(mesh[1].shape)
+        lon -= 180.
+        
+        latedge += [lat[0,0], lat[0, -1], lat[-1, 0], lat[-1, -1]]
+        lonedge += [lon[0,0], lon[0, -1], lon[-1, 0], lon[-1, -1]]
+"""
