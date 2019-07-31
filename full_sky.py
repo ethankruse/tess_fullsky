@@ -14,7 +14,7 @@ from scipy.stats import median_absolute_deviation as mad
 datadir = os.path.join(os.path.split(__file__)[0], 'data')
 figdir = os.path.join(os.path.split(__file__)[0], 'figs')
 
-#files = glob(os.path.join(datadir, '*s0012*fits'))
+#files = glob(os.path.join(datadir, '*s0013*fits'))
 #files = glob(os.path.join(datadir, '*s0011-3*fits'))
 #files = glob(os.path.join(datadir, '*4-4*fits'))
 #files = glob(os.path.join(datadir, '*-1-3*fits')) + glob(os.path.join(datadir, '*-1-4*fits'))
@@ -46,7 +46,7 @@ test = False
 makefig = True
 highres = True
 savefig = True
-makegif = True
+makegif = False
 fname = 'ortho.png'
 savefile = os.path.join(figdir, fname)
 
