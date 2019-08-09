@@ -46,8 +46,12 @@ test = False
 makefig = True
 highres = True
 savefig = True
-makegif = False
-fname = 'ortho.png'
+makegif = True
+transparent = True
+if transparent:
+    fname = 'transp_ortho.png'
+else:
+    fname = 'ortho.png'
 savefile = os.path.join(figdir, fname)
 
 credit = 'By Ethan Kruse\n@ethan_kruse'
@@ -358,9 +362,11 @@ for ii, ifile in enumerate(files):
         if makegif and savefig and ii > 0 and ((ii+1)%16) == 0:
             #elat, elon = np.loadtxt(edgefile, unpack=True)
             #plt.scatter(elon, elat, c='w', alpha=0.01, zorder=-5, marker='.', s=1, transform=data_tr)
-            
-            outfig = os.path.join(figdir, f'img{(ii+1)//16:04d}.png')
-            plt.savefig(outfig)
+            if transparent:
+                outfig = os.path.join(figdir, f'transp_img{(ii+1)//16:04d}_.png')
+            else:
+                outfig = os.path.join(figdir, f'img{(ii+1)//16:04d}.png')
+            plt.savefig(outfig, transparent=transparent)
 
 
 if makefig and savefig and not makegif:
@@ -369,7 +375,7 @@ if makefig and savefig and not makegif:
     while os.path.exists(savefile):
         savefile = os.path.splitext(orig)[0] + f'{inum}' + os.path.splitext(orig)[1]
         inum += 1
-    plt.savefig(savefile)
+    plt.savefig(savefile, transparent=transparent)
 
 
 """
