@@ -320,7 +320,12 @@ for ii, ifile in enumerate(files):
                     fig = plt.figure(figsize=(100,100))
                 else:
                     fig = plt.figure()
-                ax = plt.axes([0.01, 0.01, 0.99, 0.99], projection=tr)
+                ax = plt.axes([0.01, 0.01, 0.98, 0.98], projection=tr)
+                if highres:
+                    ax.outline_patch.set_linewidth(16)
+                if transparent:
+                    #ax.outline_patch.set_alpha(0)
+                    ax.background_patch.set_alpha(0)
                 data_tr = ccrs.PlateCarree()
 
                 elat, elon = np.loadtxt(edgefile, unpack=True)
@@ -363,7 +368,7 @@ for ii, ifile in enumerate(files):
             #elat, elon = np.loadtxt(edgefile, unpack=True)
             #plt.scatter(elon, elat, c='w', alpha=0.01, zorder=-5, marker='.', s=1, transform=data_tr)
             if transparent:
-                outfig = os.path.join(figdir, f'transp_img{(ii+1)//16:04d}_.png')
+                outfig = os.path.join(figdir, f'transp_img{(ii+1)//16:04d}.png')
             else:
                 outfig = os.path.join(figdir, f'img{(ii+1)//16:04d}.png')
             plt.savefig(outfig, transparent=transparent)
