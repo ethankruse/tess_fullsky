@@ -16,12 +16,12 @@ figdir = os.path.join(os.path.split(__file__)[0], 'figs')
 cornerdir = os.path.join(os.path.split(__file__)[0], 'corners')
 
 #cS12 2c1 c3c2
-#files = glob(os.path.join(datadir, '*s0012-2-1*fits'))
+files = glob(os.path.join(datadir, '*s001[23]-[2]-*fits'))
 #files = glob(os.path.join(datadir, '*s0001-*fits'))
 #files = glob(os.path.join(datadir, '*4-4*fits'))
 #files = glob(os.path.join(datadir, '*-1-3*fits')) + glob(os.path.join(datadir, '*-1-4*fits'))
 #files = glob(os.path.join(datadir, '*-1-4*fits'))
-files = glob(os.path.join(datadir, '*fits'))
+#files = glob(os.path.join(datadir, '*fits'))
 files.sort()
 
 
@@ -44,16 +44,16 @@ cornersec = 13
 
 doclean = True
 cleanplot = False
-badcornerfile = os.path.join(os.path.split(__file__)[0], 'bad_corners.txt')
+adjfile = os.path.join(cornerdir, 'adjustments.txt')
 noisefile = os.path.join(os.path.split(__file__)[0], 'noise.txt')
 edgefile = os.path.join(os.path.split(__file__)[0], 'edges.txt')
 
 test = False
 makefig = True
-highres = True
-savefig = True
-makegif = True
-transparent = False
+highres = False
+savefig = False
+makegif = False
+transparent = True
 
 if transparent:
     fname = 'transp_ortho.png'
@@ -98,10 +98,6 @@ if test:
     pass
 
 
-#bsec, bcam, bccd, bcor = np.loadtxt(badcornerfile, unpack=True, ndmin=2, 
-#                                    delimiter=',', dtype=int)
-
-
 
 def grab_sector(sector):
     file = os.path.join(datadir, 'tesscurl_sector_{0}_ffic.sh'.format(sector))
@@ -117,6 +113,14 @@ def grab_sector(sector):
     for iret in ret:
         print(iret)
     return
+
+
+
+bsec, bcam, bccd, badj = np.loadtxt(adjfile, unpack=True, ndmin=2, 
+                                    delimiter=',', dtype=float)
+bsec = bsec.astype(int)
+bcam = bcam.astype(int)
+bccd = bccd.astype(int)
 
 
 def clean(data, cleanplot=False, ccd=None, sec=None, cam=None, makecorner=False):
@@ -180,6 +184,18 @@ def clean(data, cleanplot=False, ccd=None, sec=None, cam=None, makecorner=False)
         pass
     else:
         raise Exception('bad corner')
+    
+    srch = np.where((sec == bsec) & (cam == bcam) & (ccd == bccd))[0]
+    if len(srch) > 1:
+        raise Exception(f'multiple adjustments for {sec}, {cam}, {ccd}')
+    
+    if len(srch) == 0:
+        adj = 0
+    else:
+        adj = badj[srch[0]]
+    
+    fix *= adj
+    
     
     # diagnostic plots to make sure it's working
     if cleanplot:
