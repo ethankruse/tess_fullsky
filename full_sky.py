@@ -13,14 +13,17 @@ from scipy.stats import median_absolute_deviation as mad
 
 datadir = os.path.join(os.path.split(__file__)[0], 'data')
 figdir = os.path.join(os.path.split(__file__)[0], 'figs')
+cornerdir = os.path.join(os.path.split(__file__)[0], 'corners')
 
-#files = glob(os.path.join(datadir, '*s0013*fits'))
-#files = glob(os.path.join(datadir, '*s0011-3*fits'))
+#cS12 2c1 c3c2
+#files = glob(os.path.join(datadir, '*s0012-2-1*fits'))
+#files = glob(os.path.join(datadir, '*s0001-*fits'))
 #files = glob(os.path.join(datadir, '*4-4*fits'))
 #files = glob(os.path.join(datadir, '*-1-3*fits')) + glob(os.path.join(datadir, '*-1-4*fits'))
 #files = glob(os.path.join(datadir, '*-1-4*fits'))
 files = glob(os.path.join(datadir, '*fits'))
 files.sort()
+
 
 
 # central longitude of the projection
@@ -36,6 +39,9 @@ vmax = 1001.
 cnorm = colors.LogNorm(vmin=vmin, vmax=vmax)
 cmap = 'gray'
 
+makecorner = False
+cornersec = 13
+
 doclean = True
 cleanplot = False
 badcornerfile = os.path.join(os.path.split(__file__)[0], 'bad_corners.txt')
@@ -47,7 +53,8 @@ makefig = True
 highres = True
 savefig = True
 makegif = True
-transparent = True
+transparent = False
+
 if transparent:
     fname = 'transp_ortho.png'
 else:
@@ -67,8 +74,16 @@ secends = {1: 'Aug 2018', 2: 'Sep 2018', 3: 'Oct 2018', 4: 'Nov 2018',
            13: 'Jul 2019'}
 ##################################################################
 
+if makecorner:
+    files = glob(os.path.join(datadir, f'*s00{cornersec:02d}-*fits'))
+    makefig = False
+    savefig = False
+    makegif = False
+    doclean = True
+    test = False
+
 if makegif:
-    figdir = os.path.join(figdir, 'gif')
+    figdir = os.path.join(figdir, 'gif2')
     prev = glob(os.path.join(figdir, '*png'))
     for iprev in prev:
         os.remove(iprev)
@@ -78,9 +93,15 @@ if not os.path.exists(figdir):
 
 if test:
     # XXX: for testing
-    files = [files[0]]
-    # files = files[:1]
+    # files = [files[0]]
+    files = files[::3]
     pass
+
+
+#bsec, bcam, bccd, bcor = np.loadtxt(badcornerfile, unpack=True, ndmin=2, 
+#                                    delimiter=',', dtype=int)
+
+
 
 def grab_sector(sector):
     file = os.path.join(datadir, 'tesscurl_sector_{0}_ffic.sh'.format(sector))
@@ -98,10 +119,8 @@ def grab_sector(sector):
     return
 
 
-def clean(data, corners=[], cleanplot=False, info=None):
+def clean(data, cleanplot=False, ccd=None, sec=None, cam=None, makecorner=False):
     import scipy.ndimage
-    from astropy.modeling import models, fitting
-    import warnings
     
     # a smoother copy of the data
     fdata = data * 1
@@ -115,134 +134,75 @@ def clean(data, corners=[], cleanplot=False, info=None):
     yinds = np.arange(0.5, data.shape[1]-0.4)
     lon, lat = np.meshgrid(xinds, yinds, indexing='ij')
     
-    if info is not None:
-        sec, cam, ccd = info
+    if ccd == 2 or ccd == 4:
+        corner = 3
+    elif ccd == 1 or ccd == 3:
+        corner = 1
     else:
-        sec, cam, ccd = 0, 0, 0
-    # make a diagnostic plot to judge bad corners
-    if cleanplot and len(corners) == 0:
+        raise Exception('bad ccd in clean')
+        
+    # fix the desired corners
+    xl, yl = fdata.shape
+    
+    # pick the right corner and get views of the data
+    if corner==1:
+        xs = lat[:xl//4,:yl//4]
+        ys = lon[:xl//4,:yl//4]
+        dat = fdata[:xl//4,:yl//4]
+        rdat = data[:xl//4,:yl//4]        
+    elif corner==2:
+        xs = lat[-xl//4:,:yl//4]
+        ys = lon[-xl//4:,:yl//4]
+        dat = fdata[-xl//4:,:yl//4]
+        rdat = data[-xl//4:,:yl//4]
+    elif corner==3:
+        xs = lat[:xl//4,-yl//4:]
+        ys = lon[:xl//4,-yl//4:]
+        dat = fdata[:xl//4,-yl//4:]
+        rdat = data[:xl//4,-yl//4:]
+    elif corner==4:
+        xs = lat[-xl//4:,-yl//4:]
+        ys = lon[-xl//4:,-yl//4:]
+        dat = fdata[-xl//4:,-yl//4:]
+        rdat = data[-xl//4:,-yl//4:]
+    else:
+        raise Exception('bad corner')
+    
+    if makecorner:
+        return xs, ys, dat
+    
+    ctxt = os.path.join(cornerdir, f'sector{sec:02d}.corner.txt')
+    fix = np.loadtxt(ctxt)
+    
+    if corner == 3:
+        fix = fix[:, ::-1]
+    elif corner == 1:
+        pass
+    else:
+        raise Exception('bad corner')
+    
+    # diagnostic plots to make sure it's working
+    if cleanplot:
         from mpl_toolkits.mplot3d import Axes3D
         fig = plt.figure()
         ax = fig.gca(projection='3d')
         ax.plot_surface(lat, lon, fdata, cmap='gray',
-                           linewidth=0, antialiased=False, alpha=0.2)
+                           linewidth=0, antialiased=False, alpha=0.3)
+
+        dat -= fix
+        
+        ax.plot_surface(lat, lon, fdata, cmap='viridis',
+                           linewidth=0, antialiased=False, alpha=0.6)
+        
         ax.text(lat[0,0],lon[0,0],50,'C1',color='red')
         ax.text(lat[-1,0],lon[-1,0],50,'C2',color='red')
         ax.text(lat[0,-1],lon[0,-1],50,'C3',color='red')
         ax.text(lat[-1,-1],lon[-1,-1],50,'C4',color='red')
-        plt.title(f'Sec {sec}, Cam {cam}, CCD {ccd}')
-    # fix the desired corners
-    for corner in corners:
-        p_init = models.Polynomial2D(degree=3)
-        fit_p = fitting.LevMarLSQFitter()
-        
-        bp_init = models.Polynomial2D(degree=1)
-        bfit_p = fitting.LevMarLSQFitter()
-        
-        xl, yl = fdata.shape
-        
-        # pick the right corner and get views of the data
-        if corner==1:
-            xs = lat[:xl//4,:yl//4]
-            ys = lon[:xl//4,:yl//4]
-            dat = fdata[:xl//4,:yl//4]
-            rdat = data[:xl//4,:yl//4]
-            
-            bxs1 = lat[xl//4:xl*3//8,:yl*3//8]
-            bys1 = lon[xl//4:xl*3//8,:yl*3//8]
-            bdat1 = fdata[xl//4:xl*3//8,:yl*3//8]
-            bxs2 = lat[:xl//4, yl//4:yl*3//8]
-            bys2 = lon[:xl//4, yl//4:yl*3//8]
-            bdat2 = fdata[:xl//4, yl//4:yl*3//8]
-            bxs = np.concatenate((bxs1.flatten(), bxs2.flatten()))
-            bys = np.concatenate((bys1.flatten(), bys2.flatten()))
-            bdat = np.concatenate((bdat1.flatten(), bdat2.flatten()))
-            
-        elif corner==2:
-            xs = lat[-xl//4:,:yl//4]
-            ys = lon[-xl//4:,:yl//4]
-            dat = fdata[-xl//4:,:yl//4]
-            rdat = data[-xl//4:,:yl//4]
-            
-            bxs1 = lat[-xl*3//8:-xl//4,:yl*3//8]
-            bys1 = lon[-xl*3//8:-xl//4,:yl*3//8]
-            bdat1 = fdata[-xl*3//8:-xl//4,:yl*3//8]
-            bxs2 = lat[-xl//4:, yl//4:yl*3//8]
-            bys2 = lon[-xl//4:, yl//4:yl*3//8]
-            bdat2 = fdata[-xl//4:, yl//4:yl*3//8]
-            bxs = np.concatenate((bxs1.flatten(), bxs2.flatten()))
-            bys = np.concatenate((bys1.flatten(), bys2.flatten()))
-            bdat = np.concatenate((bdat1.flatten(), bdat2.flatten()))
-        elif corner==3:
-            xs = lat[:xl//4,-yl//4:]
-            ys = lon[:xl//4,-yl//4:]
-            dat = fdata[:xl//4,-yl//4:]
-            rdat = data[:xl//4,-yl//4:]
-            
-            bxs1 = lat[xl//4:xl*3//8,-yl*3//8:]
-            bys1 = lon[xl//4:xl*3//8,-yl*3//8:]
-            bdat1 = fdata[xl//4:xl*3//8,-yl*3//8:]
-            bxs2 = lat[:xl//4, -yl*3//8:-yl//4]
-            bys2 = lon[:xl//4, -yl*3//8:-yl//4]
-            bdat2 = fdata[:xl//4, -yl*3//8:-yl//4]
-            bxs = np.concatenate((bxs1.flatten(), bxs2.flatten()))
-            bys = np.concatenate((bys1.flatten(), bys2.flatten()))
-            bdat = np.concatenate((bdat1.flatten(), bdat2.flatten()))
-        elif corner==4:
-            xs = lat[-xl//4:,-yl//4:]
-            ys = lon[-xl//4:,-yl//4:]
-            dat = fdata[-xl//4:,-yl//4:]
-            rdat = data[-xl//4:,-yl//4:]
-            
-            bxs1 = lat[-xl*3//8:-xl//4,-yl*3//8:]
-            bys1 = lon[-xl*3//8:-xl//4,-yl*3//8:]
-            bdat1 = fdata[-xl*3//8:-xl//4,-yl*3//8:]
-            bxs2 = lat[-xl//4:, -yl*3//8:-yl//4]
-            bys2 = lon[-xl//4:, -yl*3//8:-yl//4]
-            bdat2 = fdata[-xl//4:, -yl*3//8:-yl//4]
-            bxs = np.concatenate((bxs1.flatten(), bxs2.flatten()))
-            bys = np.concatenate((bys1.flatten(), bys2.flatten()))
-            bdat = np.concatenate((bdat1.flatten(), bdat2.flatten()))
-        else:
-            raise Exception('bad corner')
+        plt.title(f'Sec {sec}, Cam {cam}, CCD {ccd}, Corner {corner}')
+    
+    # remove the trend from the actual data
+    rdat -= fix
 
-        # Ignore model linearity warning from the fitter
-        with warnings.catch_warnings():
-            warnings.simplefilter('ignore')
-            # run the fit
-            poly = fit_p(p_init, xs, ys, dat)
-            bpoly = bfit_p(bp_init, bxs, bys, bdat)
-
-        mod = poly(xs, ys)
-        bg = bpoly(xs, ys)
-        
-        # diagnostic plots to make sure it's working
-        if cleanplot:
-            from mpl_toolkits.mplot3d import Axes3D
-            fig = plt.figure()
-            ax = fig.gca(projection='3d')
-            ax.plot_surface(lat, lon, fdata, cmap='gray',
-                               linewidth=0, antialiased=False, alpha=0.3)
-            
-            ax.plot_surface(xs, ys, mod, cmap='viridis',
-                            linewidth=0, antialiased=False, alpha=0.2)
-        
-            dat -= mod
-            dat += bg
-            
-            ax.plot_surface(lat, lon, fdata, cmap='gray',
-                               linewidth=0, antialiased=False, alpha=0.6)
-            
-            ax.text(lat[0,0],lon[0,0],50,'C1',color='red')
-            ax.text(lat[-1,0],lon[-1,0],50,'C2',color='red')
-            ax.text(lat[0,-1],lon[0,-1],50,'C3',color='red')
-            ax.text(lat[-1,-1],lon[-1,-1],50,'C4',color='red')
-            plt.title(f'Sec {sec}, Cam {cam}, CCD {ccd}, Corner {corner}')
-        
-        # remove the trend from the actual data
-        rdat -= mod
-        rdat += bg
-        
     return data
 
 
@@ -256,8 +216,9 @@ else:
     fsz = 12
     sfsz = 13
     tfsz = 15
-bsec, bcam, bccd, bcor = np.loadtxt(badcornerfile, unpack=True, ndmin=2, 
-                                    delimiter=',', dtype=int)
+
+
+xxs, yys, dats, ccds = [], [], [], []
 
 for ii, ifile in enumerate(files):
     with fits.open(ifile) as ff:
@@ -275,20 +236,11 @@ for ii, ifile in enumerate(files):
         lat = lat.reshape(mesh[1].shape)
 
         # chop out unexposed rows/columns
-        goodx = np.where(np.median(data, axis=1) > 50.)[0]
-        # make sure we're not cutting out rows in the middle
-        goodx = np.arange(goodx[0], goodx[-1]+0.5).astype(int)
-        data = data[goodx, :]
-        uind = np.unique(np.concatenate((goodx, goodx+1)))
-        lon = lon[uind, :]
-        lat = lat[uind, :]
+        # this should always be true
+        data = data[:2048, 44:2092]
+        lon = lon[:2049, 44:2093]
+        lat = lat[:2049, 44:2093]
         
-        goody = np.where(np.median(data, axis=0) > 50.)[0]
-        goody = np.arange(goody[0], goody[-1]+0.5).astype(int)
-        data = data[:, goody]
-        uind2 = np.unique(np.concatenate((goody, goody+1)))
-        lon = lon[:, uind2]
-        lat = lat[:, uind2]
         # lon must be between -180 and 180 instead of 0 to 360
         lon -= 180.
         
@@ -309,11 +261,18 @@ for ii, ifile in enumerate(files):
             np.savetxt(noisefile, noises, delimiter=', ', fmt='%.2f')
             
         if doclean:
-            tocor = np.where((bsec==isec) & (bcam==icam) & (bccd==iccd))[0]
-            print(f'Correcting corners {bcor[tocor]}')
-            data = clean(data, cleanplot=cleanplot, corners=bcor[tocor],
-                         info=(isec, icam, iccd))
-        
+            #tocor = np.where((bsec==isec) & (bcam==icam) & (bccd==iccd))[0]
+            #print(f'Correcting corners {bcor[tocor]}')
+            if makecorner:
+                xs, ys, dat = clean(data, cleanplot=cleanplot, makecorner=True,
+                                    ccd=iccd, sec=isec, cam=icam)
+                xxs.append(xs)
+                yys.append(ys)
+                dats.append(dat)
+                ccds.append(iccd)
+            else:
+                data = clean(data, cleanplot=cleanplot, ccd=iccd, sec=isec, cam=icam)
+            
         if makefig:
             if ii == 0 or test:
                 if highres:
@@ -383,112 +342,50 @@ if makefig and savefig and not makegif:
     plt.savefig(savefile, transparent=transparent)
 
 
-"""
-from mpl_toolkits.mplot3d import Axes3D
-import scipy.ndimage
-
-fdata = data * 1
-fdata[fdata > 1000] = 100
-fdata = scipy.ndimage.uniform_filter(fdata, size=201)
-
-
-fig = plt.figure()
-ax = fig.gca(projection='3d')
-ax.plot_surface(lat[1:,1:], lon[1:,1:], fdata, cmap='gray',
-                       linewidth=0, antialiased=False)
-
-
-
-plt.figure()
-ax = plt.axes([0.01, 0.01, 0.99, 0.99], projection=tr)
-plt.pcolormesh(lon, lat, data, norm=cnorm, alpha=0.3, transform=data_tr, cmap=cmap)
-"""
-
-
-"""
-corner = 4
-
-import scipy.ndimage
-from astropy.modeling import models, fitting
-
-for corner in np.arange(4)+1:
-    fdata = data * 1
-    fdata[fdata > 1000] = np.median(fdata)
-    fdata[fdata < 50] = 50
-    fdata = scipy.ndimage.uniform_filter(fdata, size=201)
+if makecorner:
+    if not os.path.exists(cornerdir):
+        os.makedirs(cornerdir, exist_ok=True)
     
-    p_init = models.Polynomial2D(degree=2)
-    fit_p = fitting.LevMarLSQFitter()
-    
-    xl, yl = fdata.shape
-    
-    if corner==1:
-        xs = lat[:xl//4,:yl//4]
-        ys = lon[:xl//4,:yl//4]
-        dat = fdata[:xl//4,:yl//4]
-    elif corner==2:
-        xs = lat[-xl//4:,:yl//4]
-        ys = lon[-xl//4:,:yl//4]
-        dat = fdata[-xl//4:,:yl//4]
-    elif corner==3:
-        xs = lat[:xl//4,-yl//4:]
-        ys = lon[:xl//4,-yl//4:]
-        dat = fdata[:xl//4,-yl//4:]
-    elif corner==4:
-        xs = lat[-xl//4:,-yl//4:]
-        ys = lon[-xl//4:,-yl//4:]
-        dat = fdata[-xl//4:,-yl//4:]
-    else:
-        raise Exception('bad corner')
-    
-    poly = fit_p(p_init, xs, ys, dat)
-    
-    
+    plt.close('all')
     from mpl_toolkits.mplot3d import Axes3D
     fig = plt.figure()
     ax = fig.gca(projection='3d')
-    ax.plot_surface(lat[1:,1:], lon[1:,1:], fdata, cmap='gray',
-                       linewidth=0, antialiased=False, alpha=0.2)
     
-    mod = poly(xs, ys)
+    xs = xxs[0]
+    ys = yys[0]
     
-    ax.plot_surface(xs, ys, mod, cmap='viridis',
-                       linewidth=0, antialiased=False, alpha=0.2)
-    
-    dat -= mod
-    dat += mod.min()
-    
-    ax.plot_surface(lat[1:,1:], lon[1:,1:], fdata, cmap='gray',
-                       linewidth=0, antialiased=False, alpha=0.2)
-    
-    ax.text(lat[0,0],lon[0,0],50,'C1',color='red')
-    ax.text(lat[-1,0],lon[-1,0],50,'C2',color='red')
-    ax.text(lat[0,-1],lon[0,-1],50,'C3',color='red')
-    ax.text(lat[-1,-1],lon[-1,-1],50,'C4',color='red')
-    plt.title('C{0}'.format(corner))
-
-"""
-
-"""
-files = glob(os.path.join(datadir, '*-1-3*fits')) + glob(os.path.join(datadir, '*-1-4*fits'))
-
-latedge, lonedge = [], []
-for ii, ifile in enumerate(files):
-    with fits.open(ifile) as ff:
-        print(ii+1, len(files))
-        wcs = WCS(ff[1].header)
+    stack = []
+    for ii in np.arange(len(dats)):
+        #xs = xxs[ii]
+        #ys = yys[ii]
+        dat = dats[ii] * 1
+        ccd = ccds[ii]
         
-        data = ff[1].data * 1
-
-        xinds = np.arange(-0.5, data.shape[0]-0.4)
-        yinds = np.arange(-0.5, data.shape[1]-0.4)
-        mesh = np.meshgrid(xinds, yinds, indexing='ij')
+        if ccd == 2 or ccd == 4:
+            corner = 3
+        elif ccd == 1 or ccd == 3:
+            corner = 1
+        else:
+            raise Exception()
+            
+        if corner == 3:
+            dat = dat[:, ::-1]
         
-        lon, lat = wcs.all_pix2world(mesh[1].flatten(), mesh[0].flatten(), 0)
-        lon = lon.reshape(mesh[0].shape)
-        lat = lat.reshape(mesh[1].shape)
-        lon -= 180.
+        dx, dy = dat.shape
         
-        latedge += [lat[0,0], lat[0, -1], lat[-1, 0], lat[-1, -1]]
-        lonedge += [lon[0,0], lon[0, -1], lon[-1, 0], lon[-1, -1]]
-"""
+        imin = np.median(dat[3*dx//4:, 3*dy//4])
+        ax.plot_surface(xs, ys, dat - imin, cmap='gray',
+                        linewidth=0, antialiased=False, alpha=0.2)
+        
+        stack.append(dat - imin)
+        
+    avg = np.median(np.dstack(stack), axis=-1)
+    ax.plot_surface(xs, ys, avg, cmap='viridis',
+                        linewidth=0, antialiased=False, alpha=0.4)
+    plt.title(f'Sec {cornersec} Corners')
+    
+    ctxt = os.path.join(cornerdir, f'sector{cornersec:02d}.corner.txt')
+    cfig = os.path.join(cornerdir, f'sector{cornersec:02d}.corner.png')
+    np.savetxt(ctxt, avg)
+    plt.savefig(cfig)
+    
