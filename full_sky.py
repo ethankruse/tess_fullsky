@@ -15,13 +15,16 @@ datadir = os.path.join(os.path.split(__file__)[0], 'data')
 figdir = os.path.join(os.path.split(__file__)[0], 'figs')
 cornerdir = os.path.join(os.path.split(__file__)[0], 'corners')
 
-#cS12 2c1 c3c2
-files = glob(os.path.join(datadir, '*s001[23]-[2]-*fits'))
-#files = glob(os.path.join(datadir, '*s0001-*fits'))
+#files = glob(os.path.join(datadir, '*s0013-4-4*fits'))
+#files = files + glob(os.path.join(datadir, '*s0013-4-3*fits'))
+#files = files + glob(os.path.join(datadir, '*s0012-3-3*fits'))
+#files = files + glob(os.path.join(datadir, '*s0011-3-1*fits'))
+#files = files + glob(os.path.join(datadir, '*s0009-3-3*fits'))
+#files = glob(os.path.join(datadir, '*s0012-*fits'))
 #files = glob(os.path.join(datadir, '*4-4*fits'))
 #files = glob(os.path.join(datadir, '*-1-3*fits')) + glob(os.path.join(datadir, '*-1-4*fits'))
 #files = glob(os.path.join(datadir, '*-1-4*fits'))
-#files = glob(os.path.join(datadir, '*fits'))
+files = glob(os.path.join(datadir, '*fits'))
 files.sort()
 
 
@@ -35,9 +38,19 @@ tr = ccrs.Orthographic(central_longitude=-89.5, central_latitude=-66.2)
 
 # minimum and maximum flux for the colorbar
 vmin = 150
-vmax = 1001.
+vmax = 901.
 cnorm = colors.LogNorm(vmin=vmin, vmax=vmax)
 cmap = 'gray'
+def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=-1):
+    import matplotlib.colors as mcolors
+    if n == -1:
+        n = cmap.N
+    new_cmap = mcolors.LinearSegmentedColormap.from_list(
+         'trunc({name},{a:.2f},{b:.2f})'.format(name=cmap.name, a=minval, b=maxval),
+         cmap(np.linspace(minval, maxval, n)))
+    return new_cmap
+cmap = truncate_colormap(plt.get_cmap(cmap), minval=0.18, maxval=1.0)
+
 
 makecorner = False
 cornersec = 13
@@ -50,9 +63,9 @@ edgefile = os.path.join(os.path.split(__file__)[0], 'edges.txt')
 
 test = False
 makefig = True
-highres = False
-savefig = False
-makegif = False
+highres = True
+savefig = True
+makegif = True
 transparent = True
 
 if transparent:
@@ -61,8 +74,12 @@ else:
     fname = 'ortho.png'
 savefile = os.path.join(figdir, fname)
 
-credit = 'By Ethan Kruse\n@ethan_kruse'
-title = "NASA TESS's View\nof the Southern\nHemisphere"
+
+#credit = 'By Ethan Kruse\n@ethan_kruse'
+#title = "NASA TESS's View\nof the Southern\nHemisphere"
+credit = ''
+title = ''
+printdate = False
 
 secstarts = {1: 'Jul 2018', 2: 'Aug 2018', 3: 'Sep 2018', 4: 'Oct 2018', 
              5: 'Nov 2018', 6: 'Dec 2018', 7: 'Jan 2019', 8: 'Feb 2019',
@@ -83,7 +100,7 @@ if makecorner:
     test = False
 
 if makegif:
-    figdir = os.path.join(figdir, 'gif2')
+    figdir = os.path.join(figdir, 'gif3')
     prev = glob(os.path.join(figdir, '*png'))
     for iprev in prev:
         os.remove(iprev)
@@ -312,8 +329,9 @@ for ii, ifile in enumerate(files):
                 plt.text(0.02, 0.98, title, transform=fig.transFigure, ha='left', 
                      va='top', multialignment='left', fontsize=tfsz, fontname='Carlito')
                 sectxt = f'Sector {isec}\n{secstarts[isec]}-{secends[isec]}'
-                text = plt.text(0.98, 0.02, sectxt, transform=fig.transFigure, ha='right', 
-                     va='bottom', multialignment='right', fontsize=sfsz, fontname='Carlito')
+                if printdate:
+                    text = plt.text(0.98, 0.02, sectxt, transform=fig.transFigure, ha='right', 
+                         va='bottom', multialignment='right', fontsize=sfsz, fontname='Carlito')
                 ssec = isec
             # for wraparounds:
             if lon.max() > cenlon + 120 and lon.min() < cenlon - 120 and mustsplit:
@@ -334,7 +352,7 @@ for ii, ifile in enumerate(files):
             #if test:
             #    plt.colorbar()
 
-        if ((ii)%16) == 0 and ii > 0:
+        if ((ii)%16) == 0 and ii > 0 and printdate:
             text.remove()
             sectxt = f'Sectors {ssec}-{isec}\n{secstarts[ssec]}-{secends[isec]}'
             text = plt.text(0.98, 0.02, sectxt, transform=fig.transFigure, ha='right', 
