@@ -15,7 +15,7 @@ datadir = os.path.join(os.path.split(__file__)[0], 'data')
 figdir = os.path.join(os.path.split(__file__)[0], 'figs')
 cornerdir = os.path.join(os.path.split(__file__)[0], 'corners')
 
-#files = glob(os.path.join(datadir, '*s0013-4-4*fits'))
+#files = glob(os.path.join(datadir, '*s0009-3-3*fits'))
 #files = files + glob(os.path.join(datadir, '*s0013-4-3*fits'))
 #files = files + glob(os.path.join(datadir, '*s0012-3-3*fits'))
 #files = files + glob(os.path.join(datadir, '*s0011-3-1*fits'))
@@ -26,8 +26,6 @@ cornerdir = os.path.join(os.path.split(__file__)[0], 'corners')
 #files = glob(os.path.join(datadir, '*-1-4*fits'))
 files = glob(os.path.join(datadir, '*fits'))
 files.sort()
-
-
 
 # central longitude of the projection
 cenlon = 0.
@@ -100,7 +98,7 @@ if makecorner:
     test = False
 
 if makegif:
-    figdir = os.path.join(figdir, 'gif3')
+    figdir = os.path.join(figdir, 'gif4')
     prev = glob(os.path.join(figdir, '*png'))
     for iprev in prev:
         os.remove(iprev)
@@ -276,6 +274,9 @@ for ii, ifile in enumerate(files):
         
         # lon must be between -180 and 180 instead of 0 to 360
         lon -= 180.
+        # because in astronomy images, plots have east on the left, so 
+        # switch east and west
+        lon *= -1.
         
         icam = ff[1].header['camera']
         iccd = ff[1].header['ccd']
@@ -305,7 +306,26 @@ for ii, ifile in enumerate(files):
                 ccds.append(iccd)
             else:
                 data = clean(data, cleanplot=cleanplot, ccd=iccd, sec=isec, cam=icam)
-            
+        
+        # some special processing to avoid problem areas
+        if isec==12 and icam==4 and iccd==3:
+            # avoid the contamination glow from the slightly off-camera bright
+            # star Canopus
+            data = data[300:, :]
+            lat = lat[300:, :]
+            lon = lon[300:, :]
+        elif isec==11 and icam==3 and iccd==3:
+            # a reflection in the CVZ only in S11
+            data = data[450:, :]
+            lat = lat[450:, :]
+            lon = lon[450:, :]
+        elif isec==9 and icam==3 and iccd==3:
+            # a reflection in the CVZ only in S9
+            data = data[400:, :]
+            lat = lat[400:, :]
+            lon = lon[400:, :]
+
+        
         if makefig:
             if ii == 0 or test:
                 if highres:
