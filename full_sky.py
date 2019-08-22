@@ -15,10 +15,10 @@ datadir = os.path.join(os.path.split(__file__)[0], 'data')
 figdir = os.path.join(os.path.split(__file__)[0], 'figs')
 cornerdir = os.path.join(os.path.split(__file__)[0], 'corners')
 
-#files = glob(os.path.join(datadir, '*s0009-3-3*fits'))
-#files = files + glob(os.path.join(datadir, '*s0013-4-3*fits'))
-#files = files + glob(os.path.join(datadir, '*s0012-3-3*fits'))
-#files = files + glob(os.path.join(datadir, '*s0011-3-1*fits'))
+#files = glob(os.path.join(datadir, '*s0013-3-4*fits'))
+#files = files + glob(os.path.join(datadir, '*s0001-3-2*fits'))
+#files = files + glob(os.path.join(datadir, '*s0012-2-3*fits'))
+#files = files + glob(os.path.join(datadir, '*s0012-1-2*fits'))
 #files = files + glob(os.path.join(datadir, '*s0009-3-3*fits'))
 #files = glob(os.path.join(datadir, '*s0012-*fits'))
 #files = glob(os.path.join(datadir, '*4-4*fits'))
@@ -31,7 +31,9 @@ files.sort()
 cenlon = 0.
 # if the projection has a dividing line where we have to split
 mustsplit = False #89.5 W, 66.2 S
-tr = ccrs.Orthographic(central_longitude=89.5, central_latitude=-66.2)
+#tr = ccrs.Orthographic(central_longitude=89.5, central_latitude=-66.2)
+tr = ccrs.Stereographic(central_longitude=89.5, central_latitude=-66.2)
+#tr = ccrs.AzimuthalEquidistant(central_longitude=89.5, central_latitude=-66.2)
 #tr = ccrs.Mollweide()
 
 # minimum and maximum flux for the colorbar
@@ -65,6 +67,8 @@ highres = True
 savefig = True
 makegif = True
 transparent = True
+if makegif:
+    figdir = os.path.join(figdir, 'gif_stereo')
 
 if transparent:
     fname = 'transp_ortho.png'
@@ -98,7 +102,6 @@ if makecorner:
     test = False
 
 if makegif:
-    figdir = os.path.join(figdir, 'gif4')
     prev = glob(os.path.join(figdir, '*png'))
     for iprev in prev:
         os.remove(iprev)
@@ -120,7 +123,7 @@ def grab_sector(sector):
         lines = ff.readlines()
     lines.sort()
     
-    midorbit = len(lines)*7//8
+    midorbit = len(lines)*93//100
     ll = lines[midorbit]
     date = ll.split('tess')[1].split('-')[0]
     ret = [line for line in lines if date in line]
@@ -324,7 +327,6 @@ for ii, ifile in enumerate(files):
             data = data[400:, :]
             lat = lat[400:, :]
             lon = lon[400:, :]
-
         
         if makefig:
             if ii == 0 or test:
@@ -333,8 +335,9 @@ for ii, ifile in enumerate(files):
                 else:
                     fig = plt.figure()
                 ax = plt.axes([0.01, 0.01, 0.98, 0.98], projection=tr)
-                if highres:
-                    ax.outline_patch.set_linewidth(16)
+                ax.outline_patch.set_linewidth(0)
+                #if highres:
+                    #ax.outline_patch.set_linewidth(0)
                 if transparent:
                     #ax.outline_patch.set_alpha(0)
                     ax.background_patch.set_alpha(0)
@@ -366,6 +369,7 @@ for ii, ifile in enumerate(files):
                 plt.pcolormesh(lonright, lat, data, norm=cnorm, alpha=1, transform=data_tr, cmap=cmap)
             else:
                 plt.pcolormesh(lon, lat, data, norm=cnorm, alpha=1, transform=data_tr, cmap=cmap)
+                #plt.plot([lon[0,0], lon[-1,-1]], [lat[0,0],lat[-1,-1]], transform=data_tr)
             #plt.text(np.median(lon), np.median(lat), '{0}'.format(ii), transform=data_tr)
             
             
