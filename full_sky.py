@@ -31,7 +31,7 @@ files.sort()
 cenlon = 0.
 # if the projection has a dividing line where we have to split
 mustsplit = False #89.5 W, 66.2 S
-tr = ccrs.Orthographic(central_longitude=-89.5, central_latitude=-66.2)
+tr = ccrs.Orthographic(central_longitude=89.5, central_latitude=-66.2)
 #tr = ccrs.Mollweide()
 
 # minimum and maximum flux for the colorbar
