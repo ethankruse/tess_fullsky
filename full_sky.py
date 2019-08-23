@@ -32,8 +32,8 @@ cenlon = 0.
 # if the projection has a dividing line where we have to split
 mustsplit = False #89.5 W, 66.2 S
 #tr = ccrs.Orthographic(central_longitude=89.5, central_latitude=-66.2)
-tr = ccrs.Stereographic(central_longitude=89.5, central_latitude=-66.2)
-#tr = ccrs.AzimuthalEquidistant(central_longitude=89.5, central_latitude=-66.2)
+#tr = ccrs.Stereographic(central_longitude=89.5, central_latitude=-66.2)
+tr = ccrs.AzimuthalEquidistant(central_longitude=89.5, central_latitude=-66.2)
 #tr = ccrs.Mollweide()
 
 # minimum and maximum flux for the colorbar
@@ -68,7 +68,7 @@ savefig = True
 makegif = True
 transparent = True
 if makegif:
-    figdir = os.path.join(figdir, 'gif_stereo')
+    figdir = os.path.join(figdir, 'gif_azeq')
 
 if transparent:
     fname = 'transp_ortho.png'
@@ -243,9 +243,10 @@ def clean(data, cleanplot=False, ccd=None, sec=None, cam=None, makecorner=False)
 plt.close('all')
 
 if highres:
-    fsz = 160
-    sfsz = 175
-    tfsz = 200
+    inches = 200
+    fsz = int(160 * inches/100.)
+    sfsz = int(175 * inches/100.)
+    tfsz = int(200 * inches/100.)
 else:
     fsz = 12
     sfsz = 13
@@ -331,7 +332,7 @@ for ii, ifile in enumerate(files):
         if makefig:
             if ii == 0 or test:
                 if highres:
-                    fig = plt.figure(figsize=(100,100))
+                    fig = plt.figure(figsize=(inches, inches))
                 else:
                     fig = plt.figure()
                 ax = plt.axes([0.01, 0.01, 0.98, 0.98], projection=tr)
