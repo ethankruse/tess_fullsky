@@ -15,7 +15,7 @@ datadir = os.path.join(os.path.split(__file__)[0], 'data')
 figdir = os.path.join(os.path.split(__file__)[0], 'figs')
 cornerdir = os.path.join(os.path.split(__file__)[0], 'corners')
 
-#files = glob(os.path.join(datadir, '*s0013-3-4*fits'))
+#files = glob(os.path.join(datadir, '*s000[14]-4*fits'))
 #files = files + glob(os.path.join(datadir, '*s0001-3-2*fits'))
 #files = files + glob(os.path.join(datadir, '*s0012-2-3*fits'))
 #files = files + glob(os.path.join(datadir, '*s0012-1-2*fits'))
@@ -30,10 +30,11 @@ files.sort()
 # central longitude of the projection
 cenlon = 0.
 # if the projection has a dividing line where we have to split
-mustsplit = False #89.5 W, 66.2 S
-#tr = ccrs.Orthographic(central_longitude=89.5, central_latitude=-66.2)
-#tr = ccrs.Stereographic(central_longitude=89.5, central_latitude=-66.2)
-tr = ccrs.AzimuthalEquidistant(central_longitude=89.5, central_latitude=-66.2)
+mustsplit = False
+# ecliptic pole coordinates are 90, -66.560708333333
+#tr = ccrs.Orthographic(central_longitude=90, central_latitude=-66.560708333333)
+#tr = ccrs.Stereographic(central_longitude=90, central_latitude=-66.560708333333)
+tr = ccrs.AzimuthalEquidistant(central_longitude=90, central_latitude=-66.560708333333)
 #tr = ccrs.Mollweide()
 
 # minimum and maximum flux for the colorbar
@@ -66,9 +67,9 @@ makefig = True
 highres = True
 savefig = True
 makegif = True
-transparent = True
+transparent = False
 if makegif:
-    figdir = os.path.join(figdir, 'gif_azeq')
+    figdir = os.path.join(figdir, 'gif_azeq_label')
 
 if transparent:
     fname = 'transp_ortho.png'
@@ -77,11 +78,11 @@ else:
 savefile = os.path.join(figdir, fname)
 
 
-#credit = 'By Ethan Kruse\n@ethan_kruse'
-#title = "NASA TESS's View\nof the Southern\nHemisphere"
-credit = ''
-title = ''
-printdate = False
+credit = 'By Ethan Kruse\n@ethan_kruse'
+title = "NASA TESS's View\nof the Southern\nHemisphere"
+#credit = ''
+#title = ''
+printdate = True
 
 secstarts = {1: 'Jul 2018', 2: 'Aug 2018', 3: 'Sep 2018', 4: 'Oct 2018', 
              5: 'Nov 2018', 6: 'Dec 2018', 7: 'Jan 2019', 8: 'Feb 2019',
