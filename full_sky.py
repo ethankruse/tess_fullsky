@@ -11,90 +11,53 @@ import matplotlib.colors as colors
 import cartopy.crs as ccrs
 from scipy.stats import median_absolute_deviation as mad
 import subprocess
+from .truncate import truncate_colormap
+
+##################################################################
+# Configuration parameters
 
 datadir = os.path.join(os.path.split(__file__)[0], 'data')
 figdir = os.path.join(os.path.split(__file__)[0], 'figs')
 cornerdir = os.path.join(os.path.split(__file__)[0], 'corners')
 
-# download the necessary files if they don't already exist
-download = os.path.join(datadir, 'download.sh')
-with open(download, 'r') as ff:
-    for line in ff.readlines():
-        fname = os.path.join(datadir, line.split()[5])
-        if not os.path.exists(fname):
-            subprocess.run(line, shell=True)
-
-files = glob(os.path.join(datadir, '*fits'))
-files.sort()
-
 # south ecliptic pole coordinates are 90, -66.560708333333
 # coordinates at the center of the projection
 cenlon = 90.
+cenlat = -66.560708333333
 
 # if the projection has a dividing line where we have to wrap data around
 wrap = False
 
 # set up our desired map projection
-# tr = ccrs.Orthographic(central_longitude=90,
-#                         central_latitude=-66.560708333333)
-# tr = ccrs.Stereographic(central_longitude=90,
-#                         central_latitude=-66.560708333333)
-tr = ccrs.AzimuthalEquidistant(central_longitude=90,
-                               central_latitude=-66.560708333333)
-# tr = ccrs.Mollweide()
+# tr = ccrs.Orthographic(central_longitude=cenlon,
+#                         central_latitude=cenlat)
+# tr = ccrs.Stereographic(central_longitude=cenlon,
+#                         central_latitude=cenlat)
+tr = ccrs.AzimuthalEquidistant(central_longitude=cenlon,
+                               central_latitude=cenlat)
 
 # minimum and maximum flux for the colorbar
 vmin = 150
 vmax = 901.
 
 # set up our custom colormap, which is a subset of the matplotlib map 'gray'.
-# we use the below truncate_colormap() to remove the blackest part of the map
+# we use truncate_colormap() to remove the blackest part of the map
 # so that even the dark areas show up against a pure black background.
 cnorm = colors.LogNorm(vmin=vmin, vmax=vmax)
 cmap = 'gray'
-
-
-def truncate_colormap(origmap, minval=0.0, maxval=1.0, n=-1):
-    """
-    Create a custom colormap out of a subset of a default matplotlib map.
-
-    Taken from https://stackoverflow.com/a/18926541
-
-    Parameters
-    ----------
-    origmap : matplotlib.colors.Colormap
-        Original colormap to truncate
-    minval: float
-        Fraction of the way through the map to begin our subset map (0-1).
-    maxval: float
-        Fraction of the way through the map to end our subset map (0-1).
-    n : int
-        Number of interpolations in the output map. If -1, use the same number
-        as the input map.
-
-    Returns
-    -------
-    matplotlib.colors.Colormap
-    """
-    import matplotlib.colors as mcolors
-    if n == -1:
-        n = origmap.N
-    new_cmap = mcolors.LinearSegmentedColormap.from_list(
-         'trunc({name},{a:.2f},{b:.2f})'.format(name=origmap.name, a=minval, b=maxval),
-         origmap(np.linspace(minval, maxval, n)))
-    return new_cmap
-
-
 # use only the latter part of the original colormap
 cmap = truncate_colormap(plt.get_cmap(cmap), minval=0.18, maxval=1.0)
 
+# do we need to make the empirical corner glow correction for a sector?
 makecorner = False
 cornersec = 13
 
-doclean = True
-cleanplot = False
+# remove the corner glow from the final image
+remove_corner_glow = True
+# make a plot of the corner glow for every CCD to check how removal is working
+corner_glow_plot = False
+
 adjfile = os.path.join(cornerdir, 'adjustments.txt')
-noisefile = os.path.join(os.path.split(__file__)[0], 'noise.txt')
 edgefile = os.path.join(os.path.split(__file__)[0], 'edges.txt')
 
 test = False
@@ -127,14 +90,26 @@ secends = {1: 'Aug 2018', 2: 'Sep 2018', 3: 'Oct 2018', 4: 'Nov 2018',
            5: 'Dec 2018', 6: 'Jan 2019', 7: 'Feb 2019', 8: 'Feb 2019',
            9: 'Mar 2019', 10: 'Apr 2019', 11: 'May 2019', 12: 'Jun 2019',
            13: 'Jul 2019'}
+
 ##################################################################
+
+# download the necessary files if they don't already exist
+download = os.path.join(datadir, 'download.sh')
+with open(download, 'r') as ff:
+    for line in ff.readlines():
+        fname = os.path.join(datadir, line.split()[5])
+        if not os.path.exists(fname):
+            subprocess.run(line, shell=True)
+
+files = glob(os.path.join(datadir, '*fits'))
+files.sort()
 
 if makecorner:
     files = glob(os.path.join(datadir, f'*s00{cornersec:02d}-*fits'))
     makefig = False
     savefig = False
     makegif = False
-    doclean = True
+    remove_corner_glow = True
     test = False
 
 if makegif:
@@ -328,24 +303,18 @@ for ii, ifile in enumerate(files):
         print(f'{ii+1} of {len(files)}: {lon.min():.2f}, {lon.max():.2f}, {lat.min():.2f}, {lat.max():.2f}')
         print(f'median {imed:.2f}, mad {imad:.2f}, 3sigma {imed+3*imad:.2f}, 5sigma {imed+5*imad:.2f}')
 
-        noises = np.loadtxt(noisefile, unpack=True, ndmin=2, delimiter=',')
-        exists = np.where((noises[0,:]==isec) & (noises[1,:]==icam) & (noises[2,:]==iccd))[0]
-        if len(exists) == 0:
-            noises = np.concatenate((noises.T, [[isec, icam, iccd, imed, imad, imed+3.*imad, imed+5.*imad]]))
-            np.savetxt(noisefile, noises, delimiter=', ', fmt='%.2f')
-
-        if doclean:
+        if remove_corner_glow:
             #tocor = np.where((bsec==isec) & (bcam==icam) & (bccd==iccd))[0]
             #print(f'Correcting corners {bcor[tocor]}')
             if makecorner:
-                xs, ys, dat = clean(data, cleanplot=cleanplot, makecorner=True,
+                xs, ys, dat = clean(data, cleanplot=corner_glow_plot, makecorner=True,
                                     ccd=iccd, sec=isec, cam=icam)
                 xxs.append(xs)
                 yys.append(ys)
                 dats.append(dat)
                 ccds.append(iccd)
             else:
-                data = clean(data, cleanplot=cleanplot, ccd=iccd, sec=isec, cam=icam)
+                data = clean(data, cleanplot=corner_glow_plot, ccd=iccd, sec=isec, cam=icam)
 
         # some special processing to avoid problem areas
         if isec==12 and icam==4 and iccd==3:
