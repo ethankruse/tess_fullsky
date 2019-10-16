@@ -10,20 +10,20 @@ import os
 import matplotlib.colors as colors
 import cartopy.crs as ccrs
 from scipy.stats import median_absolute_deviation as mad
+import subprocess
 
 datadir = os.path.join(os.path.split(__file__)[0], 'data')
 figdir = os.path.join(os.path.split(__file__)[0], 'figs')
 cornerdir = os.path.join(os.path.split(__file__)[0], 'corners')
 
-#files = glob(os.path.join(datadir, '*s000[14]-4*fits'))
-#files = files + glob(os.path.join(datadir, '*s0001-3-2*fits'))
-#files = files + glob(os.path.join(datadir, '*s0012-2-3*fits'))
-#files = files + glob(os.path.join(datadir, '*s0012-1-2*fits'))
-#files = files + glob(os.path.join(datadir, '*s0009-3-3*fits'))
-#files = glob(os.path.join(datadir, '*s0012-*fits'))
-#files = glob(os.path.join(datadir, '*4-4*fits'))
-#files = glob(os.path.join(datadir, '*-1-3*fits')) + glob(os.path.join(datadir, '*-1-4*fits'))
-#files = glob(os.path.join(datadir, '*-1-4*fits'))
+# download the necessary files if they don't already exist
+download = os.path.join(datadir, 'download.sh')
+with open(download, 'r') as ff:
+    for line in ff.readlines():
+        fname = os.path.join(datadir, line.split()[5])
+        if not os.path.exists(fname):
+            subprocess.run(line, shell=True)
+
 files = glob(os.path.join(datadir, '*fits'))
 files.sort()
 
@@ -84,11 +84,11 @@ title = "NASA TESS's View\nof the Southern\nHemisphere"
 #title = ''
 printdate = True
 
-secstarts = {1: 'Jul 2018', 2: 'Aug 2018', 3: 'Sep 2018', 4: 'Oct 2018', 
+secstarts = {1: 'Jul 2018', 2: 'Aug 2018', 3: 'Sep 2018', 4: 'Oct 2018',
              5: 'Nov 2018', 6: 'Dec 2018', 7: 'Jan 2019', 8: 'Feb 2019',
              9: 'Feb 2019', 10: 'Mar 2019', 11: 'Apr 2019', 12: 'May 2019',
              13: 'Jun 2019'}
-secends = {1: 'Aug 2018', 2: 'Sep 2018', 3: 'Oct 2018', 4: 'Nov 2018', 
+secends = {1: 'Aug 2018', 2: 'Sep 2018', 3: 'Oct 2018', 4: 'Nov 2018',
            5: 'Dec 2018', 6: 'Jan 2019', 7: 'Feb 2019', 8: 'Feb 2019',
            9: 'Mar 2019', 10: 'Apr 2019', 11: 'May 2019', 12: 'Jun 2019',
            13: 'Jul 2019'}
@@ -106,7 +106,7 @@ if makegif:
     prev = glob(os.path.join(figdir, '*png'))
     for iprev in prev:
         os.remove(iprev)
-    
+
 if not os.path.exists(figdir):
     os.makedirs(figdir, exist_ok=True)
 
@@ -123,7 +123,7 @@ def grab_sector(sector):
     with open(file, 'r') as ff:
         lines = ff.readlines()
     lines.sort()
-    
+
     midorbit = len(lines)*93//100
     ll = lines[midorbit]
     date = ll.split('tess')[1].split('-')[0]
@@ -135,7 +135,7 @@ def grab_sector(sector):
 
 
 
-bsec, bcam, bccd, badj = np.loadtxt(adjfile, unpack=True, ndmin=2, 
+bsec, bcam, bccd, badj = np.loadtxt(adjfile, unpack=True, ndmin=2,
                                     delimiter=',', dtype=float)
 bsec = bsec.astype(int)
 bcam = bcam.astype(int)
@@ -144,7 +144,7 @@ bccd = bccd.astype(int)
 
 def clean(data, cleanplot=False, ccd=None, sec=None, cam=None, makecorner=False):
     import scipy.ndimage
-    
+
     # a smoother copy of the data
     fdata = data * 1
     # remove spiky stars and bad data
@@ -152,27 +152,27 @@ def clean(data, cleanplot=False, ccd=None, sec=None, cam=None, makecorner=False)
     fdata[fdata < 50] = 50
     # smooth things out
     fdata = scipy.ndimage.uniform_filter(fdata, size=201)
-    
+
     xinds = np.arange(0.5, data.shape[0]-0.4)
     yinds = np.arange(0.5, data.shape[1]-0.4)
     lon, lat = np.meshgrid(xinds, yinds, indexing='ij')
-    
+
     if ccd == 2 or ccd == 4:
         corner = 3
     elif ccd == 1 or ccd == 3:
         corner = 1
     else:
         raise Exception('bad ccd in clean')
-        
+
     # fix the desired corners
     xl, yl = fdata.shape
-    
+
     # pick the right corner and get views of the data
     if corner==1:
         xs = lat[:xl//4,:yl//4]
         ys = lon[:xl//4,:yl//4]
         dat = fdata[:xl//4,:yl//4]
-        rdat = data[:xl//4,:yl//4]        
+        rdat = data[:xl//4,:yl//4]
     elif corner==2:
         xs = lat[-xl//4:,:yl//4]
         ys = lon[-xl//4:,:yl//4]
@@ -190,32 +190,32 @@ def clean(data, cleanplot=False, ccd=None, sec=None, cam=None, makecorner=False)
         rdat = data[-xl//4:,-yl//4:]
     else:
         raise Exception('bad corner')
-    
+
     if makecorner:
         return xs, ys, dat
-    
+
     ctxt = os.path.join(cornerdir, f'sector{sec:02d}.corner.txt')
     fix = np.loadtxt(ctxt)
-    
+
     if corner == 3:
         fix = fix[:, ::-1]
     elif corner == 1:
         pass
     else:
         raise Exception('bad corner')
-    
+
     srch = np.where((sec == bsec) & (cam == bcam) & (ccd == bccd))[0]
     if len(srch) > 1:
         raise Exception(f'multiple adjustments for {sec}, {cam}, {ccd}')
-    
+
     if len(srch) == 0:
         adj = 0
     else:
         adj = badj[srch[0]]
-    
+
     fix *= adj
-    
-    
+
+
     # diagnostic plots to make sure it's working
     if cleanplot:
         from mpl_toolkits.mplot3d import Axes3D
@@ -225,16 +225,16 @@ def clean(data, cleanplot=False, ccd=None, sec=None, cam=None, makecorner=False)
                            linewidth=0, antialiased=False, alpha=0.3)
 
         dat -= fix
-        
+
         ax.plot_surface(lat, lon, fdata, cmap='viridis',
                            linewidth=0, antialiased=False, alpha=0.6)
-        
+
         ax.text(lat[0,0],lon[0,0],50,'C1',color='red')
         ax.text(lat[-1,0],lon[-1,0],50,'C2',color='red')
         ax.text(lat[0,-1],lon[0,-1],50,'C3',color='red')
         ax.text(lat[-1,-1],lon[-1,-1],50,'C4',color='red')
         plt.title(f'Sec {sec}, Cam {cam}, CCD {ccd}, Corner {corner}')
-    
+
     # remove the trend from the actual data
     rdat -= fix
 
@@ -259,15 +259,15 @@ xxs, yys, dats, ccds = [], [], [], []
 for ii, ifile in enumerate(files):
     with fits.open(ifile) as ff:
         wcs = WCS(ff[1].header)
-            
+
         data = ff[1].data * 1
 
         xinds = np.arange(-0.5, data.shape[0]-0.4)
         yinds = np.arange(-0.5, data.shape[1]-0.4)
         mesh = np.meshgrid(xinds, yinds, indexing='ij')
-        
+
         lon, lat = wcs.all_pix2world(mesh[1].flatten(), mesh[0].flatten(), 0)
-        
+
         lon = lon.reshape(mesh[0].shape)
         lat = lat.reshape(mesh[1].shape)
 
@@ -276,29 +276,29 @@ for ii, ifile in enumerate(files):
         data = data[:2048, 44:2092]
         lon = lon[:2049, 44:2093]
         lat = lat[:2049, 44:2093]
-        
+
         # lon must be between -180 and 180 instead of 0 to 360
         lon -= 180.
-        # because in astronomy images, plots have east on the left, so 
+        # because in astronomy images, plots have east on the left, so
         # switch east and west
         lon *= -1.
-        
+
         icam = ff[1].header['camera']
         iccd = ff[1].header['ccd']
         isec = int(ifile.split('-s0')[1][:3])
-        
+
         imed = np.median(data)
         imad = mad(data, axis=None)
-        
+
         print(f'{ii+1} of {len(files)}: {lon.min():.2f}, {lon.max():.2f}, {lat.min():.2f}, {lat.max():.2f}')
         print(f'median {imed:.2f}, mad {imad:.2f}, 3sigma {imed+3*imad:.2f}, 5sigma {imed+5*imad:.2f}')
-        
+
         noises = np.loadtxt(noisefile, unpack=True, ndmin=2, delimiter=',')
         exists = np.where((noises[0,:]==isec) & (noises[1,:]==icam) & (noises[2,:]==iccd))[0]
         if len(exists) == 0:
             noises = np.concatenate((noises.T, [[isec, icam, iccd, imed, imad, imed+3.*imad, imed+5.*imad]]))
             np.savetxt(noisefile, noises, delimiter=', ', fmt='%.2f')
-            
+
         if doclean:
             #tocor = np.where((bsec==isec) & (bcam==icam) & (bccd==iccd))[0]
             #print(f'Correcting corners {bcor[tocor]}')
@@ -311,7 +311,7 @@ for ii, ifile in enumerate(files):
                 ccds.append(iccd)
             else:
                 data = clean(data, cleanplot=cleanplot, ccd=iccd, sec=isec, cam=icam)
-        
+
         # some special processing to avoid problem areas
         if isec==12 and icam==4 and iccd==3:
             # avoid the contamination glow from the slightly off-camera bright
@@ -329,7 +329,7 @@ for ii, ifile in enumerate(files):
             data = data[400:, :]
             lat = lat[400:, :]
             lon = lon[400:, :]
-        
+
         if makefig:
             if ii == 0 or test:
                 if highres:
@@ -347,15 +347,15 @@ for ii, ifile in enumerate(files):
 
                 elat, elon = np.loadtxt(edgefile, unpack=True)
                 plt.scatter(elon, elat, c='w', alpha=0.01, zorder=-5, marker='.', s=1, transform=data_tr)
-                
-                plt.text(0.02, 0.02, credit, transform=fig.transFigure, ha='left', 
+
+                plt.text(0.02, 0.02, credit, transform=fig.transFigure, ha='left',
                      va='bottom', multialignment='left', fontsize=fsz, fontname='Carlito')
 
-                plt.text(0.02, 0.98, title, transform=fig.transFigure, ha='left', 
+                plt.text(0.02, 0.98, title, transform=fig.transFigure, ha='left',
                      va='top', multialignment='left', fontsize=tfsz, fontname='Carlito')
                 sectxt = f'Sector {isec}\n{secstarts[isec]}-{secends[isec]}'
                 if printdate:
-                    text = plt.text(0.98, 0.02, sectxt, transform=fig.transFigure, ha='right', 
+                    text = plt.text(0.98, 0.02, sectxt, transform=fig.transFigure, ha='right',
                          va='bottom', multialignment='right', fontsize=sfsz, fontname='Carlito')
                 ssec = isec
             # for wraparounds:
@@ -364,7 +364,7 @@ for ii, ifile in enumerate(files):
                 lonleft = lon * 1
                 lonleft[left] = cenlon - 180.
                 plt.pcolormesh(lonleft, lat, data, norm=cnorm, alpha=1, transform=data_tr, cmap=cmap)
-                
+
                 right = np.where(lon < cenlon - 120)
                 lonright = lon * 1
                 lonright[right] = cenlon + 180.
@@ -373,15 +373,15 @@ for ii, ifile in enumerate(files):
                 plt.pcolormesh(lon, lat, data, norm=cnorm, alpha=1, transform=data_tr, cmap=cmap)
                 #plt.plot([lon[0,0], lon[-1,-1]], [lat[0,0],lat[-1,-1]], transform=data_tr)
             #plt.text(np.median(lon), np.median(lat), '{0}'.format(ii), transform=data_tr)
-            
-            
+
+
             #if test:
             #    plt.colorbar()
 
         if ((ii)%16) == 0 and ii > 0 and printdate:
             text.remove()
             sectxt = f'Sectors {ssec}-{isec}\n{secstarts[ssec]}-{secends[isec]}'
-            text = plt.text(0.98, 0.02, sectxt, transform=fig.transFigure, ha='right', 
+            text = plt.text(0.98, 0.02, sectxt, transform=fig.transFigure, ha='right',
                      va='bottom', multialignment='right', fontsize=sfsz, fontname='Carlito')
         if makegif and savefig and ii > 0 and ((ii+1)%16) == 0:
             #elat, elon = np.loadtxt(edgefile, unpack=True)
@@ -405,47 +405,47 @@ if makefig and savefig and not makegif:
 if makecorner:
     if not os.path.exists(cornerdir):
         os.makedirs(cornerdir, exist_ok=True)
-    
+
     plt.close('all')
     from mpl_toolkits.mplot3d import Axes3D
     fig = plt.figure()
     ax = fig.gca(projection='3d')
-    
+
     xs = xxs[0]
     ys = yys[0]
-    
+
     stack = []
     for ii in np.arange(len(dats)):
         #xs = xxs[ii]
         #ys = yys[ii]
         dat = dats[ii] * 1
         ccd = ccds[ii]
-        
+
         if ccd == 2 or ccd == 4:
             corner = 3
         elif ccd == 1 or ccd == 3:
             corner = 1
         else:
             raise Exception()
-            
+
         if corner == 3:
             dat = dat[:, ::-1]
-        
+
         dx, dy = dat.shape
-        
+
         imin = np.median(dat[3*dx//4:, 3*dy//4])
         ax.plot_surface(xs, ys, dat - imin, cmap='gray',
                         linewidth=0, antialiased=False, alpha=0.2)
-        
+
         stack.append(dat - imin)
-        
+
     avg = np.median(np.dstack(stack), axis=-1)
     ax.plot_surface(xs, ys, avg, cmap='viridis',
                         linewidth=0, antialiased=False, alpha=0.4)
     plt.title(f'Sec {cornersec} Corners')
-    
+
     ctxt = os.path.join(cornerdir, f'sector{cornersec:02d}.corner.txt')
     cfig = os.path.join(cornerdir, f'sector{cornersec:02d}.corner.png')
     np.savetxt(ctxt, avg)
     plt.savefig(cfig)
-    
+
