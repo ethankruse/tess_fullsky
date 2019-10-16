@@ -27,31 +27,66 @@ with open(download, 'r') as ff:
 files = glob(os.path.join(datadir, '*fits'))
 files.sort()
 
-# central longitude of the projection
-cenlon = 0.
-# if the projection has a dividing line where we have to split
-mustsplit = False
-# ecliptic pole coordinates are 90, -66.560708333333
-#tr = ccrs.Orthographic(central_longitude=90, central_latitude=-66.560708333333)
-#tr = ccrs.Stereographic(central_longitude=90, central_latitude=-66.560708333333)
-tr = ccrs.AzimuthalEquidistant(central_longitude=90, central_latitude=-66.560708333333)
-#tr = ccrs.Mollweide()
+# south ecliptic pole coordinates are 90, -66.560708333333
+# coordinates at the center of the projection
+cenlon = 90.
+
+# if the projection has a dividing line where we have to wrap data around
+wrap = False
+
+# set up our desired map projection
+# tr = ccrs.Orthographic(central_longitude=90,
+#                         central_latitude=-66.560708333333)
+# tr = ccrs.Stereographic(central_longitude=90,
+#                         central_latitude=-66.560708333333)
+tr = ccrs.AzimuthalEquidistant(central_longitude=90,
+                               central_latitude=-66.560708333333)
+# tr = ccrs.Mollweide()
 
 # minimum and maximum flux for the colorbar
 vmin = 150
 vmax = 901.
+
+# set up our custom colormap, which is a subset of the matplotlib map 'gray'.
+# we use the below truncate_colormap() to remove the blackest part of the map
+# so that even the dark areas show up against a pure black background.
 cnorm = colors.LogNorm(vmin=vmin, vmax=vmax)
 cmap = 'gray'
-def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=-1):
+
+
+def truncate_colormap(origmap, minval=0.0, maxval=1.0, n=-1):
+    """
+    Create a custom colormap out of a subset of a default matplotlib map.
+
+    Taken from https://stackoverflow.com/a/18926541
+
+    Parameters
+    ----------
+    origmap : matplotlib.colors.Colormap
+        Original colormap to truncate
+    minval: float
+        Fraction of the way through the map to begin our subset map (0-1).
+    maxval: float
+        Fraction of the way through the map to end our subset map (0-1).
+    n : int
+        Number of interpolations in the output map. If -1, use the same number
+        as the input map.
+
+    Returns
+    -------
+    matplotlib.colors.Colormap
+    """
     import matplotlib.colors as mcolors
     if n == -1:
-        n = cmap.N
+        n = origmap.N
     new_cmap = mcolors.LinearSegmentedColormap.from_list(
-         'trunc({name},{a:.2f},{b:.2f})'.format(name=cmap.name, a=minval, b=maxval),
-         cmap(np.linspace(minval, maxval, n)))
+         'trunc({name},{a:.2f},{b:.2f})'.format(name=origmap.name, a=minval, b=maxval),
+         origmap(np.linspace(minval, maxval, n)))
     return new_cmap
-cmap = truncate_colormap(plt.get_cmap(cmap), minval=0.18, maxval=1.0)
 
+
+# use only the latter part of the original colormap
+cmap = truncate_colormap(plt.get_cmap(cmap), minval=0.18, maxval=1.0)
 
 makecorner = False
 cornersec = 13
@@ -359,7 +394,7 @@ for ii, ifile in enumerate(files):
                          va='bottom', multialignment='right', fontsize=sfsz, fontname='Carlito')
                 ssec = isec
             # for wraparounds:
-            if lon.max() > cenlon + 120 and lon.min() < cenlon - 120 and mustsplit:
+            if lon.max() > cenlon + 120 and lon.min() < cenlon - 120 and wrap:
                 left = np.where(lon > cenlon + 120)
                 lonleft = lon * 1
                 lonleft[left] = cenlon - 180.
