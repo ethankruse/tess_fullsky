@@ -238,6 +238,8 @@ for ii, ifile in enumerate(files):
         icam = ff[1].header['camera']
         iccd = ff[1].header['ccd']
         isec = int(ifile.split('-s0')[1][:3])
+        print(f'Processing image {ii+1} of {len(files)}: Sector {isec} Camera '
+              f'{icam} CCD {iccd}')
 
         if remove_corner_glow:
             # create the empirical corner glow model
