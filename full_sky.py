@@ -48,7 +48,7 @@ cmap = 'gray'
 # use only the latter part of the original colormap
 cmap = truncate_colormap(plt.get_cmap(cmap), minval=0.18, maxval=1.0)
 
-# do we need to make the empirical corner glow correction for a sector?
+# do we need to create the empirical corner glow correction for a sector?
 makecorner = False
 cornersec = 13
 
@@ -191,35 +191,39 @@ adjustments = (bsec, bcam, bccd, badj)
 
 plt.close('all')
 
+# get font sizes right for the output image size
 if highres:
     inches = 200
     fsz = int(160 * inches/100.)
     sfsz = int(175 * inches/100.)
     tfsz = int(200 * inches/100.)
 else:
+    inches = 8
     fsz = 12
     sfsz = 13
     tfsz = 15
 
+# for creating the empirical corner models
 xxs, yys, dats, ccds = [], [], [], []
 
+# loop through every image and create the mosaic
 for ii, ifile in enumerate(files):
     with fits.open(ifile) as ff:
         wcs = WCS(ff[1].header)
-
         data = ff[1].data * 1
 
+        # get the coordinates of every data point in CCD coordinates
         xinds = np.arange(-0.5, data.shape[0]-0.4)
         yinds = np.arange(-0.5, data.shape[1]-0.4)
         mesh = np.meshgrid(xinds, yinds, indexing='ij')
 
+        # transofrm to actual sky coordinates
         lon, lat = wcs.all_pix2world(mesh[1].flatten(), mesh[0].flatten(), 0)
-
         lon = lon.reshape(mesh[0].shape)
         lat = lat.reshape(mesh[1].shape)
 
         # chop out unexposed rows/columns
-        # this should always be true
+        # this should always be true, leaving a 2048x2048 image
         data = data[:2048, 44:2092]
         lon = lon[:2049, 44:2093]
         lat = lat[:2049, 44:2093]
@@ -230,113 +234,133 @@ for ii, ifile in enumerate(files):
         # switch east and west
         lon *= -1.
 
+        # what image is this
         icam = ff[1].header['camera']
         iccd = ff[1].header['ccd']
         isec = int(ifile.split('-s0')[1][:3])
 
         if remove_corner_glow:
-            #tocor = np.where((bsec==isec) & (bcam==icam) & (bccd==iccd))[0]
-            #print(f'Correcting corners {bcor[tocor]}')
+            # create the empirical corner glow model
             if makecorner:
-                xs, ys, dat = clean_corner(data, cornerdir, adjustments, cleanplot=corner_glow_plot, create=True,
-                                           ccd=iccd, sec=isec, cam=icam)
+                xs, ys, dat = clean_corner(data, cornerdir, adjustments,
+                                           cleanplot=corner_glow_plot,
+                                           create=True, ccd=iccd, sec=isec,
+                                           cam=icam)
+                # save the coordinates and smoothed corner
                 xxs.append(xs)
                 yys.append(ys)
                 dats.append(dat)
                 ccds.append(iccd)
+            # remove the corner glow from this CCD
             else:
-                data = clean_corner(data, cornerdir, adjustments, cleanplot=corner_glow_plot, ccd=iccd, sec=isec, cam=icam)
+                data = clean_corner(data, cornerdir, adjustments,
+                                    cleanplot=corner_glow_plot, ccd=iccd,
+                                    sec=isec, cam=icam)
 
-        # some special processing to avoid problem areas
-        if isec==12 and icam==4 and iccd==3:
+        # some special processing to avoid problem areas.
+        # these are all in overlap zones, so removing contaminated chunks
+        # of these images doesn't affect the overall footprint and makes for a
+        # cleaner final image.
+        if isec == 12 and icam == 4 and iccd == 3:
             # avoid the contamination glow from the slightly off-camera bright
             # star Canopus
             data = data[300:, :]
             lat = lat[300:, :]
             lon = lon[300:, :]
-        elif isec==11 and icam==3 and iccd==3:
+        elif isec == 11 and icam == 3 and iccd == 3:
             # a reflection in the CVZ only in S11
             data = data[450:, :]
             lat = lat[450:, :]
             lon = lon[450:, :]
-        elif isec==9 and icam==3 and iccd==3:
+        elif isec == 9 and icam == 3 and iccd == 3:
             # a reflection in the CVZ only in S9
             data = data[400:, :]
             lat = lat[400:, :]
             lon = lon[400:, :]
 
         if makefig:
+            # create the figure. if testing, each CCD gets its own figure
             if ii == 0 or test:
                 if highres:
                     fig = plt.figure(figsize=(inches, inches))
                 else:
                     fig = plt.figure()
+                # 1% border on all sides
                 ax = plt.axes([0.01, 0.01, 0.98, 0.98], projection=tr)
+                # remove the outline circle of the globe
                 ax.outline_patch.set_linewidth(0)
-                #if highres:
-                    #ax.outline_patch.set_linewidth(0)
+                # set transparency
                 if transparent:
-                    #ax.outline_patch.set_alpha(0)
                     ax.background_patch.set_alpha(0)
+                # the data coordinates are lat/lon in a grid
                 data_tr = ccrs.PlateCarree()
-
+                # load the edges of all the outer CCDs and invisibly plot them
+                # so that after just 1 sector, the plot isn't artificially
+                # zoomed to just that one sector.
                 elat, elon = np.loadtxt(edgefile, unpack=True)
-                plt.scatter(elon, elat, c='w', alpha=0.01, zorder=-5, marker='.', s=1, transform=data_tr)
+                plt.scatter(elon, elat, c='w', alpha=0.01, zorder=-5,
+                            marker='.', s=1, transform=data_tr)
 
-                plt.text(0.02, 0.02, credit, transform=fig.transFigure, ha='left',
-                     va='bottom', multialignment='left', fontsize=fsz, fontname='Carlito')
-
-                plt.text(0.02, 0.98, title, transform=fig.transFigure, ha='left',
-                     va='top', multialignment='left', fontsize=tfsz, fontname='Carlito')
+                # add the labels
+                plt.text(0.02, 0.02, credit, transform=fig.transFigure,
+                         ha='left', va='bottom', multialignment='left',
+                         fontsize=fsz, fontname='Carlito')
+                plt.text(0.02, 0.98, title, transform=fig.transFigure,
+                         ha='left', va='top', multialignment='left',
+                         fontsize=tfsz, fontname='Carlito')
                 sectxt = f'Sector {isec}\n{secstarts[isec]}-{secends[isec]}'
                 if printdate:
-                    text = plt.text(0.98, 0.02, sectxt, transform=fig.transFigure, ha='right',
-                         va='bottom', multialignment='right', fontsize=sfsz, fontname='Carlito')
+                    text = plt.text(0.98, 0.02, sectxt,
+                                    transform=fig.transFigure, ha='right',
+                                    va='bottom', multialignment='right',
+                                    fontsize=sfsz, fontname='Carlito')
                 ssec = isec
             # for wraparounds:
-            if lon.max() > cenlon + 120 and lon.min() < cenlon - 120 and wrap:
+            if wrap and lon.max() > cenlon + 120 and lon.min() < cenlon - 120:
                 left = np.where(lon > cenlon + 120)
                 lonleft = lon * 1
                 lonleft[left] = cenlon - 180.
-                plt.pcolormesh(lonleft, lat, data, norm=cnorm, alpha=1, transform=data_tr, cmap=cmap)
+                plt.pcolormesh(lonleft, lat, data, norm=cnorm, alpha=1,
+                               transform=data_tr, cmap=cmap)
 
                 right = np.where(lon < cenlon - 120)
                 lonright = lon * 1
                 lonright[right] = cenlon + 180.
-                plt.pcolormesh(lonright, lat, data, norm=cnorm, alpha=1, transform=data_tr, cmap=cmap)
+                plt.pcolormesh(lonright, lat, data, norm=cnorm, alpha=1,
+                               transform=data_tr, cmap=cmap)
+            # plot the actual image from this CCD
             else:
-                plt.pcolormesh(lon, lat, data, norm=cnorm, alpha=1, transform=data_tr, cmap=cmap)
-                #plt.plot([lon[0,0], lon[-1,-1]], [lat[0,0],lat[-1,-1]], transform=data_tr)
-            #plt.text(np.median(lon), np.median(lat), '{0}'.format(ii), transform=data_tr)
+                plt.pcolormesh(lon, lat, data, norm=cnorm, alpha=1,
+                               transform=data_tr, cmap=cmap)
 
-
-            #if test:
-            #    plt.colorbar()
-
-        if ((ii)%16) == 0 and ii > 0 and printdate:
+        # if we're starting to plot a new sector, update the date
+        if (ii % 16) == 0 and ii > 0 and printdate:
             text.remove()
             sectxt = f'Sectors {ssec}-{isec}\n{secstarts[ssec]}-{secends[isec]}'
-            text = plt.text(0.98, 0.02, sectxt, transform=fig.transFigure, ha='right',
-                     va='bottom', multialignment='right', fontsize=sfsz, fontname='Carlito')
-        if makegif and savefig and ii > 0 and ((ii+1)%16) == 0:
-            #elat, elon = np.loadtxt(edgefile, unpack=True)
-            #plt.scatter(elon, elat, c='w', alpha=0.01, zorder=-5, marker='.', s=1, transform=data_tr)
+            text = plt.text(0.98, 0.02, sectxt, transform=fig.transFigure,
+                            ha='right', va='bottom', multialignment='right',
+                            fontsize=sfsz, fontname='Carlito')
+        # save the plot after each sector for the gif
+        if makegif and savefig and ii > 0 and ((ii+1) % 16) == 0:
             if transparent:
                 outfig = os.path.join(figdir, f'transp_img{(ii+1)//16:04d}.png')
             else:
                 outfig = os.path.join(figdir, f'img{(ii+1)//16:04d}.png')
             plt.savefig(outfig, transparent=transparent)
 
-
+# save the figure if we haven't already as part of the gif
+# don't overwrite any previous file, increment the number
 if makefig and savefig and not makegif:
     inum = 1
     orig = savefile
     while os.path.exists(savefile):
-        savefile = os.path.splitext(orig)[0] + f'{inum}' + os.path.splitext(orig)[1]
+        savefile = (os.path.splitext(orig)[0] + f'{inum}' +
+                    os.path.splitext(orig)[1])
         inum += 1
     plt.savefig(savefile, transparent=transparent)
 
-
+# if we're creating the empirical corner model, look at all the corners from
+# this sector together
 if makecorner:
     if not os.path.exists(cornerdir):
         os.makedirs(cornerdir, exist_ok=True)
@@ -351,8 +375,6 @@ if makecorner:
 
     stack = []
     for ii in np.arange(len(dats)):
-        #xs = xxs[ii]
-        #ys = yys[ii]
         dat = dats[ii] * 1
         mccd = ccds[ii]
 
@@ -361,26 +383,31 @@ if makecorner:
         elif mccd == 1 or mccd == 3:
             corner = 1
         else:
-            raise Exception()
+            raise Exception('Bad CCD')
 
+        # get the orientation of all the corner glow regions the same
         if corner == 3:
             dat = dat[:, ::-1]
 
         dx, dy = dat.shape
-
-        imin = np.median(dat[3*dx//4:, 3*dy//4])
+        # look at the 'baseline' noise level far enough from the corner to not
+        # be strongly affected by the glow
+        imin = np.median(dat[3*dx//4:, 3*dy//4:])
+        # plot and save the baseline adjusted corner glow
         ax.plot_surface(xs, ys, dat - imin, cmap='gray',
                         linewidth=0, antialiased=False, alpha=0.2)
-
         stack.append(dat - imin)
 
+    # get the empirical median corner glow shape for this sector and plot it in
+    # color to compare against the stack of individual corners
     avg = np.median(np.dstack(stack), axis=-1)
     ax.plot_surface(xs, ys, avg, cmap='viridis',
-                        linewidth=0, antialiased=False, alpha=0.4)
+                    linewidth=0, antialiased=False, alpha=0.4)
     plt.title(f'Sec {cornersec} Corners')
 
+    # save the diagnostic plot and the median corner glow to be used in future
+    # corrections
     ctxt = os.path.join(cornerdir, f'sector{cornersec:02d}.corner.txt')
     cfig = os.path.join(cornerdir, f'sector{cornersec:02d}.corner.png')
     np.savetxt(ctxt, avg)
     plt.savefig(cfig)
-
