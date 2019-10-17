@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import os
+import subprocess
+from glob import glob
 import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.colors as colors
 from astropy.io import fits
 from astropy.wcs import WCS
-from glob import glob
-import matplotlib.pyplot as plt
-import os
-import matplotlib.colors as colors
 import cartopy.crs as ccrs
-from scipy.stats import median_absolute_deviation as mad
-import subprocess
 from .truncate import truncate_colormap
+from .clean import clean_corner
 
 ##################################################################
 # Configuration parameters
@@ -57,31 +57,42 @@ remove_corner_glow = True
 # make a plot of the corner glow for every CCD to check how removal is working
 corner_glow_plot = False
 
+# manual adjustments to the strength of corner glow corrections
 adjfile = os.path.join(cornerdir, 'adjustments.txt')
+# the coordinates of the corners of the CCDs
 edgefile = os.path.join(os.path.split(__file__)[0], 'edges.txt')
 
+# flag indicating we're just testing things
 test = False
+# create the output figure
 makefig = True
+# the output figure in full resolution
 highres = True
+# save the output figure
 savefig = True
+# save every sector image for a gif in a subdirectory
 makegif = True
-transparent = False
 if makegif:
     figdir = os.path.join(figdir, 'gif_azeq_label')
-
+# use a transparent background instead of white
+transparent = False
+# the output figure file name
 if transparent:
     fname = 'transp_ortho.png'
 else:
     fname = 'ortho.png'
 savefile = os.path.join(figdir, fname)
 
-
+# credit text in lower left and title text in upper left
 credit = 'By Ethan Kruse\n@ethan_kruse'
 title = "NASA TESS's View\nof the Southern\nHemisphere"
-#credit = ''
-#title = ''
+# credit = ''
+# title = ''
+
+# print the dates of the images in the lower right
 printdate = True
 
+# dates the sectors started and ended for when we print these
 secstarts = {1: 'Jul 2018', 2: 'Aug 2018', 3: 'Sep 2018', 4: 'Oct 2018',
              5: 'Nov 2018', 6: 'Dec 2018', 7: 'Jan 2019', 8: 'Feb 2019',
              9: 'Feb 2019', 10: 'Mar 2019', 11: 'Apr 2019', 12: 'May 2019',
@@ -104,152 +115,79 @@ with open(download, 'r') as ff:
 files = glob(os.path.join(datadir, '*fits'))
 files.sort()
 
+# make sure the output directory exists
+if not os.path.exists(figdir) and makefig:
+    os.makedirs(figdir, exist_ok=True)
+
+# if we're creating the corner glow adjustments, only use that sector's files
+# and make sure we're not trying to make a final output
 if makecorner:
     files = glob(os.path.join(datadir, f'*s00{cornersec:02d}-*fits'))
+    files.sort()
     makefig = False
     savefig = False
     makegif = False
     remove_corner_glow = True
     test = False
 
+# remove any previous images in the gif subdirectory
 if makegif:
     prev = glob(os.path.join(figdir, '*png'))
     for iprev in prev:
         os.remove(iprev)
 
-if not os.path.exists(figdir):
-    os.makedirs(figdir, exist_ok=True)
-
+# anything we want to test
 if test:
-    # XXX: for testing
-    # files = [files[0]]
-    files = files[::3]
     pass
 
 
+def grab_sector(sector, frac=0.95):
+    """
+    Print the download scripts for all the FFIs from a certain fraction of
+    the way through a sector.
 
-def grab_sector(sector):
-    file = os.path.join(datadir, 'tesscurl_sector_{0}_ffic.sh'.format(sector))
-    with open(file, 'r') as ff:
-        lines = ff.readlines()
+    Assumes that the tesscurl_sector_X_ffic.sh file already exists in the
+    data directory.
+
+    Parameters
+    ----------
+    sector : int
+    frac : float
+        What fraction (0-1) of the way through the sector do we want to get FFIs
+        to use in this graphic
+
+    Returns
+    -------
+    List[str]
+    """
+    # get time-ordered list of all FFI files in the sector
+    sfile = os.path.join(datadir, f'tesscurl_sector_{sector}_ffic.sh')
+    with open(sfile, 'r') as sff:
+        lines = sff.readlines()
     lines.sort()
 
-    midorbit = len(lines)*93//100
-    ll = lines[midorbit]
+    # go to the right fraction of the way through the sector
+    fthru = int(len(lines)*frac)
+    ll = lines[fthru]
+    # figure out what timestamp this file has
     date = ll.split('tess')[1].split('-')[0]
-    ret = [line for line in lines if date in line]
+    # grab all files with that same timestamp
+    ret = [sline for sline in lines if date in sline]
+    # make sure we have one image per CCD and print/return them
     assert len(ret) == 16
     for iret in ret:
         print(iret)
-    return
+    return ret
 
 
-
+# load the manual corner glow adjustments
 bsec, bcam, bccd, badj = np.loadtxt(adjfile, unpack=True, ndmin=2,
                                     delimiter=',', dtype=float)
 bsec = bsec.astype(int)
 bcam = bcam.astype(int)
 bccd = bccd.astype(int)
-
-
-def clean(data, cleanplot=False, ccd=None, sec=None, cam=None, makecorner=False):
-    import scipy.ndimage
-
-    # a smoother copy of the data
-    fdata = data * 1
-    # remove spiky stars and bad data
-    fdata[fdata > 1000] = np.median(fdata)
-    fdata[fdata < 50] = 50
-    # smooth things out
-    fdata = scipy.ndimage.uniform_filter(fdata, size=201)
-
-    xinds = np.arange(0.5, data.shape[0]-0.4)
-    yinds = np.arange(0.5, data.shape[1]-0.4)
-    lon, lat = np.meshgrid(xinds, yinds, indexing='ij')
-
-    if ccd == 2 or ccd == 4:
-        corner = 3
-    elif ccd == 1 or ccd == 3:
-        corner = 1
-    else:
-        raise Exception('bad ccd in clean')
-
-    # fix the desired corners
-    xl, yl = fdata.shape
-
-    # pick the right corner and get views of the data
-    if corner==1:
-        xs = lat[:xl//4,:yl//4]
-        ys = lon[:xl//4,:yl//4]
-        dat = fdata[:xl//4,:yl//4]
-        rdat = data[:xl//4,:yl//4]
-    elif corner==2:
-        xs = lat[-xl//4:,:yl//4]
-        ys = lon[-xl//4:,:yl//4]
-        dat = fdata[-xl//4:,:yl//4]
-        rdat = data[-xl//4:,:yl//4]
-    elif corner==3:
-        xs = lat[:xl//4,-yl//4:]
-        ys = lon[:xl//4,-yl//4:]
-        dat = fdata[:xl//4,-yl//4:]
-        rdat = data[:xl//4,-yl//4:]
-    elif corner==4:
-        xs = lat[-xl//4:,-yl//4:]
-        ys = lon[-xl//4:,-yl//4:]
-        dat = fdata[-xl//4:,-yl//4:]
-        rdat = data[-xl//4:,-yl//4:]
-    else:
-        raise Exception('bad corner')
-
-    if makecorner:
-        return xs, ys, dat
-
-    ctxt = os.path.join(cornerdir, f'sector{sec:02d}.corner.txt')
-    fix = np.loadtxt(ctxt)
-
-    if corner == 3:
-        fix = fix[:, ::-1]
-    elif corner == 1:
-        pass
-    else:
-        raise Exception('bad corner')
-
-    srch = np.where((sec == bsec) & (cam == bcam) & (ccd == bccd))[0]
-    if len(srch) > 1:
-        raise Exception(f'multiple adjustments for {sec}, {cam}, {ccd}')
-
-    if len(srch) == 0:
-        adj = 0
-    else:
-        adj = badj[srch[0]]
-
-    fix *= adj
-
-
-    # diagnostic plots to make sure it's working
-    if cleanplot:
-        from mpl_toolkits.mplot3d import Axes3D
-        fig = plt.figure()
-        ax = fig.gca(projection='3d')
-        ax.plot_surface(lat, lon, fdata, cmap='gray',
-                           linewidth=0, antialiased=False, alpha=0.3)
-
-        dat -= fix
-
-        ax.plot_surface(lat, lon, fdata, cmap='viridis',
-                           linewidth=0, antialiased=False, alpha=0.6)
-
-        ax.text(lat[0,0],lon[0,0],50,'C1',color='red')
-        ax.text(lat[-1,0],lon[-1,0],50,'C2',color='red')
-        ax.text(lat[0,-1],lon[0,-1],50,'C3',color='red')
-        ax.text(lat[-1,-1],lon[-1,-1],50,'C4',color='red')
-        plt.title(f'Sec {sec}, Cam {cam}, CCD {ccd}, Corner {corner}')
-
-    # remove the trend from the actual data
-    rdat -= fix
-
-    return data
-
+# package these up
+adjustments = (bsec, bcam, bccd, badj)
 
 plt.close('all')
 
@@ -262,7 +200,6 @@ else:
     fsz = 12
     sfsz = 13
     tfsz = 15
-
 
 xxs, yys, dats, ccds = [], [], [], []
 
@@ -289,7 +226,7 @@ for ii, ifile in enumerate(files):
 
         # lon must be between -180 and 180 instead of 0 to 360
         lon -= 180.
-        # because in astronomy images, plots have east on the left, so
+        # because in astronomy images, plots have east on the left,
         # switch east and west
         lon *= -1.
 
@@ -297,24 +234,18 @@ for ii, ifile in enumerate(files):
         iccd = ff[1].header['ccd']
         isec = int(ifile.split('-s0')[1][:3])
 
-        imed = np.median(data)
-        imad = mad(data, axis=None)
-
-        print(f'{ii+1} of {len(files)}: {lon.min():.2f}, {lon.max():.2f}, {lat.min():.2f}, {lat.max():.2f}')
-        print(f'median {imed:.2f}, mad {imad:.2f}, 3sigma {imed+3*imad:.2f}, 5sigma {imed+5*imad:.2f}')
-
         if remove_corner_glow:
             #tocor = np.where((bsec==isec) & (bcam==icam) & (bccd==iccd))[0]
             #print(f'Correcting corners {bcor[tocor]}')
             if makecorner:
-                xs, ys, dat = clean(data, cleanplot=corner_glow_plot, makecorner=True,
-                                    ccd=iccd, sec=isec, cam=icam)
+                xs, ys, dat = clean_corner(data, cornerdir, adjustments, cleanplot=corner_glow_plot, create=True,
+                                           ccd=iccd, sec=isec, cam=icam)
                 xxs.append(xs)
                 yys.append(ys)
                 dats.append(dat)
                 ccds.append(iccd)
             else:
-                data = clean(data, cleanplot=corner_glow_plot, ccd=iccd, sec=isec, cam=icam)
+                data = clean_corner(data, cornerdir, adjustments, cleanplot=corner_glow_plot, ccd=iccd, sec=isec, cam=icam)
 
         # some special processing to avoid problem areas
         if isec==12 and icam==4 and iccd==3:
@@ -423,11 +354,11 @@ if makecorner:
         #xs = xxs[ii]
         #ys = yys[ii]
         dat = dats[ii] * 1
-        ccd = ccds[ii]
+        mccd = ccds[ii]
 
-        if ccd == 2 or ccd == 4:
+        if mccd == 2 or mccd == 4:
             corner = 3
-        elif ccd == 1 or ccd == 3:
+        elif mccd == 1 or mccd == 3:
             corner = 1
         else:
             raise Exception()
