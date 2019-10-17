@@ -110,7 +110,7 @@ with open(download, 'r') as ff:
     for line in ff.readlines():
         fname = os.path.join(datadir, line.split()[5])
         if not os.path.exists(fname):
-            subprocess.run(line, shell=True)
+            subprocess.run(line, shell=True, cwd=datadir)
 
 files = glob(os.path.join(datadir, '*fits'))
 files.sort()
