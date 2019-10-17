@@ -10,8 +10,8 @@ import matplotlib.colors as colors
 from astropy.io import fits
 from astropy.wcs import WCS
 import cartopy.crs as ccrs
-from .truncate import truncate_colormap
-from .clean import clean_corner
+from truncate import truncate_colormap
+from clean import clean_corner
 
 ##################################################################
 # Configuration parameters
