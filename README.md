@@ -16,11 +16,11 @@ python full_sky.py
 Required packages: `python 3.6+, numpy, matplotlib, scipy, astropy, cartopy`.
 
 Running the code will first download the 208 full frame images used in the 
-mosaic (7 GB) into the data/ directory.
+mosaic (7 GB) into the [data/](data/) directory.
 
 It will then create hi-res versions of the 13 frames of the gif (1.5 GB total) 
-in the figs/gif_azeq_label/ directory. Warning: this will take several hours on 
-a single machine and use all of your RAM.
+in the [figs/gif_azeq_label/](figs/gif_azeq_label/) directory. Warning: this
+will take several hours on a single machine and use all of your RAM.
 
 If you have `imagemagick` installed, you can then recreate the gif. I recommend
 copying the files into a lo-res directory first. Then you can navigate into the
