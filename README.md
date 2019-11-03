@@ -1,6 +1,6 @@
 # TESS Full Sky Mosaic
-This repo contains the code used to create a full-sky mosaic of NASA's TESS 
-full frame image data, like the gif shown below. Included in this is 
+This repository contains the code used to create a full-sky mosaic of NASA 
+TESS's full frame image data, like the gif shown below. Included in this is 
 corner glow modeling to remove the increased background light observed in the
 corners of the cameras and produce  an image with a more uniform background 
 everywhere.
@@ -13,7 +13,7 @@ To recreate this gif, you can simply clone the repository and run
 python full_sky.py
 ```
 
-Required packages: `numpy, matplotlib, scipy, astropy, cartopy`.
+Required packages: `python 3.6+, numpy, matplotlib, scipy, astropy, cartopy`.
 
 Running the code will first download the 208 full frame images used in the 
 mosaic (7 GB) into the data/ directory.
