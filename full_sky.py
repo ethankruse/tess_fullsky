@@ -22,19 +22,22 @@ cornerdir = os.path.join(os.path.split(__file__)[0], 'corners')
 
 # south ecliptic pole coordinates are 90, -66.560708333333
 # coordinates at the center of the projection
-cenlon = 90.
-cenlat = -66.560708333333
+# cenlon = 90.
+# cenlat = -66.560708333333
+cenlon = 0.
+cenlat = 0.
 
 # if the projection has a dividing line where we have to wrap data around
-wrap = False
+wrap = True
 
 # set up our desired map projection
 # tr = ccrs.Orthographic(central_longitude=cenlon,
-#                         central_latitude=cenlat)
+#                        central_latitude=cenlat)
 # tr = ccrs.Stereographic(central_longitude=cenlon,
 #                         central_latitude=cenlat)
-tr = ccrs.AzimuthalEquidistant(central_longitude=cenlon,
-                               central_latitude=cenlat)
+# tr = ccrs.AzimuthalEquidistant(central_longitude=cenlon,
+#                                central_latitude=cenlat)
+tr = ccrs.Mollweide(central_longitude=cenlon)
 
 # minimum and maximum flux for the colorbar
 vmin = 150
@@ -60,7 +63,11 @@ corner_glow_plot = False
 # manual adjustments to the strength of corner glow corrections
 adjfile = os.path.join(cornerdir, 'adjustments.txt')
 # the coordinates of the corners of the CCDs
-edgefile = os.path.join(os.path.split(__file__)[0], 'edges.txt')
+
+# adjust this depending on which hemisphere we want to plot
+# edgefile = os.path.join(os.path.split(__file__)[0], 'edges.txt')
+edgefiles = [os.path.join(os.path.split(__file__)[0], 'edges_south.txt'), 
+             os.path.join(os.path.split(__file__)[0], 'edges_north.txt')]
 
 # flag indicating we're just testing things
 test = False
@@ -73,19 +80,19 @@ savefig = True
 # save every sector image for a gif in a subdirectory
 makegif = True
 if makegif:
-    figdir = os.path.join(figdir, 'gif_azeq_label')
+    figdir = os.path.join(figdir, 'gif_molly_label')
 # use a transparent background instead of white
 transparent = False
 # the output figure file name
 if transparent:
-    fname = 'transp_ortho.png'
+    fname = 'transp_molly.png'
 else:
-    fname = 'ortho.png'
+    fname = 'molly.png'
 savefile = os.path.join(figdir, fname)
 
 # credit text in lower left and title text in upper left
 credit = 'By Ethan Kruse\n@ethan_kruse'
-title = "NASA TESS's View\nof the Southern\nHemisphere"
+title = "NASA TESS's View\nof the Sky"
 # credit = ''
 # title = ''
 
@@ -138,7 +145,7 @@ if makegif:
 
 # anything we want to test
 if test:
-    pass
+    files = files[9:11]
 
 
 def grab_sector(sector, frac=0.95):
@@ -289,8 +296,9 @@ for ii, ifile in enumerate(files):
                     fig = plt.figure()
                 # 1% border on all sides
                 ax = plt.axes([0.01, 0.01, 0.98, 0.98], projection=tr)
-                # remove the outline circle of the globe
-                ax.outline_patch.set_linewidth(0)
+                if not test:
+                    # remove the outline circle of the globe
+                    ax.outline_patch.set_linewidth(0)
                 # set transparency
                 if transparent:
                     ax.background_patch.set_alpha(0)
@@ -299,9 +307,13 @@ for ii, ifile in enumerate(files):
                 # load the edges of all the outer CCDs and invisibly plot them
                 # so that after just 1 sector, the plot isn't artificially
                 # zoomed to just that one sector.
-                elat, elon = np.loadtxt(edgefile, unpack=True)
-                plt.scatter(elon, elat, c='w', alpha=0.01, zorder=-5,
-                            marker='.', s=1, transform=data_tr)
+                for edgefile in edgefiles:
+                    elat, elon = np.loadtxt(edgefile, unpack=True)
+                    plt.scatter(elon, elat, c='w', alpha=0.01, zorder=-5,
+                                marker='.', s=1, transform=data_tr)
+                    if test:
+                        plt.scatter(elon, elat, c='r', alpha=1, zorder=5,
+                                    s=20, transform=data_tr)
 
                 # add the labels
                 plt.text(0.02, 0.02, credit, transform=fig.transFigure,
@@ -317,21 +329,31 @@ for ii, ifile in enumerate(files):
                                     va='bottom', multialignment='right',
                                     fontsize=sfsz, fontname='Carlito')
                 ssec = isec
+
             # for wraparounds:
-            if wrap and lon.max() > cenlon + 120 and lon.min() < cenlon - 120:
-                left = np.where(lon > cenlon + 120)
+            if wrap and lon.max() > cenlon + 160 and lon.min() < cenlon - 160:
+                # find a longitude gap where there's no data to worry about
+                vals, bins = np.histogram(lon, bins=np.arange(-180,181,2))
+                valid = np.where(vals==0)[0]
+                if valid.size == 0:
+                    raise Exception("Cannot find empty longitude to split on.")
+                ind = valid.size//2
+                splitlon = (bins[ind] + bins[ind+1])/2.
+                
+                left = np.where(lon > splitlon)
                 lonleft = lon * 1
-                lonleft[left] = cenlon - 180.
+                lonleft[left] = cenlon - 179.999
                 plt.pcolormesh(lonleft, lat, data, norm=cnorm, alpha=1,
                                transform=data_tr, cmap=cmap)
 
-                right = np.where(lon < cenlon - 120)
+                right = np.where(lon < splitlon)
                 lonright = lon * 1
-                lonright[right] = cenlon + 180.
+                lonright[right] = cenlon + 179.9999
                 plt.pcolormesh(lonright, lat, data, norm=cnorm, alpha=1,
                                transform=data_tr, cmap=cmap)
-            # plot the actual image from this CCD
+
             else:
+                # plot the actual image from this CCD
                 plt.pcolormesh(lon, lat, data, norm=cnorm, alpha=1,
                                transform=data_tr, cmap=cmap)
 
