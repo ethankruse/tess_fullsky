@@ -56,7 +56,7 @@ elif hemisphere == 'north':
     tr = ccrs.AzimuthalEquidistant(central_longitude=cenlon,
                                    central_latitude=cenlat)
     edgefiles = [os.path.join(os.path.split(__file__)[0], 'edges_north.txt')]
-    fbase = 'aseq_north'
+    fbase = 'azeq_north'
     title = "NASA TESS's View\nof the Northern\nHemisphere"
 else:
     raise Exception(f'Unidentified hemisphere option: {hemisphere}')
