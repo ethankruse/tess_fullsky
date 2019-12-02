@@ -75,12 +75,12 @@ cmap = truncate_colormap(plt.get_cmap(cmap), minval=0.18, maxval=1.0)
 
 # do we need to create the empirical corner glow correction for a sector?
 makecorner = False
-cornersec = 13
+cornersec = 14
 
 # remove the corner glow from the final image
 remove_corner_glow = True
 # make a plot of the corner glow for every CCD to check how removal is working
-corner_glow_plot = False
+corner_glow_plot = True
 
 # manual adjustments to the strength of corner glow corrections
 adjfile = os.path.join(cornerdir, 'adjustments.txt')
@@ -88,7 +88,7 @@ adjfile = os.path.join(cornerdir, 'adjustments.txt')
 # flag indicating we're just testing things
 test = True
 # create the output figure
-makefig = True
+makefig = False
 # the output figure in full resolution
 highres = False
 # save the output figure
@@ -173,7 +173,9 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = files[187:188]
+    # files = files[187:188]
+    files = glob(os.path.join(datadir, f'*s00{cornersec:02d}-1*fits'))
+    files.sort()
     
 
 
