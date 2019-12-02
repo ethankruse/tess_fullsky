@@ -20,24 +20,46 @@ datadir = os.path.join(os.path.split(__file__)[0], 'data')
 figdir = os.path.join(os.path.split(__file__)[0], 'figs')
 cornerdir = os.path.join(os.path.split(__file__)[0], 'corners')
 
-# south ecliptic pole coordinates are 90, -66.560708333333
-# coordinates at the center of the projection
-# cenlon = 90.
-# cenlat = -66.560708333333
-cenlon = 0.
-cenlat = 0.
+# options are 'north', 'south', or 'both'
+hemisphere = 'both'
 
-# if the projection has a dividing line where we have to wrap data around
-wrap = True
-
-# set up our desired map projection
-# tr = ccrs.Orthographic(central_longitude=cenlon,
-#                        central_latitude=cenlat)
-# tr = ccrs.Stereographic(central_longitude=cenlon,
-#                         central_latitude=cenlat)
-# tr = ccrs.AzimuthalEquidistant(central_longitude=cenlon,
-#                                central_latitude=cenlat)
-tr = ccrs.Mollweide(central_longitude=cenlon)
+# parameters that change depending on the hemisphere
+if hemisphere == 'both':
+    # coordinates at the center of the projection
+    cenlon = 0.
+    cenlat = 0.
+    # if the projection has a dividing line where we have to wrap data around
+    wrap = True
+    # set up our desired map projection
+    tr = ccrs.Mollweide(central_longitude=cenlon)
+    # the coordinates of the corners of the CCDs
+    edgefiles = [os.path.join(os.path.split(__file__)[0], 'edges_south.txt'), 
+                 os.path.join(os.path.split(__file__)[0], 'edges_north.txt')]
+    # what the output file name base should be
+    fbase = 'mollweide'
+    #  title text in upper left
+    title = "NASA TESS's View\nof the Sky"
+elif hemisphere == 'south':
+    # south ecliptic pole coordinates are 90, -66.560708333333
+    cenlon = 90.
+    cenlat = -66.560708333333
+    wrap = False
+    tr = ccrs.AzimuthalEquidistant(central_longitude=cenlon,
+                                   central_latitude=cenlat)
+    edgefiles = [os.path.join(os.path.split(__file__)[0], 'edges_south.txt')]
+    fbase = 'azeq_south'
+    title = "NASA TESS's View\nof the Southern\nHemisphere"
+elif hemisphere == 'north':
+    cenlon = -90.
+    cenlat = 66.560708333333
+    wrap = False
+    tr = ccrs.AzimuthalEquidistant(central_longitude=cenlon,
+                                   central_latitude=cenlat)
+    edgefiles = [os.path.join(os.path.split(__file__)[0], 'edges_north.txt')]
+    fbase = 'aseq_north'
+    title = "NASA TESS's View\nof the Northern\nHemisphere"
+else:
+    raise Exception(f'Unidentified hemisphere option: {hemisphere}')
 
 # minimum and maximum flux for the colorbar
 vmin = 150
@@ -62,39 +84,30 @@ corner_glow_plot = False
 
 # manual adjustments to the strength of corner glow corrections
 adjfile = os.path.join(cornerdir, 'adjustments.txt')
-# the coordinates of the corners of the CCDs
-
-# adjust this depending on which hemisphere we want to plot
-# edgefile = os.path.join(os.path.split(__file__)[0], 'edges.txt')
-edgefiles = [os.path.join(os.path.split(__file__)[0], 'edges_south.txt'), 
-             os.path.join(os.path.split(__file__)[0], 'edges_north.txt')]
 
 # flag indicating we're just testing things
-test = False
+test = True
 # create the output figure
 makefig = True
 # the output figure in full resolution
-highres = True
+highres = False
 # save the output figure
-savefig = True
+savefig = False
 # save every sector image for a gif in a subdirectory
-makegif = True
+makegif = False
 if makegif:
-    figdir = os.path.join(figdir, 'gif_molly_label')
+    figdir = os.path.join(figdir, f'gif_{fbase}')
 # use a transparent background instead of white
 transparent = False
 # the output figure file name
 if transparent:
-    fname = 'transp_molly.png'
+    fname = f'transp_{fbase}.png'
 else:
-    fname = 'molly.png'
+    fname = f'{fbase}.png'
 savefile = os.path.join(figdir, fname)
 
-# credit text in lower left and title text in upper left
+# credit text in lower left
 credit = 'By Ethan Kruse\n@ethan_kruse'
-title = "NASA TESS's View\nof the Sky"
-# credit = ''
-# title = ''
 
 # print the dates of the images in the lower right
 printdate = True
@@ -103,11 +116,15 @@ printdate = True
 secstarts = {1: 'Jul 2018', 2: 'Aug 2018', 3: 'Sep 2018', 4: 'Oct 2018',
              5: 'Nov 2018', 6: 'Dec 2018', 7: 'Jan 2019', 8: 'Feb 2019',
              9: 'Feb 2019', 10: 'Mar 2019', 11: 'Apr 2019', 12: 'May 2019',
-             13: 'Jun 2019'}
+             13: 'Jun 2019', 14: 'Jul 2019', 15: 'Aug 2019', 16: 'Sep 2019', 
+             17: 'Oct 2019', 18: 'Nov 2019', 19: 'Nov 2019', 20: 'Dec 2019',
+             21: 'Jan 2020'}
 secends = {1: 'Aug 2018', 2: 'Sep 2018', 3: 'Oct 2018', 4: 'Nov 2018',
            5: 'Dec 2018', 6: 'Jan 2019', 7: 'Feb 2019', 8: 'Feb 2019',
            9: 'Mar 2019', 10: 'Apr 2019', 11: 'May 2019', 12: 'Jun 2019',
-           13: 'Jul 2019'}
+           13: 'Jul 2019', 14: 'Aug 2019', 15: 'Sep 2019', 16: 'Oct 2019', 
+           17: 'Nov 2019', 18: 'Nov 2019', 19: 'Dec 2019', 20: 'Jan 2020',
+           21: 'Feb 2020'}
 
 ##################################################################
 
@@ -119,8 +136,19 @@ with open(download, 'r') as ff:
         if not os.path.exists(fname):
             subprocess.run(line, shell=True, cwd=datadir)
 
-files = glob(os.path.join(datadir, '*fits'))
-files.sort()
+allfiles = glob(os.path.join(datadir, '*fits'))
+allfiles.sort()
+
+# only grab the correct hemispheres of data
+files = []
+for ifile in allfiles:
+    # grab the sector from the file name
+    fsec = int(os.path.split(ifile)[1].split('-')[1][1:])
+    # decide if we want to use it
+    if fsec < 14 and hemisphere != 'north':
+        files.append(ifile)
+    elif fsec > 13 and hemisphere != 'south':
+        files.append(ifile)
 
 # make sure the output directory exists
 if not os.path.exists(figdir) and makefig:
@@ -145,7 +173,8 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = files[9:11]
+    files = files[187:188]
+    
 
 
 def grab_sector(sector, frac=0.95):
@@ -200,12 +229,23 @@ plt.close('all')
 
 # get font sizes right for the output image size
 if highres:
-    inches = 200
-    fsz = int(160 * inches/100.)
-    sfsz = int(175 * inches/100.)
-    tfsz = int(200 * inches/100.)
+    fscl = 200
+    if hemisphere == 'both':
+        xinch = 300
+        yinch = 150
+    else:
+        xinch = 200
+        yinch = 200
+    fsz = int(160 * fscl/100.)
+    sfsz = int(175 * fscl/100.)
+    tfsz = int(200 * fscl/100.)
 else:
-    inches = 8
+    if hemisphere == 'both':
+        xinch = 12
+        yinch = 6
+    else:
+        xinch = 8
+        yinch = 8
     fsz = 12
     sfsz = 13
     tfsz = 15
@@ -290,10 +330,7 @@ for ii, ifile in enumerate(files):
         if makefig:
             # create the figure. if testing, each CCD gets its own figure
             if ii == 0 or test:
-                if highres:
-                    fig = plt.figure(figsize=(inches, inches))
-                else:
-                    fig = plt.figure()
+                fig = plt.figure(figsize=(xinch, yinch))
                 # 1% border on all sides
                 ax = plt.axes([0.01, 0.01, 0.98, 0.98], projection=tr)
                 if not test:
@@ -329,28 +366,45 @@ for ii, ifile in enumerate(files):
                                     va='bottom', multialignment='right',
                                     fontsize=sfsz, fontname='Carlito')
                 ssec = isec
-
+                
             # for wraparounds:
-            if wrap and lon.max() > cenlon + 160 and lon.min() < cenlon - 160:
+            if wrap and lon.max() > cenlon + 178 and lon.min() < cenlon - 178:
                 # find a longitude gap where there's no data to worry about
                 vals, bins = np.histogram(lon, bins=np.arange(-180,181,2))
                 valid = np.where(vals==0)[0]
                 if valid.size == 0:
-                    raise Exception("Cannot find empty longitude to split on.")
-                ind = valid.size//2
-                splitlon = (bins[ind] + bins[ind+1])/2.
-                
-                left = np.where(lon > splitlon)
-                lonleft = lon * 1
-                lonleft[left] = cenlon - 179.999
-                plt.pcolormesh(lonleft, lat, data, norm=cnorm, alpha=1,
-                               transform=data_tr, cmap=cmap)
-
-                right = np.where(lon < splitlon)
-                lonright = lon * 1
-                lonright[right] = cenlon + 179.9999
-                plt.pcolormesh(lonright, lat, data, norm=cnorm, alpha=1,
-                               transform=data_tr, cmap=cmap)
+                    # the chip covers all possible longitudes, so it's 
+                    # sitting on a pole. This makes splitting into halves
+                    # impossible.
+                    
+                    # find the problem areas that wrap around in longitude
+                    bad = ((np.abs(lon[:-1,:-1] - lon[:-1,1:]) > 355.)|
+                           (np.abs(lon[:-1,:-1] - lon[1:,:-1]) > 355.)|
+                           (np.abs(lon[:-1,:-1] - lon[1:,1:]) > 355.))
+                    # mask them and just don't plot these pixels
+                    maskeddata = np.ma.masked_where(bad, data)
+                    plt.pcolormesh(lon, lat, maskeddata, norm=cnorm, alpha=1,
+                                   transform=data_tr, cmap=cmap)
+                else:
+                    # the chip wraps around the map, but there are longitudes
+                    # that don't have any data we can use to split things up
+                    # into an east and west half
+                    ind = valid.size//2
+                    splitlon = (bins[ind] + bins[ind+1])/2.
+        
+                    # plot things up against the western border
+                    left = np.where(lon > splitlon)
+                    lonleft = lon * 1
+                    lonleft[left] = cenlon - 179.999
+                    plt.pcolormesh(lonleft, lat, data, norm=cnorm, alpha=1,
+                                   transform=data_tr, cmap=cmap)
+    
+                    # plot against the eastern border
+                    right = np.where(lon < splitlon)
+                    lonright = lon * 1
+                    lonright[right] = cenlon + 179.9999
+                    plt.pcolormesh(lonright, lat, data, norm=cnorm, alpha=1,
+                                   transform=data_tr, cmap=cmap)
 
             else:
                 # plot the actual image from this CCD
