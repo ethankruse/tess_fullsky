@@ -21,7 +21,7 @@ figdir = os.path.join(os.path.split(__file__)[0], 'figs')
 cornerdir = os.path.join(os.path.split(__file__)[0], 'corners')
 
 # options are 'north', 'south', or 'both'
-hemisphere = 'both'
+hemisphere = 'north'
 
 # parameters that change depending on the hemisphere
 if hemisphere == 'both':
@@ -78,7 +78,7 @@ makecorner = False
 cornersec = 16
 
 # remove the corner glow from the final image
-remove_corner_glow = True
+remove_corner_glow = False
 # make a plot of the corner glow for every CCD to check how removal is working
 corner_glow_plot = False
 
@@ -86,15 +86,15 @@ corner_glow_plot = False
 adjfile = os.path.join(cornerdir, 'adjustments.txt')
 
 # flag indicating we're just testing things
-test = False
+test = True
 # create the output figure
 makefig = True
 # the output figure in full resolution
-highres = True
+highres = False
 # save the output figure
-savefig = True
+savefig = False
 # save every sector image for a gif in a subdirectory
-makegif = True
+makegif = False
 if makegif:
     figdir = os.path.join(figdir, f'gif_{fbase}')
 # use a transparent background instead of white
@@ -174,7 +174,7 @@ if makegif:
 # anything we want to test
 if test:
     # files = files[187:188]
-    files = glob(os.path.join(datadir, f'*s0014-4-4*fits'))
+    files = glob(os.path.join(datadir, f'*s0017-2-4*fits'))
     files.sort()
     
 
@@ -356,6 +356,13 @@ for ii, ifile in enumerate(files):
                     if test:
                         plt.scatter(elon, elat, c='r', alpha=1, zorder=5,
                                     s=20, transform=data_tr)
+                        # XXX: remove this
+                        # TOI-700 location
+                        #plt.scatter([82.9032125], [-65.579311], c='g', alpha=1, zorder=5,
+                        #            s=80, transform=data_tr, marker='*')
+                        # Andromeda
+                        plt.scatter([169.35], [41.269], c='g', alpha=1, zorder=5,
+                                    s=80, transform=data_tr, marker='*')
 
                 # add the labels
                 plt.text(0.02, 0.02, credit, transform=fig.transFigure,
