@@ -75,12 +75,12 @@ cmap = truncate_colormap(plt.get_cmap(cmap), minval=0.18, maxval=1.0)
 
 # do we need to create the empirical corner glow correction for a sector?
 makecorner = False
-cornersec = 16
+cornersec = 17
 
 # remove the corner glow from the final image
-remove_corner_glow = False
+remove_corner_glow = True
 # make a plot of the corner glow for every CCD to check how removal is working
-corner_glow_plot = False
+corner_glow_plot = True
 
 # manual adjustments to the strength of corner glow corrections
 adjfile = os.path.join(cornerdir, 'adjustments.txt')
@@ -88,7 +88,7 @@ adjfile = os.path.join(cornerdir, 'adjustments.txt')
 # flag indicating we're just testing things
 test = True
 # create the output figure
-makefig = True
+makefig = False
 # the output figure in full resolution
 highres = False
 # save the output figure
@@ -174,7 +174,7 @@ if makegif:
 # anything we want to test
 if test:
     # files = files[187:188]
-    files = glob(os.path.join(datadir, f'*s0017-2-4*fits'))
+    files = glob(os.path.join(datadir, f'*s0017-4-4*fits'))
     files.sort()
     
 
@@ -357,12 +357,9 @@ for ii, ifile in enumerate(files):
                         plt.scatter(elon, elat, c='r', alpha=1, zorder=5,
                                     s=20, transform=data_tr)
                         # XXX: remove this
-                        # TOI-700 location
-                        #plt.scatter([82.9032125], [-65.579311], c='g', alpha=1, zorder=5,
-                        #            s=80, transform=data_tr, marker='*')
                         # Andromeda
-                        plt.scatter([169.35], [41.269], c='g', alpha=1, zorder=5,
-                                    s=80, transform=data_tr, marker='*')
+                        # plt.scatter([169.35], [41.269], c='g', alpha=1, zorder=5,
+                        #             s=80, transform=data_tr, marker='*')
 
                 # add the labels
                 plt.text(0.02, 0.02, credit, transform=fig.transFigure,
@@ -380,43 +377,15 @@ for ii, ifile in enumerate(files):
                 ssec = isec
                 
             # for wraparounds:
-            if wrap and lon.max() > cenlon + 178 and lon.min() < cenlon - 178:
-                # find a longitude gap where there's no data to worry about
-                vals, bins = np.histogram(lon, bins=np.arange(-180,181,2))
-                valid = np.where(vals==0)[0]
-                if valid.size == 0:
-                    # the chip covers all possible longitudes, so it's 
-                    # sitting on a pole. This makes splitting into halves
-                    # impossible.
-                    
-                    # find the problem areas that wrap around in longitude
-                    bad = ((np.abs(lon[:-1,:-1] - lon[:-1,1:]) > 355.)|
-                           (np.abs(lon[:-1,:-1] - lon[1:,:-1]) > 355.)|
-                           (np.abs(lon[:-1,:-1] - lon[1:,1:]) > 355.))
-                    # mask them and just don't plot these pixels
-                    maskeddata = np.ma.masked_where(bad, data)
-                    plt.pcolormesh(lon, lat, maskeddata, norm=cnorm, alpha=1,
-                                   transform=data_tr, cmap=cmap)
-                else:
-                    # the chip wraps around the map, but there are longitudes
-                    # that don't have any data we can use to split things up
-                    # into an east and west half
-                    ind = valid.size//2
-                    splitlon = (bins[ind] + bins[ind+1])/2.
-        
-                    # plot things up against the western border
-                    left = np.where(lon > splitlon)
-                    lonleft = lon * 1
-                    lonleft[left] = cenlon - 179.999
-                    plt.pcolormesh(lonleft, lat, data, norm=cnorm, alpha=1,
-                                   transform=data_tr, cmap=cmap)
-    
-                    # plot against the eastern border
-                    right = np.where(lon < splitlon)
-                    lonright = lon * 1
-                    lonright[right] = cenlon + 179.9999
-                    plt.pcolormesh(lonright, lat, data, norm=cnorm, alpha=1,
-                                   transform=data_tr, cmap=cmap)
+            if wrap and lon.max() > cenlon + 178 and lon.min() < cenlon - 178:                    
+                # find the problem areas that wrap around in longitude
+                bad = ((np.abs(lon[:-1,:-1] - lon[:-1,1:]) > 355.)|
+                       (np.abs(lon[:-1,:-1] - lon[1:,:-1]) > 355.)|
+                       (np.abs(lon[:-1,:-1] - lon[1:,1:]) > 355.))
+                # mask them and just don't plot these pixels
+                maskeddata = np.ma.masked_where(bad, data)
+                plt.pcolormesh(lon, lat, maskeddata, norm=cnorm, alpha=1,
+                               transform=data_tr, cmap=cmap)
 
             else:
                 # plot the actual image from this CCD
