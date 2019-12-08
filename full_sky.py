@@ -175,7 +175,10 @@ if makegif:
 # anything we want to test
 if test:
     # files = files[187:188]
-    files = glob(os.path.join(datadir, f'*s0017-2-4*fits'))
+    files = glob(os.path.join(datadir, f'*s0016-2-3*fits'))   
+    files += glob(os.path.join(datadir, f'*s0016-1-2*fits'))   
+    files += glob(os.path.join(datadir, f'*s0015-1-1*fits'))   
+    
     files.sort()
     tfile = os.path.join(os.path.split(__file__)[0], 'all_targets_S017_v1.txt')
     tic, tras, tdecs = np.loadtxt(tfile, usecols=(0,4,5), unpack=True)
@@ -341,7 +344,7 @@ for ii, ifile in enumerate(files):
 
         if makefig:
             # create the figure. if testing, each CCD gets its own figure
-            if ii == 0 or test:
+            if ii == 0:
                 fig = plt.figure(figsize=(xinch, yinch))
                 # 1% border on all sides
                 ax = plt.axes([0.01, 0.01, 0.98, 0.98], projection=tr)
