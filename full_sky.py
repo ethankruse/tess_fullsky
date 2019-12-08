@@ -4,6 +4,7 @@
 import os
 import subprocess
 from glob import glob
+from datetime import datetime
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
@@ -80,7 +81,7 @@ cornersec = 17
 # remove the corner glow from the final image
 remove_corner_glow = True
 # make a plot of the corner glow for every CCD to check how removal is working
-corner_glow_plot = True
+corner_glow_plot = False
 
 # manual adjustments to the strength of corner glow corrections
 adjfile = os.path.join(cornerdir, 'adjustments.txt')
@@ -88,7 +89,7 @@ adjfile = os.path.join(cornerdir, 'adjustments.txt')
 # flag indicating we're just testing things
 test = True
 # create the output figure
-makefig = False
+makefig = True
 # the output figure in full resolution
 highres = False
 # save the output figure
@@ -174,8 +175,13 @@ if makegif:
 # anything we want to test
 if test:
     # files = files[187:188]
-    files = glob(os.path.join(datadir, f'*s0017-4-4*fits'))
+    files = glob(os.path.join(datadir, f'*s0017-2-4*fits'))
     files.sort()
+    tfile = os.path.join(os.path.split(__file__)[0], 'all_targets_S017_v1.txt')
+    tic, tras, tdecs = np.loadtxt(tfile, usecols=(0,4,5), unpack=True)
+    
+    tras -= 180.
+    tras *= -1.
     
 
 
@@ -287,8 +293,9 @@ for ii, ifile in enumerate(files):
         icam = ff[1].header['camera']
         iccd = ff[1].header['ccd']
         isec = int(ifile.split('-s0')[1][:3])
-        print(f'Processing image {ii+1} of {len(files)}: Sector {isec} Camera '
-              f'{icam} CCD {iccd}')
+        now = datetime.now().strftime("%d.%m.%Y %H:%M:%S") 
+        print(f'{now}. Processing image {ii+1} of {len(files)}: Sector {isec} '
+              f'Camera {icam} CCD {iccd}')
 
         if remove_corner_glow:
             # create the empirical corner glow model
@@ -360,7 +367,9 @@ for ii, ifile in enumerate(files):
                         # Andromeda
                         # plt.scatter([169.35], [41.269], c='g', alpha=1, zorder=5,
                         #             s=80, transform=data_tr, marker='*')
-
+                        #nearby = np.where((tras > 165.) & (tras < 175.) & (tdecs > 35.) & (tdecs < 46))[0]
+                        #plt.scatter(tras[nearby], tdecs[nearby], c='r', alpha=0.7, zorder=5,
+                        #             s=80, transform=data_tr, marker='*')
                 # add the labels
                 plt.text(0.02, 0.02, credit, transform=fig.transFigure,
                          ha='left', va='bottom', multialignment='left',
