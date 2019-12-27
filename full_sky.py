@@ -175,8 +175,8 @@ if makegif:
 # anything we want to test
 if test:
     # files = files[187:188]
-    files = glob(os.path.join(datadir, f'*s0017-2-2*fits'))   
-    files += glob(os.path.join(datadir, f'*s0016-1-1*fits'))   
+    files = glob(os.path.join(datadir, f'*s0016-4-1*fits'))   
+    files += glob(os.path.join(datadir, f'*s0016-4-2*fits'))   
     #files += glob(os.path.join(datadir, f'*s0015-1-1*fits'))   
     
     files.sort()
@@ -373,6 +373,9 @@ for ii, ifile in enumerate(files):
                         #nearby = np.where((tras > 165.) & (tras < 175.) & (tdecs > 35.) & (tdecs < 46))[0]
                         #plt.scatter(tras[nearby], tdecs[nearby], c='r', alpha=0.7, zorder=5,
                         #             s=80, transform=data_tr, marker='*')
+                        # alpha drac (pixel location 12334, 9059)
+                        plt.scatter([-31.0972], [+64.375], c='g', alpha=1, zorder=5,
+                                     s=80, transform=data_tr, marker='*')
                 # add the labels
                 plt.text(0.02, 0.02, credit, transform=fig.transFigure,
                          ha='left', va='bottom', multialignment='left',
