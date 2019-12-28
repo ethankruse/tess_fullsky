@@ -26,3 +26,5 @@ If you have `imagemagick` installed, you can then recreate the gif. I recommend
 copying the files into a lo-res directory first. Then you can navigate into the
 appropriate directory and run the two commands in `makegif.sh` to downsize the
 individual frames and create the gif.
+
+To make a northern hemisphere version, simply change 

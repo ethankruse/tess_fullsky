@@ -22,7 +22,7 @@ figdir = os.path.join(os.path.split(__file__)[0], 'figs')
 cornerdir = os.path.join(os.path.split(__file__)[0], 'corners')
 
 # options are 'north', 'south', or 'both'
-hemisphere = 'north'
+hemisphere = 'south'
 
 # parameters that change depending on the hemisphere
 if hemisphere == 'both':
