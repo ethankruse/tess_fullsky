@@ -175,9 +175,9 @@ if makegif:
 # anything we want to test
 if test:
     # files = files[187:188]
-    files = glob(os.path.join(datadir, f'*s0018-4-4*fits'))
-    # files += glob(os.path.join(datadir, f'*s0016-4-2*fits'))   
-    #files += glob(os.path.join(datadir, f'*s0015-1-1*fits'))   
+    files = glob(os.path.join(datadir, f'*s0018-2-2*fits'))
+    files += glob(os.path.join(datadir, f'*s0018-3-1*fits'))   
+    files += glob(os.path.join(datadir, f'*s0017-2-1*fits'))
     
     files.sort()
     
