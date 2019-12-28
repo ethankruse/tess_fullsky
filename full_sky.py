@@ -76,7 +76,7 @@ cmap = truncate_colormap(plt.get_cmap(cmap), minval=0.18, maxval=1.0)
 
 # do we need to create the empirical corner glow correction for a sector?
 makecorner = False
-cornersec = 17
+cornersec = 18
 
 # remove the corner glow from the final image
 remove_corner_glow = True
@@ -87,15 +87,15 @@ corner_glow_plot = False
 adjfile = os.path.join(cornerdir, 'adjustments.txt')
 
 # flag indicating we're just testing things
-test = True
+test = False
 # create the output figure
 makefig = True
 # the output figure in full resolution
-highres = False
+highres = True
 # save the output figure
-savefig = False
+savefig = True
 # save every sector image for a gif in a subdirectory
-makegif = False
+makegif = True
 if makegif:
     figdir = os.path.join(figdir, f'gif_{fbase}')
 # use a transparent background instead of white
@@ -175,16 +175,11 @@ if makegif:
 # anything we want to test
 if test:
     # files = files[187:188]
-    files = glob(os.path.join(datadir, f'*s0016-4-1*fits'))   
-    files += glob(os.path.join(datadir, f'*s0016-4-2*fits'))   
+    files = glob(os.path.join(datadir, f'*s0018-4-4*fits'))
+    # files += glob(os.path.join(datadir, f'*s0016-4-2*fits'))   
     #files += glob(os.path.join(datadir, f'*s0015-1-1*fits'))   
     
     files.sort()
-    tfile = os.path.join(os.path.split(__file__)[0], 'all_targets_S017_v1.txt')
-    tic, tras, tdecs = np.loadtxt(tfile, usecols=(0,4,5), unpack=True)
-    
-    tras -= 180.
-    tras *= -1.
     
 
 
@@ -370,12 +365,7 @@ for ii, ifile in enumerate(files):
                         # Andromeda
                         # plt.scatter([169.35], [41.269], c='g', alpha=1, zorder=5,
                         #             s=80, transform=data_tr, marker='*')
-                        #nearby = np.where((tras > 165.) & (tras < 175.) & (tdecs > 35.) & (tdecs < 46))[0]
-                        #plt.scatter(tras[nearby], tdecs[nearby], c='r', alpha=0.7, zorder=5,
-                        #             s=80, transform=data_tr, marker='*')
-                        # alpha drac (pixel location 12334, 9059)
-                        plt.scatter([-31.0972], [+64.375], c='g', alpha=1, zorder=5,
-                                     s=80, transform=data_tr, marker='*')
+
                 # add the labels
                 plt.text(0.02, 0.02, credit, transform=fig.transFigure,
                          ha='left', va='bottom', multialignment='left',
