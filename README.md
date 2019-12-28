@@ -5,7 +5,7 @@ corner glow modeling to remove the increased background light observed in the
 corners of the cameras and produce  an image with a more uniform background 
 everywhere.
 
-![TESS gif](tess_south_azeq_label.gif)
+![TESS southern hemisphere gif](tess_south_azeq_label.gif)
 
 
 To recreate this gif, you can simply clone the repository and run
@@ -27,4 +27,8 @@ copying the files into a lo-res directory first. Then you can navigate into the
 appropriate directory and run the two commands in `makegif.sh` to downsize the
 individual frames and create the gif.
 
-To make a northern hemisphere version, simply change 
+To make a northern hemisphere version, simply change the `hemisphere` parameter
+to `north` at the top of `full_sky.py`. `hemisphere` can be set to `both` to
+create the full-sky Mollweide projection map as seen below.
+
+![TESS full-sky gif](tess_sky.gif)
