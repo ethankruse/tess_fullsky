@@ -13,6 +13,7 @@ from astropy.wcs import WCS
 import cartopy.crs as ccrs
 from truncate import truncate_colormap
 from clean import clean_corner
+from astropy.coordinates import SkyCoord, BarycentricTrueEcliptic
 
 ##################################################################
 # Configuration parameters
@@ -23,6 +24,9 @@ cornerdir = os.path.join(os.path.split(__file__)[0], 'corners')
 
 # options are 'north', 'south', or 'both'
 hemisphere = 'south'
+# for full-sky Mollweide projections, do we want to use ecliptic coordinates
+# if False, uses celestial coordinates (ICRS, right ascension/declination)
+ecliptic_coords = True
 
 # parameters that change depending on the hemisphere
 if hemisphere == 'both':
@@ -38,6 +42,8 @@ if hemisphere == 'both':
                  os.path.join(os.path.split(__file__)[0], 'edges_north.txt')]
     # what the output file name base should be
     fbase = 'mollweide'
+    if ecliptic_coords:
+        fbase += '_ecliptic'
     #  title text in upper left
     title = "NASA TESS's View\nof the Sky"
 elif hemisphere == 'south':
@@ -50,6 +56,8 @@ elif hemisphere == 'south':
     edgefiles = [os.path.join(os.path.split(__file__)[0], 'edges_south.txt')]
     fbase = 'azeq_south'
     title = "NASA TESS's View\nof the Southern\nHemisphere"
+    # turn off ecliptic coordinates since it doesn't matter
+    ecliptic_coords = False
 elif hemisphere == 'north':
     cenlon = -90.
     cenlat = 66.560708333333
@@ -59,6 +67,8 @@ elif hemisphere == 'north':
     edgefiles = [os.path.join(os.path.split(__file__)[0], 'edges_north.txt')]
     fbase = 'azeq_north'
     title = "NASA TESS's View\nof the Northern\nHemisphere"
+    # turn off ecliptic coordinates since it doesn't matter
+    ecliptic_coords = False
 else:
     raise Exception(f'Unidentified hemisphere option: {hemisphere}')
 
@@ -280,6 +290,13 @@ for ii, ifile in enumerate(files):
         data = data[:2048, 44:2092]
         lon = lon[:2049, 44:2093]
         lat = lat[:2049, 44:2093]
+        
+        # transform to ecliptic coordinates if desired
+        if ecliptic_coords:
+            icrs = SkyCoord(ra=lon, dec=lat, frame='icrs', unit='deg')
+            ecliptic = icrs.transform_to(BarycentricTrueEcliptic)
+            lon = ecliptic.lon * 1
+            lat = ecliptic.lat * 1
 
         # lon must be between -180 and 180 instead of 0 to 360
         lon -= 180.
@@ -475,3 +492,5 @@ if makecorner:
     cfig = os.path.join(cornerdir, f'sector{cornersec:02d}.corner.png')
     np.savetxt(ctxt, avg)
     plt.savefig(cfig)
+
+
