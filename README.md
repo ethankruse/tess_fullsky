@@ -28,7 +28,13 @@ appropriate directory and run the two commands in `makegif.sh` to downsize the
 individual frames and create the gif.
 
 To make a northern hemisphere version, simply change the `hemisphere` parameter
-to `north` at the top of `full_sky.py`. `hemisphere` can be set to `both` to
-create the full-sky Mollweide projection map as seen below.
+to `north` at the top of `full_sky.py`. `hemisphere` can also be set to `both`
+to create the full-sky Mollweide projection map as seen below.
+
+![TESS full-sky ecliptic coords gif](tess_sky_ecliptic.gif)
+
+To switch from ecliptic coordinates to equatorial coordinates (right ascension
+and declination), change the `ecliptic_coords` parameter at the top of 
+`full_sky.py` to `False`. That will produce the gif below.
 
 ![TESS full-sky gif](tess_sky.gif)
