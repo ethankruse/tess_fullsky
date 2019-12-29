@@ -295,8 +295,8 @@ for ii, ifile in enumerate(files):
         if ecliptic_coords:
             icrs = SkyCoord(ra=lon, dec=lat, frame='icrs', unit='deg')
             ecliptic = icrs.transform_to(BarycentricTrueEcliptic)
-            lon = ecliptic.lon * 1
-            lat = ecliptic.lat * 1
+            lon = ecliptic.lon.value * 1
+            lat = ecliptic.lat.value * 1
 
         # lon must be between -180 and 180 instead of 0 to 360
         lon -= 180.
