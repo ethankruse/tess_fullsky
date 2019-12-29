@@ -26,7 +26,7 @@ cornerdir = os.path.join(os.path.split(__file__)[0], 'corners')
 hemisphere = 'south'
 # for full-sky Mollweide projections, do we want to use ecliptic coordinates
 # if False, uses celestial coordinates (ICRS, right ascension/declination)
-ecliptic_coords = False
+ecliptic_coords = True
 
 # parameters that change depending on the hemisphere
 if hemisphere == 'both':
