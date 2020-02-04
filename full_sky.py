@@ -185,10 +185,10 @@ if makegif:
 # anything we want to test
 if test:
     # files = files[187:188]
-    files = glob(os.path.join(datadir, f'*s0018-*fits'))
-    files += glob(os.path.join(datadir, f'*s0019*fits'))   
-    #files += glob(os.path.join(datadir, f'*s0017-2-1*fits'))
-    
+    files = glob(os.path.join(datadir, f'*s0019-3-3*fits'))
+    files += glob(os.path.join(datadir, f'*s0014-3-3*fits'))   
+    #files += glob(os.path.join(datadir, f'*s0018-1-1*fits'))
+    #files += glob(os.path.join(datadir, f'*s0018-2-4*fits'))
     files.sort()
     
 
@@ -353,6 +353,12 @@ for ii, ifile in enumerate(files):
             data = data[400:, :]
             lat = lat[400:, :]
             lon = lon[400:, :]
+        elif isec == 19 and icam == 3 and iccd == 3:
+            # a reflection in the CVZ only in S19
+            data = data[360:, :]
+            lat = lat[360:, :]
+            lon = lon[360:, :]
+
 
         if makefig:
             # create the figure. if testing, each CCD gets its own figure
