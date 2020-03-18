@@ -86,12 +86,12 @@ cmap = truncate_colormap(plt.get_cmap(cmap), minval=0.18, maxval=1.0)
 
 # do we need to create the empirical corner glow correction for a sector?
 makecorner = False
-cornersec = 19
+cornersec = 21
 
 # remove the corner glow from the final image
 remove_corner_glow = True
 # make a plot of the corner glow for every CCD to check how removal is working
-corner_glow_plot = False
+corner_glow_plot = True
 
 # manual adjustments to the strength of corner glow corrections
 adjfile = os.path.join(cornerdir, 'adjustments.txt')
@@ -129,13 +129,15 @@ secstarts = {1: 'Jul 2018', 2: 'Aug 2018', 3: 'Sep 2018', 4: 'Oct 2018',
              9: 'Feb 2019', 10: 'Mar 2019', 11: 'Apr 2019', 12: 'May 2019',
              13: 'Jun 2019', 14: 'Jul 2019', 15: 'Aug 2019', 16: 'Sep 2019', 
              17: 'Oct 2019', 18: 'Nov 2019', 19: 'Nov 2019', 20: 'Dec 2019',
-             21: 'Jan 2020'}
+             21: 'Jan 2020', 22: 'Feb 2020', 23: 'Mar 2020', 24: 'Apr 2020', 
+             25: 'May 2020', 26: 'Jun 2020'}
 secends = {1: 'Aug 2018', 2: 'Sep 2018', 3: 'Oct 2018', 4: 'Nov 2018',
            5: 'Dec 2018', 6: 'Jan 2019', 7: 'Feb 2019', 8: 'Feb 2019',
            9: 'Mar 2019', 10: 'Apr 2019', 11: 'May 2019', 12: 'Jun 2019',
            13: 'Jul 2019', 14: 'Aug 2019', 15: 'Sep 2019', 16: 'Oct 2019', 
            17: 'Nov 2019', 18: 'Nov 2019', 19: 'Dec 2019', 20: 'Jan 2020',
-           21: 'Feb 2020'}
+           21: 'Feb 2020', 22: 'Mar 2020', 23: 'Apr 2020', 24: 'May 2020', 
+           25: 'Jun 2020', 26: 'Jul 2020'}
 
 ##################################################################
 
@@ -185,9 +187,9 @@ if makegif:
 # anything we want to test
 if test:
     # files = files[187:188]
-    files = glob(os.path.join(datadir, f'*s0019-3-3*fits'))
-    files += glob(os.path.join(datadir, f'*s0014-3-3*fits'))   
-    #files += glob(os.path.join(datadir, f'*s0018-1-1*fits'))
+    files = glob(os.path.join(datadir, f'*s0020-2-3*fits'))
+    #files += glob(os.path.join(datadir, f'*s0020*fits'))
+    #files += glob(os.path.join(datadir, f'*s0021*fits'))
     #files += glob(os.path.join(datadir, f'*s0018-2-4*fits'))
     files.sort()
     
@@ -384,10 +386,6 @@ for ii, ifile in enumerate(files):
                     if test:
                         plt.scatter(elon, elat, c='r', alpha=1, zorder=5,
                                     s=20, transform=data_tr)
-                        # XXX: remove this
-                        # Andromeda
-                        # plt.scatter([169.35], [41.269], c='g', alpha=1, zorder=5,
-                        #             s=80, transform=data_tr, marker='*')
 
                 # add the labels
                 plt.text(0.02, 0.02, credit, transform=fig.transFigure,
