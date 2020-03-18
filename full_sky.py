@@ -91,7 +91,7 @@ cornersec = 21
 # remove the corner glow from the final image
 remove_corner_glow = True
 # make a plot of the corner glow for every CCD to check how removal is working
-corner_glow_plot = True
+corner_glow_plot = False
 
 # manual adjustments to the strength of corner glow corrections
 adjfile = os.path.join(cornerdir, 'adjustments.txt')
