@@ -38,3 +38,7 @@ and declination), change the `ecliptic_coords` parameter at the top of
 `full_sky.py` to `False`. That will produce the gif below.
 
 ![TESS full-sky gif](tess_sky.gif)
+
+Finally, for completeness, here is the northern hemisphere version.
+
+![TESS northern hemisphere gif](tess_north_azeq_label.gif)
