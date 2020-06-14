@@ -190,9 +190,9 @@ if test:
     #files = glob(os.path.join(datadir, f'*s0022-*fits'))
     #files += glob(os.path.join(datadir, f'*s0023*fits')) 3,3
     
-    files = glob(os.path.join(datadir, f'*s0024-3-3*fits'))
-    files += glob(os.path.join(datadir, f'*s0024-4-2*fits'))
-    #files += glob(os.path.join(datadir, f'*s0018-2-4*fits'))
+    files = glob(os.path.join(datadir, f'*s0024-4-2*fits'))
+    #files += glob(os.path.join(datadir, f'*s0017-3-1*fits'))
+    #files += glob(os.path.join(datadir, f'*s0017-3-2*fits'))
     files.sort()
     
 
@@ -370,6 +370,22 @@ for ii, ifile in enumerate(files):
         elif isec == 23 and icam == 3 and iccd == 4:
             # bad corner glow
             data[:200, -100:] = np.nan
+        elif isec == 24 and icam == 2 and iccd == 2:
+            data[:330, 1850:] = np.nan
+        elif isec == 24 and icam == 3 and iccd == 3:
+            data[:200, :700] = np.nan
+        elif isec == 24 and icam == 4 and iccd == 3:
+            data[:150, 1700:] = np.nan
+            data[:500, :300] = np.nan
+        elif isec == 24 and icam == 4 and iccd == 4:
+            data[:400, 1600:] = np.nan
+        
+        # this camera in this sector is too bright and doesn't match the rest
+        if isec == 24 and icam == 4:
+            if iccd in [3, 4]:
+                data *= 0.7
+            else:
+                data *= 0.85
 
         if makefig:
             # create the figure. if testing, each CCD gets its own figure
@@ -390,11 +406,13 @@ for ii, ifile in enumerate(files):
                 # zoomed to just that one sector.
                 for edgefile in edgefiles:
                     elat, elon = np.loadtxt(edgefile, unpack=True)
-                    plt.scatter(elon, elat, c='w', alpha=0.01, zorder=-5,
-                                marker='.', s=1, transform=data_tr)
-                    if test:
-                        plt.scatter(elon, elat, c='r', alpha=1, zorder=5,
-                                    s=20, transform=data_tr)
+                    if not test:
+                        plt.scatter(elon, elat, c='w', alpha=0.01, zorder=-5,
+                                    marker='.', s=1, transform=data_tr)
+                    else:
+                        pass
+                        #plt.scatter(elon, elat, c='r', alpha=1, zorder=5,
+                        #            s=20, transform=data_tr)
 
                 # add the labels
                 plt.text(0.02, 0.02, credit, transform=fig.transFigure,
