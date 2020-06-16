@@ -97,13 +97,13 @@ corner_glow_plot = False
 adjfile = os.path.join(cornerdir, 'adjustments.txt')
 
 # flag indicating we're just testing things
-test = True
+test = False
 # create the output figure
 makefig = True
 # the output figure in full resolution
-highres = False
+highres = True
 # save the output figure
-savefig = False
+savefig = True
 # save every sector image for a gif in a subdirectory
 makegif = False
 if makegif:
