@@ -23,7 +23,7 @@ figdir = os.path.join(os.path.split(__file__)[0], 'figs')
 cornerdir = os.path.join(os.path.split(__file__)[0], 'corners')
 
 # options are 'north', 'south', or 'both'
-hemisphere = 'south'
+hemisphere = 'north'
 # for full-sky Mollweide projections, do we want to use ecliptic coordinates
 # if False, uses celestial coordinates (ICRS, right ascension/declination)
 ecliptic_coords = True
@@ -97,15 +97,15 @@ corner_glow_plot = False
 adjfile = os.path.join(cornerdir, 'adjustments.txt')
 
 # flag indicating we're just testing things
-test = False
+test = True
 # create the output figure
 makefig = True
 # the output figure in full resolution
-highres = True
+highres = False
 # save the output figure
-savefig = True
+savefig = False
 # save every sector image for a gif in a subdirectory
-makegif = True
+makegif = False
 if makegif:
     figdir = os.path.join(figdir, f'gif_{fbase}')
 # use a transparent background instead of white
@@ -189,10 +189,14 @@ if test:
     # files = files[187:188]
     #files = glob(os.path.join(datadir, f'*s0022-*fits'))
     #files += glob(os.path.join(datadir, f'*s0023*fits')) 3,3
+    #files = glob(os.path.join(datadir, f'*s0014*fits'))
     
-    files = glob(os.path.join(datadir, f'*s0024-4-2*fits'))
-    #files += glob(os.path.join(datadir, f'*s0017-3-1*fits'))
-    #files += glob(os.path.join(datadir, f'*s0017-3-2*fits'))
+    files = glob(os.path.join(datadir, f'*s0015-1-1*fits'))
+    #files += glob(os.path.join(datadir, f'*s0018-3*fits'))
+    files += glob(os.path.join(datadir, f'*s0015-1-4*fits'))
+    files += glob(os.path.join(datadir, f'*s0016-1-2*fits'))
+    files += glob(os.path.join(datadir, f'*s0016-1-3*fits'))
+    #files += glob(os.path.join(datadir, f'*s0018-2-1*fits'))
     files.sort()
     
 
@@ -383,9 +387,13 @@ for ii, ifile in enumerate(files):
         # this camera in this sector is too bright and doesn't match the rest
         if isec == 24 and icam == 4:
             if iccd in [3, 4]:
-                data *= 0.7
+                data -= 70
             else:
-                data *= 0.85
+                data -= 35
+        if isec == 15 and icam == 1 and iccd in [2, 3]:
+            data += 15
+        if isec == 16 and icam == 1 and iccd in [2]:
+            data += 20
 
         if makefig:
             # create the figure. if testing, each CCD gets its own figure
