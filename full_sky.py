@@ -28,6 +28,9 @@ hemisphere = 'north'
 # if False, uses celestial coordinates (ICRS, right ascension/declination)
 ecliptic_coords = True
 
+# option to not print any text on the images
+notext = True
+
 # parameters that change depending on the hemisphere
 if hemisphere == 'both':
     # coordinates at the center of the projection
@@ -45,7 +48,10 @@ if hemisphere == 'both':
     if ecliptic_coords:
         fbase += '_ecliptic'
     #  title text in upper left
-    title = "NASA TESS's View\nof the Sky"
+    if notext:
+        title = ''
+    else:
+        title = "NASA TESS's View\nof the Sky"
 elif hemisphere == 'south':
     # south ecliptic pole coordinates are 90, -66.560708333333
     cenlon = 90.
@@ -55,7 +61,10 @@ elif hemisphere == 'south':
                                    central_latitude=cenlat)
     edgefiles = [os.path.join(os.path.split(__file__)[0], 'edges_south.txt')]
     fbase = 'azeq_south'
-    title = "NASA TESS's View\nof the Southern\nHemisphere"
+    if notext:
+        title = ''
+    else:
+        title = "NASA TESS's View\nof the Southern\nHemisphere"
     # turn off ecliptic coordinates since it doesn't matter
     ecliptic_coords = False
 elif hemisphere == 'north':
@@ -66,7 +75,10 @@ elif hemisphere == 'north':
                                    central_latitude=cenlat)
     edgefiles = [os.path.join(os.path.split(__file__)[0], 'edges_north.txt')]
     fbase = 'azeq_north'
-    title = "NASA TESS's View\nof the Northern\nHemisphere"
+    if notext:
+        title = ''
+    else:
+        title = "NASA TESS's View\nof the Northern\nHemisphere"
     # turn off ecliptic coordinates since it doesn't matter
     ecliptic_coords = False
 else:
@@ -105,11 +117,11 @@ highres = True
 # save the output figure
 savefig = True
 # save every sector image for a gif in a subdirectory
-makegif = False
+makegif = True
 if makegif:
     figdir = os.path.join(figdir, f'gif_{fbase}')
 # use a transparent background instead of white
-transparent = False
+transparent = True
 # the output figure file name
 if transparent:
     fname = f'transp_{fbase}.png'
@@ -118,10 +130,15 @@ else:
 savefile = os.path.join(figdir, fname)
 
 # credit text in lower left
-credit = 'By Ethan Kruse\n@ethan_kruse'
+if notext:
+    credit = ''
+else:
+    credit = 'By Ethan Kruse\n@ethan_kruse'
 
 # print the dates of the images in the lower right
 printdate = True
+if notext:
+    printdate = False
 
 # dates the sectors started and ended for when we print these
 secstarts = {1: 'Jul 2018', 2: 'Aug 2018', 3: 'Sep 2018', 4: 'Oct 2018',
