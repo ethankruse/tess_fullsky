@@ -26,7 +26,7 @@ cornerdir = os.path.join(os.path.split(__file__)[0], 'corners')
 hemisphere = 'north'
 # for full-sky Mollweide projections, do we want to use ecliptic coordinates
 # if False, uses celestial coordinates (ICRS, right ascension/declination)
-ecliptic_coords = True
+ecliptic_coords = False
 
 # option to not print any text on the images
 notext = True
@@ -124,6 +124,7 @@ if makegif:
 transparent = True
 # the output figure file name
 if transparent:
+    figdir += '_transp'
     fname = f'transp_{fbase}.png'
 else:
     fname = f'{fbase}.png'
