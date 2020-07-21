@@ -29,7 +29,7 @@ hemisphere = 'north'
 ecliptic_coords = False
 
 # option to not print any text on the images
-notext = True
+notext = False
 
 # parameters that change depending on the hemisphere
 if hemisphere == 'both':
@@ -98,7 +98,7 @@ cmap = truncate_colormap(plt.get_cmap(cmap), minval=0.18, maxval=1.0)
 
 # do we need to create the empirical corner glow correction for a sector?
 makecorner = False
-cornersec = 24
+cornersec = 26
 
 # remove the corner glow from the final image
 remove_corner_glow = True
@@ -121,7 +121,7 @@ makegif = True
 if makegif:
     figdir = os.path.join(figdir, f'gif_{fbase}')
 # use a transparent background instead of white
-transparent = True
+transparent = False
 # the output figure file name
 if transparent:
     figdir += '_transp'
@@ -207,13 +207,13 @@ if test:
     # files = files[187:188]
     #files = glob(os.path.join(datadir, f'*s0022-*fits'))
     #files += glob(os.path.join(datadir, f'*s0023*fits')) 3,3
-    #files = glob(os.path.join(datadir, f'*s0014*fits'))
+    #files = glob(os.path.join(datadir, f'*s0014*fits')) 2,4 3,3
     
-    files = glob(os.path.join(datadir, f'*s0015-1-1*fits'))
-    #files += glob(os.path.join(datadir, f'*s0018-3*fits'))
-    files += glob(os.path.join(datadir, f'*s0015-1-4*fits'))
-    files += glob(os.path.join(datadir, f'*s0016-1-2*fits'))
-    files += glob(os.path.join(datadir, f'*s0016-1-3*fits'))
+    files = glob(os.path.join(datadir, f'*s0026-3*fits'))
+    #files += glob(os.path.join(datadir, f'*s0019-2-2*fits'))
+    #files += glob(os.path.join(datadir, f'*s0015-1-4*fits'))
+    #files += glob(os.path.join(datadir, f'*s0016-1-2*fits'))
+    #files += glob(os.path.join(datadir, f'*s0016-1-3*fits'))
     #files += glob(os.path.join(datadir, f'*s0018-2-1*fits'))
     files.sort()
     
@@ -401,6 +401,14 @@ for ii, ifile in enumerate(files):
             data[:500, :300] = np.nan
         elif isec == 24 and icam == 4 and iccd == 4:
             data[:400, 1600:] = np.nan
+        elif isec == 26 and icam == 1 and iccd == 1:
+            data[:350, :350] = np.nan
+        elif isec == 26 and icam == 3 and iccd == 3:
+            data[:200, :500] = np.nan
+        elif isec == 26 and icam == 4 and iccd == 3:
+            data -= 35
+            data[:700, :500] = np.nan
+            
         
         # this camera in this sector is too bright and doesn't match the rest
         if isec == 24 and icam == 4:
