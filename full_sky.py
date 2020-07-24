@@ -124,7 +124,8 @@ if makegif:
 transparent = False
 # the output figure file name
 if transparent:
-    figdir += '_transp'
+    if makegif:
+        figdir += '_transp'
     fname = f'transp_{fbase}.png'
 else:
     fname = f'{fbase}.png'
@@ -209,8 +210,8 @@ if test:
     #files += glob(os.path.join(datadir, f'*s0023*fits')) 3,3
     #files = glob(os.path.join(datadir, f'*s0014*fits')) s26 weird lines: 2,4 3,3
     
-    files = glob(os.path.join(datadir, f'*s0025-4*fits'))
-    #files += glob(os.path.join(datadir, f'*s0019-2-2*fits'))
+    files = glob(os.path.join(datadir, f'*s0025-4-*fits'))
+    files += glob(os.path.join(datadir, f'*s0018-3-[12]*fits'))
     #files += glob(os.path.join(datadir, f'*s0015-1-4*fits'))
     #files += glob(os.path.join(datadir, f'*s0016-1-2*fits'))
     #files += glob(os.path.join(datadir, f'*s0016-1-3*fits'))
@@ -416,6 +417,11 @@ for ii, ifile in enumerate(files):
                 data -= 70
             else:
                 data -= 35
+        if isec == 25 and icam == 4:
+            if iccd in [3, 4]:
+                data -= 50
+            else:
+                data -= 25
         if isec == 15 and icam == 1 and iccd in [2, 3]:
             data += 15
         if isec == 16 and icam == 1 and iccd in [2]:
