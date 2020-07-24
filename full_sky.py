@@ -26,7 +26,7 @@ cornerdir = os.path.join(os.path.split(__file__)[0], 'corners')
 hemisphere = 'north'
 # for full-sky Mollweide projections, do we want to use ecliptic coordinates
 # if False, uses celestial coordinates (ICRS, right ascension/declination)
-ecliptic_coords = False
+ecliptic_coords = True
 
 # option to not print any text on the images
 notext = False
@@ -210,9 +210,9 @@ if test:
     #files += glob(os.path.join(datadir, f'*s0023*fits')) 3,3
     #files = glob(os.path.join(datadir, f'*s0014*fits')) s26 weird lines: 2,4 3,3
     
-    files = glob(os.path.join(datadir, f'*s0025-4-*fits'))
-    files += glob(os.path.join(datadir, f'*s0018-3-[12]*fits'))
-    #files += glob(os.path.join(datadir, f'*s0015-1-4*fits'))
+    files = glob(os.path.join(datadir, f'*s0026-2-4*fits'))
+    files += glob(os.path.join(datadir, f'*s0026-3-3*fits'))
+    #files += glob(os.path.join(datadir, f'*s0020-2-2*fits'))
     #files += glob(os.path.join(datadir, f'*s0016-1-2*fits'))
     #files += glob(os.path.join(datadir, f'*s0016-1-3*fits'))
     #files += glob(os.path.join(datadir, f'*s0018-2-1*fits'))
@@ -356,9 +356,7 @@ for ii, ifile in enumerate(files):
                 data = clean_corner(data, cornerdir, adjustments,
                                     cleanplot=corner_glow_plot, ccd=iccd,
                                     sec=isec, cam=icam)
-                if corner_glow_plot:
-                    plt.figure()
-                    plt.imshow(data, norm=cnorm, cmap=cmap)
+                
 
         # some special processing to avoid problem areas.
         # these are all in overlap zones, so removing contaminated chunks
@@ -407,9 +405,15 @@ for ii, ifile in enumerate(files):
         elif isec == 26 and icam == 3 and iccd == 3:
             data[:200, :500] = np.nan
         elif isec == 26 and icam == 4 and iccd == 3:
-            data -= 35
             data[:700, :500] = np.nan
             
+        # remove weird saturated columns that don't have obvious sources
+        if isec == 26 and icam == 3 and iccd == 3:
+            data[:, 1195] = data[:, 1194]
+            data[:, 1196] = data[:, 1197]
+        if isec == 26 and icam == 2 and iccd == 4:
+            data[:, 507] = data[:, 506]
+            data[:, 508] = data[:, 509]
         
         # this camera in this sector is too bright and doesn't match the rest
         if isec == 24 and icam == 4:
@@ -422,10 +426,16 @@ for ii, ifile in enumerate(files):
                 data -= 50
             else:
                 data -= 25
+        if isec == 26 and icam == 4 and iccd in [3, 4]:
+            data -= 35
         if isec == 15 and icam == 1 and iccd in [2, 3]:
             data += 15
         if isec == 16 and icam == 1 and iccd in [2]:
             data += 20
+            
+        if corner_glow_plot:
+            plt.figure()
+            plt.imshow(data, norm=cnorm, cmap=cmap)
 
         if makefig:
             # create the figure. if testing, each CCD gets its own figure
