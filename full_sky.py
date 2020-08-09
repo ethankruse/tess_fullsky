@@ -23,13 +23,13 @@ figdir = os.path.join(os.path.split(__file__)[0], 'figs')
 cornerdir = os.path.join(os.path.split(__file__)[0], 'corners')
 
 # options are 'north', 'south', or 'both'
-hemisphere = 'both'
+hemisphere = 'south'
 # for full-sky Mollweide projections, do we want to use ecliptic coordinates
 # if False, uses celestial coordinates (ICRS, right ascension/declination)
 ecliptic_coords = True
 
 # option to not print any text on the images
-notext = True
+notext = False
 
 # parameters that change depending on the hemisphere
 if hemisphere == 'both':
@@ -117,11 +117,11 @@ highres = True
 # save the output figure
 savefig = True
 # save every sector image for a gif in a subdirectory
-makegif = False
+makegif = True
 if makegif:
     figdir = os.path.join(figdir, f'gif_{fbase}')
 # use a transparent background instead of white
-transparent = True
+transparent = False
 # the output figure file name
 if transparent:
     if makegif:
