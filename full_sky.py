@@ -23,13 +23,13 @@ figdir = os.path.join(os.path.split(__file__)[0], 'figs')
 cornerdir = os.path.join(os.path.split(__file__)[0], 'corners')
 
 # options are 'north', 'south', or 'both'
-hemisphere = 'north'
+hemisphere = 'both'
 # for full-sky Mollweide projections, do we want to use ecliptic coordinates
 # if False, uses celestial coordinates (ICRS, right ascension/declination)
 ecliptic_coords = True
 
 # option to not print any text on the images
-notext = False
+notext = True
 
 # parameters that change depending on the hemisphere
 if hemisphere == 'both':
@@ -117,11 +117,11 @@ highres = True
 # save the output figure
 savefig = True
 # save every sector image for a gif in a subdirectory
-makegif = True
+makegif = False
 if makegif:
     figdir = os.path.join(figdir, f'gif_{fbase}')
 # use a transparent background instead of white
-transparent = False
+transparent = True
 # the output figure file name
 if transparent:
     if makegif:
@@ -210,8 +210,8 @@ if test:
     #files += glob(os.path.join(datadir, f'*s0023*fits')) 3,3
     #files = glob(os.path.join(datadir, f'*s0014*fits')) s26 weird lines: 2,4 3,3
     
-    files = glob(os.path.join(datadir, f'*s0026-2-4*fits'))
-    files += glob(os.path.join(datadir, f'*s0026-3-3*fits'))
+    files = glob(os.path.join(datadir, f'*s0026-1-3*fits'))
+    files += glob(os.path.join(datadir, f'*s0025-1-4*fits'))
     #files += glob(os.path.join(datadir, f'*s0020-2-2*fits'))
     #files += glob(os.path.join(datadir, f'*s0016-1-2*fits'))
     #files += glob(os.path.join(datadir, f'*s0016-1-3*fits'))
