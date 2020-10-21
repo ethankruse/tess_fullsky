@@ -103,8 +103,8 @@ cmap = 'gray'
 cmap = truncate_colormap(plt.get_cmap(cmap), minval=0.18, maxval=1.0)
 
 # do we need to create the empirical corner glow correction for a sector?
-makecorner = False
-cornersec = 25
+makecorner = True
+cornersec = 28
 
 # remove the corner glow from the final image
 remove_corner_glow = True
@@ -115,15 +115,15 @@ corner_glow_plot = False
 adjfile = os.path.join(cornerdir, 'adjustments.txt')
 
 # flag indicating we're just testing things
-test = False
+test = True
 # create the output figure
-makefig = True
+makefig = False
 # the output figure in full resolution
-highres = True
+highres = False
 # save the output figure
-savefig = True
+savefig = False
 # save every sector image for a gif in a subdirectory
-makegif = True
+makegif = False
 if makegif:
     figdir = os.path.join(figdir, f'gif_{fbase}')
 # use a transparent background instead of white
@@ -155,14 +155,20 @@ secstarts = {1: 'Jul 2018', 2: 'Aug 2018', 3: 'Sep 2018', 4: 'Oct 2018',
              13: 'Jun 2019', 14: 'Jul 2019', 15: 'Aug 2019', 16: 'Sep 2019', 
              17: 'Oct 2019', 18: 'Nov 2019', 19: 'Nov 2019', 20: 'Dec 2019',
              21: 'Jan 2020', 22: 'Feb 2020', 23: 'Mar 2020', 24: 'Apr 2020', 
-             25: 'May 2020', 26: 'Jun 2020'}
+             25: 'May 2020', 26: 'Jun 2020', 27: 'Jul 2020', 28: 'Jul 2020',
+             29: 'Aug 2020', 30: 'Sep 2020', 31: 'Oct 2020', 32: 'Nov 2020',
+             33: 'Dec 2020', 34: 'Jan 2021', 35: 'Feb 2021', 36: 'Mar 2021', 
+             37: 'Apr 2021', 38: 'Apr 2021', 39: 'May 2021'}
 secends = {1: 'Aug 2018', 2: 'Sep 2018', 3: 'Oct 2018', 4: 'Nov 2018',
            5: 'Dec 2018', 6: 'Jan 2019', 7: 'Feb 2019', 8: 'Feb 2019',
            9: 'Mar 2019', 10: 'Apr 2019', 11: 'May 2019', 12: 'Jun 2019',
            13: 'Jul 2019', 14: 'Aug 2019', 15: 'Sep 2019', 16: 'Oct 2019', 
            17: 'Nov 2019', 18: 'Nov 2019', 19: 'Dec 2019', 20: 'Jan 2020',
            21: 'Feb 2020', 22: 'Mar 2020', 23: 'Apr 2020', 24: 'May 2020', 
-           25: 'Jun 2020', 26: 'Jul 2020'}
+           25: 'Jun 2020', 26: 'Jul 2020', 27: 'Jul 2020', 28: 'Aug 2020',
+           29: 'Sep 2020', 30: 'Oct 2020', 31: 'Nov 2020', 32: 'Dec 2020',
+           33: 'Jan 2021', 34: 'Feb 2021', 35: 'Mar 2021', 36: 'Apr 2021', 
+           37: 'Apr 2021', 38: 'May 2021', 39: 'Jun 2021'}
 
 ##################################################################
 
@@ -183,9 +189,9 @@ for ifile in allfiles:
     # grab the sector from the file name
     fsec = int(os.path.split(ifile)[1].split('-')[1][1:])
     # decide if we want to use it
-    if fsec < 14 and hemisphere != 'north':
+    if ((fsec < 14) or (fsec > 26)) and hemisphere in ['both', 'south']:
         files.append(ifile)
-    elif fsec > 13 and hemisphere != 'south':
+    elif 13 < fsec < 27 and hemisphere in ['both', 'north']:
         files.append(ifile)
 
 # make sure the output directory exists
@@ -261,7 +267,7 @@ def grab_sector(sector, frac=0.95):
     # make sure we have one image per CCD and print/return them
     assert len(ret) == 16
     for iret in ret:
-        print(iret)
+        print(iret[:-1])
     return ret
 
 
