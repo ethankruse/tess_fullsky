@@ -117,9 +117,11 @@ adjfile = os.path.join(cornerdir, 'adjustments.txt')
 # flag indicating we're just testing things
 test = True
 # create the output figure
-makefig = False
-# the output figure in full resolution
-highres = False
+makefig = True
+# the output figure in high or "full" resolution
+highres = True
+fullres = False
+
 # save the output figure
 savefig = False
 # save every sector image for a gif in a subdirectory
@@ -171,6 +173,9 @@ secends = {1: 'Aug 2018', 2: 'Sep 2018', 3: 'Oct 2018', 4: 'Nov 2018',
            37: 'Apr 2021', 38: 'May 2021', 39: 'Jun 2021'}
 
 ##################################################################
+
+if fullres and highres:
+    raise Exception('Must choose either full or high resolution.')
 
 # download the necessary files if they don't already exist
 download = os.path.join(datadir, 'download.sh')
@@ -291,6 +296,17 @@ if highres:
     else:
         xinch = 200
         yinch = 200
+    fsz = int(160 * fscl/100.)
+    sfsz = int(175 * fscl/100.)
+    tfsz = int(200 * fscl/100.)
+elif fullres:
+    fscl = 400
+    if hemisphere == 'both':
+        xinch = 600
+        yinch = 300
+    else:
+        xinch = 400
+        yinch = 400
     fsz = int(160 * fscl/100.)
     sfsz = int(175 * fscl/100.)
     tfsz = int(200 * fscl/100.)
@@ -453,8 +469,11 @@ for ii, ifile in enumerate(files):
             # create the figure. if testing, each CCD gets its own figure
             if ii == 0:
                 fig = plt.figure(figsize=(xinch, yinch))
-                # 1% border on all sides
-                ax = plt.axes([0.01, 0.01, 0.98, 0.98], projection=tr)
+                if hemisphere == 'both' and platecarree:
+                    ax = plt.axes([0.0, 0.0, 1.0, 1.0], projection=tr)
+                else:
+                    # 1% border on all sides
+                    ax = plt.axes([0.01, 0.01, 0.98, 0.98], projection=tr)
                 if not test:
                     # remove the outline circle of the globe
                     ax.outline_patch.set_linewidth(0)
