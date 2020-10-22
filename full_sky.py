@@ -103,7 +103,7 @@ cmap = 'gray'
 cmap = truncate_colormap(plt.get_cmap(cmap), minval=0.18, maxval=1.0)
 
 # do we need to create the empirical corner glow correction for a sector?
-makecorner = True
+makecorner = False
 cornersec = 28
 
 # remove the corner glow from the final image
@@ -123,7 +123,7 @@ highres = True
 fullres = False
 
 # save the output figure
-savefig = False
+savefig = True
 # save every sector image for a gif in a subdirectory
 makegif = False
 if makegif:
@@ -223,8 +223,10 @@ if makegif:
 # anything we want to test
 if test:
     # files = files[187:188]
-    files = glob(os.path.join(datadir, f'*s0001-*fits'))
-    #files += glob(os.path.join(datadir, f'*s0023*fits')) 3,3
+    files = glob(os.path.join(datadir, f'*s0027-1*fits'))
+    files += glob(os.path.join(datadir, f'*s0028-1*fits'))
+    files += glob(os.path.join(datadir, f'*s0001-1*fits'))
+    files += glob(os.path.join(datadir, f'*s0002-1*fits'))
     #files = glob(os.path.join(datadir, f'*s0014*fits')) s26 weird lines: 2,4 3,3
     
     #files = glob(os.path.join(datadir, f'*s0026-1-3*fits'))
@@ -434,6 +436,12 @@ for ii, ifile in enumerate(files):
             data[:200, :500] = np.nan
         elif isec == 26 and icam == 4 and iccd == 3:
             data[:700, :500] = np.nan
+        elif isec == 27 and icam == 1 and iccd == 4:
+            data[:700, -600:] = np.nan
+        elif isec == 27 and icam == 1 and iccd == 2:
+            data[:120, -120:] = np.nan
+        elif isec == 27 and icam == 3 and iccd == 3:
+            data[:150, 300:550] = np.nan
             
         # remove weird saturated columns that don't have obvious sources
         if isec == 26 and icam == 3 and iccd == 3:
@@ -460,6 +468,12 @@ for ii, ifile in enumerate(files):
             data += 15
         if isec == 16 and icam == 1 and iccd in [2]:
             data += 20
+        if isec == 27 and icam == 1 and iccd in [3, 4]:
+            data += 23
+        if isec == 28 and icam == 1 and iccd in [3, 4]:
+            data += 15
+        if isec in [27, 28] and icam == 1 and iccd in [1, 2]:
+            data += 15
             
         if corner_glow_plot:
             plt.figure()
@@ -551,6 +565,9 @@ if makefig and savefig and not makegif:
                     os.path.splitext(orig)[1])
         inum += 1
     plt.savefig(savefile, transparent=transparent)
+    
+now = datetime.now().strftime("%d.%m.%Y %H:%M:%S") 
+print(f'{now}. Finished.')
 
 # if we're creating the empirical corner model, look at all the corners from
 # this sector together
