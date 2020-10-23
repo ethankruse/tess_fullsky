@@ -544,7 +544,7 @@ for ii, ifile in enumerate(files):
         if (ii % 16) == 0 and ii > 0 and printdate:
             text.remove()
             if hemisphere == 'both' or isec < 27:
-                sectxt = f'Sectors {ssec}$-${isec}\n{secstarts[ssec]}-${secends[isec]}'
+                sectxt = f'Sectors {ssec}$-${isec}\n{secstarts[ssec]}$-${secends[isec]}'
             elif hemisphere == 'south':
                 if isec == 27:
                     sectxt = f'Sectors 1$-$13; 27\n{secstarts[1]}$-${secends[13]}\n{secstarts[27]}$-${secends[27]}'
