@@ -115,7 +115,7 @@ corner_glow_plot = False
 adjfile = os.path.join(cornerdir, 'adjustments.txt')
 
 # flag indicating we're just testing things
-test = True
+test = False
 # create the output figure
 makefig = True
 # the output figure in high or "full" resolution
@@ -125,7 +125,7 @@ fullres = False
 # save the output figure
 savefig = True
 # save every sector image for a gif in a subdirectory
-makegif = False
+makegif = True
 if makegif:
     figdir = os.path.join(figdir, f'gif_{fbase}')
 # use a transparent background instead of white
@@ -516,7 +516,7 @@ for ii, ifile in enumerate(files):
                 plt.text(0.02, 0.98, title, transform=fig.transFigure,
                          ha='left', va='top', multialignment='left',
                          fontsize=tfsz, fontname='Carlito')
-                sectxt = f'Sector {isec}\n{secstarts[isec]}-{secends[isec]}'
+                sectxt = f'Sector {isec}\n{secstarts[isec]}$-${secends[isec]}'
                 if printdate:
                     text = plt.text(0.98, 0.02, sectxt,
                                     transform=fig.transFigure, ha='right',
@@ -543,7 +543,15 @@ for ii, ifile in enumerate(files):
         # if we're starting to plot a new sector, update the date
         if (ii % 16) == 0 and ii > 0 and printdate:
             text.remove()
-            sectxt = f'Sectors {ssec}-{isec}\n{secstarts[ssec]}-{secends[isec]}'
+            if hemisphere == 'both' or isec < 27:
+                sectxt = f'Sectors ${ssec}–{isec}$\n{secstarts[ssec]}$–${secends[isec]}'
+            elif hemisphere == 'south':
+                if isec == 27:
+                    sectxt = f'Sectors $1-13$; 27\n{secstarts[1]}$–${secends[13]}\n{secstarts[27]}$–${secends[27]}'
+                else:
+                    sectxt = f'Sectors $1-13$; $27–{isec}$\n{secstarts[1]}$–${secends[13]}\n{secstarts[27]}$–${secends[isec]}'
+            else:
+                raise Exception('need to handle this')
             text = plt.text(0.98, 0.02, sectxt, transform=fig.transFigure,
                             ha='right', va='bottom', multialignment='right',
                             fontsize=sfsz, fontname='Carlito')
