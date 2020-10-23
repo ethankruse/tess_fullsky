@@ -224,9 +224,9 @@ if makegif:
 if test:
     # files = files[187:188]
     files = glob(os.path.join(datadir, f'*s0027-1*fits'))
-    files += glob(os.path.join(datadir, f'*s0028-1*fits'))
-    files += glob(os.path.join(datadir, f'*s0001-1*fits'))
-    files += glob(os.path.join(datadir, f'*s0002-1*fits'))
+    #files += glob(os.path.join(datadir, f'*s0028-1*fits'))
+    #files += glob(os.path.join(datadir, f'*s0001-1*fits'))
+    #files += glob(os.path.join(datadir, f'*s0002-1*fits'))
     #files = glob(os.path.join(datadir, f'*s0014*fits')) s26 weird lines: 2,4 3,3
     
     #files = glob(os.path.join(datadir, f'*s0026-1-3*fits'))
@@ -516,7 +516,7 @@ for ii, ifile in enumerate(files):
                 plt.text(0.02, 0.98, title, transform=fig.transFigure,
                          ha='left', va='top', multialignment='left',
                          fontsize=tfsz, fontname='Carlito')
-                sectxt = f'Sector {isec}\n{secstarts[isec]}$-${secends[isec]}'
+                sectxt = f'Sector {isec}\n{secstarts[isec]}\u2013{secends[isec]}'
                 if printdate:
                     text = plt.text(0.98, 0.02, sectxt,
                                     transform=fig.transFigure, ha='right',
@@ -544,12 +544,12 @@ for ii, ifile in enumerate(files):
         if (ii % 16) == 0 and ii > 0 and printdate:
             text.remove()
             if hemisphere == 'both' or isec < 27:
-                sectxt = f'Sectors {ssec}$-${isec}\n{secstarts[ssec]}$-${secends[isec]}'
+                sectxt = f'Sectors {ssec}\u2013{isec}\n{secstarts[ssec]}\u2013{secends[isec]}'
             elif hemisphere == 'south':
                 if isec == 27:
-                    sectxt = f'Sectors 1$-$13; 27\n{secstarts[1]}$-${secends[13]}\n{secstarts[27]}$-${secends[27]}'
+                    sectxt = f'Sectors 1\u201313; 27\n{secstarts[1]}\u2013{secends[13]}\n{secstarts[27]}\u2013{secends[27]}'
                 else:
-                    sectxt = f'Sectors 1$-$13; 27$-${isec}\n{secstarts[1]}$-${secends[13]}\n{secstarts[27]}$-${secends[isec]}'
+                    sectxt = f'Sectors 1\u201313; 27\u2013{isec}\n{secstarts[1]}\u2013{secends[13]}\n{secstarts[27]}\u2013{secends[isec]}'
             else:
                 raise Exception('need to handle this')
             text = plt.text(0.98, 0.02, sectxt, transform=fig.transFigure,
