@@ -23,12 +23,15 @@ figdir = os.path.join(os.path.split(__file__)[0], 'figs')
 cornerdir = os.path.join(os.path.split(__file__)[0], 'corners')
 
 # options are 'north', 'south', or 'both'
-hemisphere = 'south'
+hemisphere = 'both'
 # for full-sky Mollweide projections, do we want to use ecliptic coordinates
 # if False, uses celestial coordinates (ICRS, right ascension/declination)
 ecliptic_coords = True
 # make a Plate Caree image instead of Mollweide
 platecarree = False
+
+# for hemisphere == 'both', whether to include the Kepler/K2 footprints
+addkepler = True
 
 # option to not print any text on the images
 notext = False
@@ -73,6 +76,8 @@ elif hemisphere == 'south':
         title = "NASA TESS's View\nof the Southern\nHemisphere"
     # turn off ecliptic coordinates since it doesn't matter
     ecliptic_coords = False
+    # for now, don't try to put Kepler/K2 on the hemisphere maps
+    addkepler = False
 elif hemisphere == 'north':
     cenlon = -90.
     cenlat = 66.560708333333
@@ -87,6 +92,8 @@ elif hemisphere == 'north':
         title = "NASA TESS's View\nof the Northern\nHemisphere"
     # turn off ecliptic coordinates since it doesn't matter
     ecliptic_coords = False
+    # for now, don't try to put Kepler/K2 on the hemisphere maps
+    addkepler = False
 else:
     raise Exception(f'Unidentified hemisphere option: {hemisphere}')
 
@@ -115,7 +122,7 @@ corner_glow_plot = False
 adjfile = os.path.join(cornerdir, 'adjustments.txt')
 
 # flag indicating we're just testing things
-test = False
+test = True
 # create the output figure
 makefig = True
 # the output figure in high or "full" resolution
@@ -125,7 +132,7 @@ fullres = False
 # save the output figure
 savefig = True
 # save every sector image for a gif in a subdirectory
-makegif = True
+makegif = False
 if makegif:
     figdir = os.path.join(figdir, f'gif_{fbase}')
 # use a transparent background instead of white
@@ -184,20 +191,38 @@ with open(download, 'r') as ff:
         fname = os.path.join(datadir, line.split()[5])
         if not os.path.exists(fname):
             subprocess.run(line, shell=True, cwd=datadir)
+            
+if addkepler:
+    download2 = os.path.join(datadir, 'kepler_k2.sh')
+    with open(download2, 'r') as ff:
+        for line in ff.readlines():
+            fname = os.path.join(datadir, line.split()[-2][1:-1])
+            if not os.path.exists(fname):
+                subprocess.run(line, shell=True, cwd=datadir)
 
-allfiles = glob(os.path.join(datadir, '*fits'))
+if addkepler:
+    allfiles = glob(os.path.join(datadir, '*fits'))
+else:
+    allfiles = glob(os.path.join(datadir, 'tess*fits'))
 allfiles.sort()
 
 # only grab the correct hemispheres of data
 files = []
+kepfiles = []
 for ifile in allfiles:
     # grab the sector from the file name
-    fsec = int(os.path.split(ifile)[1].split('-')[1][1:])
-    # decide if we want to use it
-    if ((fsec < 14) or (fsec > 26)) and hemisphere in ['both', 'south']:
-        files.append(ifile)
-    elif 13 < fsec < 27 and hemisphere in ['both', 'north']:
-        files.append(ifile)
+    if os.path.split(ifile)[1][0] == 't':
+        fsec = int(os.path.split(ifile)[1].split('-')[1][1:])
+        # decide if we want to use it
+        if ((fsec < 14) or (fsec > 26)) and hemisphere in ['both', 'south']:
+            files.append(ifile)
+        elif 13 < fsec < 27 and hemisphere in ['both', 'north']:
+            files.append(ifile)
+    else:
+        if addkepler and hemisphere == 'both':
+            kepfiles.append(ifile)
+        else:
+            raise Exception('Should not have non-TESS files in the list')
 
 # make sure the output directory exists
 if not os.path.exists(figdir) and makefig:
@@ -213,6 +238,7 @@ if makecorner:
     makegif = False
     remove_corner_glow = True
     test = False
+    kepfiles = []
 
 # remove any previous images in the gif subdirectory
 if makegif:
@@ -223,7 +249,7 @@ if makegif:
 # anything we want to test
 if test:
     # files = files[187:188]
-    files = glob(os.path.join(datadir, f'*s0027-1*fits'))
+    files = glob(os.path.join(datadir, f'*s0014-1-1*fits'))
     #files += glob(os.path.join(datadir, f'*s0028-1*fits'))
     #files += glob(os.path.join(datadir, f'*s0001-1*fits'))
     #files += glob(os.path.join(datadir, f'*s0002-1*fits'))
@@ -236,6 +262,10 @@ if test:
     #files += glob(os.path.join(datadir, f'*s0016-1-3*fits'))
     #files += glob(os.path.join(datadir, f'*s0018-2-1*fits'))
     files.sort()
+    
+    # kepfiles = []
+    kepfiles = glob(os.path.join(datadir, f'k*fits'))
+    kepfiles.sort()
     
 
 
@@ -325,6 +355,124 @@ else:
 
 # for creating the empirical corner models
 xxs, yys, dats, ccds = [], [], [], []
+
+
+# create the figure
+if makefig:
+    fig = plt.figure(figsize=(xinch, yinch))
+    if hemisphere == 'both' and platecarree:
+        ax = plt.axes([0.0, 0.0, 1.0, 1.0], projection=tr)
+    else:
+        # 1% border on all sides
+        ax = plt.axes([0.01, 0.01, 0.98, 0.98], projection=tr)
+    if not test:
+        # remove the outline circle of the globe
+        ax.spines['geo'].set_linewidth(0)
+    # set transparency
+    if transparent:
+        ax.background_patch.set_alpha(0)
+    # the data coordinates are lat/lon in a grid
+    data_tr = ccrs.PlateCarree()
+    # load the edges of all the outer CCDs and invisibly plot them
+    # so that after just 1 sector, the plot isn't artificially
+    # zoomed to just that one sector.
+    for edgefile in edgefiles:
+        elat, elon = np.loadtxt(edgefile, unpack=True)
+        if not test:
+            plt.scatter(elon, elat, c='w', alpha=0.01, zorder=-5,
+                        marker='.', s=1, transform=data_tr)
+        else:
+            pass
+            #plt.scatter(elon, elat, c='r', alpha=1, zorder=5,
+            #            s=20, transform=data_tr)
+
+    # add the labels
+    plt.text(0.02, 0.02, credit, transform=fig.transFigure,
+             ha='left', va='bottom', multialignment='left',
+             fontsize=fsz, fontname='Carlito')
+    plt.text(0.02, 0.98, title, transform=fig.transFigure,
+             ha='left', va='top', multialignment='left',
+             fontsize=tfsz, fontname='Carlito')
+    
+
+def rebin(arr, new_shape):
+    """Rebin 2D array arr to shape new_shape by averaging."""
+    shape = (new_shape[0], arr.shape[0] // new_shape[0],
+             new_shape[1], arr.shape[1] // new_shape[1])
+    return arr.reshape(shape).mean(-1).mean(1)
+
+
+for ict, ifile in enumerate(kepfiles):
+    now = datetime.now().strftime("%d.%m.%Y %H:%M:%S") 
+    print(f'{now}. Processing Kepler/K2 image {ict+1} of {len(kepfiles)}.')
+    with fits.open(ifile) as ffi:
+        # go through each CCD in a Kepler FFI
+        for ii in np.arange(1, len(ffi)):
+            wcs = WCS(ffi[ii].header)
+            data = ffi[ii].data * 1
+            
+            # get the coordinates of every data point in CCD coordinates
+            xinds = np.arange(-0.5, data.shape[0]-0.4)
+            yinds = np.arange(-0.5, data.shape[1]-0.4)
+            mesh = np.meshgrid(xinds, yinds, indexing='ij')
+            
+            # transofrm to actual sky coordinates
+            lon, lat = wcs.all_pix2world(mesh[1].flatten(), mesh[0].flatten(), 0)
+            lon = lon.reshape(mesh[0].shape)
+            lat = lat.reshape(mesh[1].shape)
+            
+            # detect bad modules
+            if (lon[0,0] == 0.5) and (lat[0,0] == 0.5):
+                continue
+            
+            # chop out unexposed rows/columns
+            data = data[20:1044, 12:1112]
+            lon = lon[20:1045, 12:1113]
+            lat = lat[20:1045, 12:1113]
+        
+            # transform to ecliptic coordinates if desired
+            if ecliptic_coords:
+                icrs = SkyCoord(ra=lon, dec=lat, frame='icrs', unit='deg')
+                ecliptic = icrs.transform_to(BarycentricTrueEcliptic)
+                lon = ecliptic.lon.value * 1
+                lat = ecliptic.lat.value * 1
+        
+            # lon must be between -180 and 180 instead of 0 to 360
+            lon -= 180.
+            # because in astronomy images, plots have east on the left,
+            # switch east and west
+            lon *= -1.
+        
+            # rebin from Kepler's 4 arcsec to 16 arcsec pixels, closer to TESS
+            data = rebin(data, (data.shape[0]//4, data.shape[1]//4))
+            lat = lat[::4, ::4]
+            lon = lon[::4, ::4]
+            
+            # bring things to the TESS background level
+            data -= 100
+            
+            if makefig:
+                # for wraparounds:
+                if wrap and lon.max() > cenlon + 178 and lon.min() < cenlon - 178:                    
+                    # find the problem areas that wrap around in longitude
+                    bad = ((np.abs(lon[:-1,:-1] - lon[:-1,1:]) > 355.)|
+                           (np.abs(lon[:-1,:-1] - lon[1:,:-1]) > 355.)|
+                           (np.abs(lon[:-1,:-1] - lon[1:,1:]) > 355.))
+                    # mask them and just don't plot these pixels
+                    maskeddata = np.ma.masked_where(bad, data)
+                    plt.pcolormesh(lon, lat, maskeddata, norm=cnorm, alpha=1,
+                                   transform=data_tr, cmap=cmap)
+                else:
+                    # plot the actual image from this CCD
+                    plt.pcolormesh(lon, lat, data, norm=cnorm, alpha=1,
+                                   transform=data_tr, cmap=cmap)
+# save the plot after each sector for the gif
+if makegif and savefig and makefig and len(kepfiles) > 0:
+    if transparent:
+        outfig = os.path.join(figdir, f'transp_img{0:04d}.png')
+    else:
+        outfig = os.path.join(figdir, f'img{0:04d}.png')
+    plt.savefig(outfig, transparent=transparent)
 
 # loop through every image and create the mosaic
 for ii, ifile in enumerate(files):
@@ -480,42 +628,7 @@ for ii, ifile in enumerate(files):
             plt.imshow(data, norm=cnorm, cmap=cmap)
 
         if makefig:
-            # create the figure. if testing, each CCD gets its own figure
             if ii == 0:
-                fig = plt.figure(figsize=(xinch, yinch))
-                if hemisphere == 'both' and platecarree:
-                    ax = plt.axes([0.0, 0.0, 1.0, 1.0], projection=tr)
-                else:
-                    # 1% border on all sides
-                    ax = plt.axes([0.01, 0.01, 0.98, 0.98], projection=tr)
-                if not test:
-                    # remove the outline circle of the globe
-                    ax.spines['geo'].set_linewidth(0)
-                # set transparency
-                if transparent:
-                    ax.background_patch.set_alpha(0)
-                # the data coordinates are lat/lon in a grid
-                data_tr = ccrs.PlateCarree()
-                # load the edges of all the outer CCDs and invisibly plot them
-                # so that after just 1 sector, the plot isn't artificially
-                # zoomed to just that one sector.
-                for edgefile in edgefiles:
-                    elat, elon = np.loadtxt(edgefile, unpack=True)
-                    if not test:
-                        plt.scatter(elon, elat, c='w', alpha=0.01, zorder=-5,
-                                    marker='.', s=1, transform=data_tr)
-                    else:
-                        pass
-                        #plt.scatter(elon, elat, c='r', alpha=1, zorder=5,
-                        #            s=20, transform=data_tr)
-
-                # add the labels
-                plt.text(0.02, 0.02, credit, transform=fig.transFigure,
-                         ha='left', va='bottom', multialignment='left',
-                         fontsize=fsz, fontname='Carlito')
-                plt.text(0.02, 0.98, title, transform=fig.transFigure,
-                         ha='left', va='top', multialignment='left',
-                         fontsize=tfsz, fontname='Carlito')
                 sectxt = f'Sector {isec}\n{secstarts[isec]}\u2013{secends[isec]}'
                 if printdate:
                     text = plt.text(0.98, 0.02, sectxt,
@@ -523,7 +636,6 @@ for ii, ifile in enumerate(files):
                                     va='bottom', multialignment='right',
                                     fontsize=sfsz, fontname='Carlito')
                 ssec = isec
-                
             # for wraparounds:
             if wrap and lon.max() > cenlon + 178 and lon.min() < cenlon - 178:                    
                 # find the problem areas that wrap around in longitude
@@ -541,7 +653,7 @@ for ii, ifile in enumerate(files):
                                transform=data_tr, cmap=cmap)
 
         # if we're starting to plot a new sector, update the date
-        if (ii % 16) == 0 and ii > 0 and printdate:
+        if (ii % 16) == 0 and ii > 0 and printdate and makefig:
             text.remove()
             if hemisphere == 'both' or isec < 27:
                 sectxt = f'Sectors {ssec}\u2013{isec}\n{secstarts[ssec]}\u2013{secends[isec]}'
@@ -556,7 +668,7 @@ for ii, ifile in enumerate(files):
                             ha='right', va='bottom', multialignment='right',
                             fontsize=sfsz, fontname='Carlito')
         # save the plot after each sector for the gif
-        if makegif and savefig and ii > 0 and ((ii+1) % 16) == 0:
+        if makegif and savefig and makefig and ii > 0 and ((ii+1) % 16) == 0:
             if transparent:
                 outfig = os.path.join(figdir, f'transp_img{(ii+1)//16:04d}.png')
             else:
