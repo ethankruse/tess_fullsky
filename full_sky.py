@@ -249,7 +249,11 @@ if makegif:
 # anything we want to test
 if test:
     # files = files[187:188]
-    files = glob(os.path.join(datadir, f'*s0014-1-1*fits'))
+    #files = glob(os.path.join(datadir, f'*s0010-1-[34]*fits'))
+    files = glob(os.path.join(datadir, f'*s0007-1-[34]*fits'))
+    files += glob(os.path.join(datadir, f'*s002[1]-1-[34]*fits'))
+    #files += glob(os.path.join(datadir, f'*s0011-1-4*fits'))
+    #files += glob(os.path.join(datadir, f'*s0013-2-[34]*fits'))
     #files += glob(os.path.join(datadir, f'*s0028-1*fits'))
     #files += glob(os.path.join(datadir, f'*s0001-1*fits'))
     #files += glob(os.path.join(datadir, f'*s0002-1*fits'))
@@ -264,9 +268,9 @@ if test:
     files.sort()
     
     # kepfiles = []
-    kepfiles = glob(os.path.join(datadir, f'k*fits'))
+    kepfiles = glob(os.path.join(datadir, f'k*c05*fits'))
+    kepfiles += glob(os.path.join(datadir, f'k*c1[68]*fits'))
     kepfiles.sort()
-    
 
 
 def grab_sector(sector, frac=0.95):
@@ -406,10 +410,16 @@ for ict, ifile in enumerate(kepfiles):
     now = datetime.now().strftime("%d.%m.%Y %H:%M:%S") 
     print(f'{now}. Processing Kepler/K2 image {ict+1} of {len(kepfiles)}.')
     with fits.open(ifile) as ffi:
+        if 'campaign' in ffi[0].header:
+            camp = ffi[0].header['campaign']
+        else:
+            camp = 'kep'
         # go through each CCD in a Kepler FFI
         for ii in np.arange(1, len(ffi)):
             wcs = WCS(ffi[ii].header)
             data = ffi[ii].data * 1
+            # convert from max Kepler counts to max TESS counts
+            data *= 0.6
             
             # get the coordinates of every data point in CCD coordinates
             xinds = np.arange(-0.5, data.shape[0]-0.4)
@@ -448,8 +458,31 @@ for ict, ifile in enumerate(kepfiles):
             lat = lat[::4, ::4]
             lon = lon[::4, ::4]
             
-            # bring things to the TESS background level
-            data -= 100
+            # make adjustments to match the TESS intersections and each other
+            if camp == 3:
+                data -= 50.
+            elif camp == 19:
+                data -= 10
+            elif camp == 12:
+                data -= 50
+            # campaigns 10 and 11 were split into two pieces and these ints
+            # work (111/112 and 101/102)
+            elif camp == 111:
+                data -= 40
+            elif camp == 2:
+                data -= 20
+            elif camp == 15:
+                data -= 10
+            elif camp == 6:
+                data -= 10
+            elif camp == 17:
+                data -= 30
+            elif camp == 16:
+                data -= 40.
+            elif camp == 5:
+                data -= 20
+            elif camp == 18:
+                data -= 20.
             
             if makefig:
                 # for wraparounds:
