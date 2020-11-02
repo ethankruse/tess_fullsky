@@ -250,8 +250,9 @@ if makegif:
 if test:
     # files = files[187:188]
     #files = glob(os.path.join(datadir, f'*s0010-1-[34]*fits'))
-    files = glob(os.path.join(datadir, f'*s0007-1-[34]*fits'))
-    files += glob(os.path.join(datadir, f'*s002[1]-1-[34]*fits'))
+    files = glob(os.path.join(datadir, f'*s0003-1-3*fits'))
+    #files += glob(os.path.join(datadir, f'*s0020-1-[34]*fits'))
+    files += glob(os.path.join(datadir, f'*s0017-1-[34]*fits'))
     #files += glob(os.path.join(datadir, f'*s0011-1-4*fits'))
     #files += glob(os.path.join(datadir, f'*s0013-2-[34]*fits'))
     #files += glob(os.path.join(datadir, f'*s0028-1*fits'))
@@ -268,8 +269,8 @@ if test:
     files.sort()
     
     # kepfiles = []
-    kepfiles = glob(os.path.join(datadir, f'k*c05*fits'))
-    kepfiles += glob(os.path.join(datadir, f'k*c1[68]*fits'))
+    kepfiles = glob(os.path.join(datadir, f'k*c08*fits'))
+    #kepfiles += glob(os.path.join(datadir, f'k*c13*fits'))
     kepfiles.sort()
 
 
@@ -459,30 +460,18 @@ for ict, ifile in enumerate(kepfiles):
             lon = lon[::4, ::4]
             
             # make adjustments to match the TESS intersections and each other
-            if camp == 3:
-                data -= 50.
-            elif camp == 19:
-                data -= 10
-            elif camp == 12:
-                data -= 50
             # campaigns 10 and 11 were split into two pieces and these ints
             # work (111/112 and 101/102)
-            elif camp == 111:
-                data -= 40
-            elif camp == 2:
+            if camp in [0, 6, 15, 19]:
+                data -= 10
+            elif camp in [2, 4, 5, 8, 13, 18]:
                 data -= 20
-            elif camp == 15:
-                data -= 10
-            elif camp == 6:
-                data -= 10
-            elif camp == 17:
+            elif camp in [17]:
                 data -= 30
-            elif camp == 16:
-                data -= 40.
-            elif camp == 5:
-                data -= 20
-            elif camp == 18:
-                data -= 20.
+            elif camp in [111, 16]:
+                data -= 40
+            elif camp in [3, 12]:
+                data -= 50.
             
             if makefig:
                 # for wraparounds:
@@ -499,6 +488,7 @@ for ict, ifile in enumerate(kepfiles):
                     # plot the actual image from this CCD
                     plt.pcolormesh(lon, lat, data, norm=cnorm, alpha=1,
                                    transform=data_tr, cmap=cmap)
+                    
 # save the plot after each sector for the gif
 if makegif and savefig and makefig and len(kepfiles) > 0:
     if transparent:
