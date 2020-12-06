@@ -56,6 +56,8 @@ if hemisphere == 'both':
                  os.path.join(os.path.split(__file__)[0], 'edges_north.txt')]
     if ecliptic_coords:
         fbase += '_ecliptic'
+    if addkepler:
+        fbase += '_kepler'
     #  title text in upper left
     if notext:
         title = ''
