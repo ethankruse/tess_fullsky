@@ -23,7 +23,7 @@ figdir = os.path.join(os.path.split(__file__)[0], 'figs')
 cornerdir = os.path.join(os.path.split(__file__)[0], 'corners')
 
 # options are 'north', 'south', or 'both'
-hemisphere = 'both'
+hemisphere = 'south'
 # for full-sky Mollweide projections, do we want to use ecliptic coordinates
 # if False, uses celestial coordinates (ICRS, right ascension/declination)
 ecliptic_coords = True
@@ -113,7 +113,7 @@ cmap = truncate_colormap(plt.get_cmap(cmap), minval=0.18, maxval=1.0)
 
 # do we need to create the empirical corner glow correction for a sector?
 makecorner = False
-cornersec = 28
+cornersec = 29
 
 # remove the corner glow from the final image
 remove_corner_glow = True
@@ -124,7 +124,7 @@ corner_glow_plot = False
 adjfile = os.path.join(cornerdir, 'adjustments.txt')
 
 # flag indicating we're just testing things
-test = True
+test = False
 # create the output figure
 makefig = True
 # the output figure in high or "full" resolution
@@ -251,10 +251,11 @@ if makegif:
 # anything we want to test
 if test:
     # files = files[187:188]
-    #files = glob(os.path.join(datadir, f'*s0010-1-[34]*fits'))
-    files = glob(os.path.join(datadir, f'*s0003-1-3*fits'))
-    #files += glob(os.path.join(datadir, f'*s0020-1-[34]*fits'))
-    files += glob(os.path.join(datadir, f'*s0017-1-[34]*fits'))
+    files = glob(os.path.join(datadir, f'*s0029-4-*fits'))
+    
+    #files = glob(os.path.join(datadir, f'*s0003-1-[34]*fits'))
+    #files += glob(os.path.join(datadir, f'*s0002-1-[34]*fits'))
+    #files += glob(os.path.join(datadir, f'*s0029-1-[34]*fits'))
     #files += glob(os.path.join(datadir, f'*s0011-1-4*fits'))
     #files += glob(os.path.join(datadir, f'*s0013-2-[34]*fits'))
     #files += glob(os.path.join(datadir, f'*s0028-1*fits'))
@@ -270,8 +271,8 @@ if test:
     #files += glob(os.path.join(datadir, f'*s0018-2-1*fits'))
     files.sort()
     
-    # kepfiles = []
-    kepfiles = glob(os.path.join(datadir, f'k*c08*fits'))
+    kepfiles = []
+    #kepfiles = glob(os.path.join(datadir, f'k*c08*fits'))
     #kepfiles += glob(os.path.join(datadir, f'k*c13*fits'))
     kepfiles.sort()
 
