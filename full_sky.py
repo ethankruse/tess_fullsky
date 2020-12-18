@@ -251,12 +251,12 @@ if makegif:
 # anything we want to test
 if test:
     # files = files[187:188]
-    files = glob(os.path.join(datadir, f'*s0029-4-*fits'))
+    #files = glob(os.path.join(datadir, f'*s0029-4-*fits'))
     
-    #files = glob(os.path.join(datadir, f'*s0003-1-[34]*fits'))
-    #files += glob(os.path.join(datadir, f'*s0002-1-[34]*fits'))
-    #files += glob(os.path.join(datadir, f'*s0029-1-[34]*fits'))
-    #files += glob(os.path.join(datadir, f'*s0011-1-4*fits'))
+    #files = glob(os.path.join(datadir, f'*s0003-1-1*fits'))
+    #files = glob(os.path.join(datadir, f'*s0002-1-[12]*fits'))
+    #files = glob(os.path.join(datadir, f'*s0001-2-2*fits'))
+    files = glob(os.path.join(datadir, f'*s0029-4-3*fits'))
     #files += glob(os.path.join(datadir, f'*s0013-2-[34]*fits'))
     #files += glob(os.path.join(datadir, f'*s0028-1*fits'))
     #files += glob(os.path.join(datadir, f'*s0001-1*fits'))
@@ -608,7 +608,7 @@ for ii, ifile in enumerate(files):
             data[:350, :350] = np.nan
         elif isec == 26 and icam == 3 and iccd == 3:
             data[:200, :500] = np.nan
-        elif isec == 26 and icam == 4 and iccd == 3:
+        elif isec in [26, 28, 29] and icam == 4 and iccd == 3:
             data[:700, :500] = np.nan
         elif isec == 27 and icam == 1 and iccd == 4:
             data[:700, -600:] = np.nan
@@ -616,6 +616,9 @@ for ii, ifile in enumerate(files):
             data[:120, -120:] = np.nan
         elif isec == 27 and icam == 3 and iccd == 3:
             data[:150, 300:550] = np.nan
+        elif isec == 29 and icam == 1 and iccd == 1:
+            data[:200, :350] = np.nan
+
             
         # remove weird saturated columns that don't have obvious sources
         if isec == 26 and icam == 3 and iccd == 3:
@@ -648,6 +651,8 @@ for ii, ifile in enumerate(files):
             data += 15
         if isec in [27, 28] and icam == 1 and iccd in [1, 2]:
             data += 15
+        if isec == 1 and icam == 2 and iccd == 2:
+            data -= 30
             
         if corner_glow_plot:
             plt.figure()
