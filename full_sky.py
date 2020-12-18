@@ -113,7 +113,7 @@ cmap = truncate_colormap(plt.get_cmap(cmap), minval=0.18, maxval=1.0)
 
 # do we need to create the empirical corner glow correction for a sector?
 makecorner = False
-cornersec = 29
+cornersec = 30
 
 # remove the corner glow from the final image
 remove_corner_glow = True
@@ -256,7 +256,7 @@ if test:
     #files = glob(os.path.join(datadir, f'*s0003-1-1*fits'))
     #files = glob(os.path.join(datadir, f'*s0002-1-[12]*fits'))
     #files = glob(os.path.join(datadir, f'*s0001-2-2*fits'))
-    files = glob(os.path.join(datadir, f'*s0029-4-3*fits'))
+    files = glob(os.path.join(datadir, f'*s0030-4-*fits'))
     #files += glob(os.path.join(datadir, f'*s0013-2-[34]*fits'))
     #files += glob(os.path.join(datadir, f'*s0028-1*fits'))
     #files += glob(os.path.join(datadir, f'*s0001-1*fits'))
@@ -602,7 +602,7 @@ for ii, ifile in enumerate(files):
         elif isec == 24 and icam == 4 and iccd == 3:
             data[:150, 1700:] = np.nan
             data[:500, :300] = np.nan
-        elif isec == 24 and icam == 4 and iccd == 4:
+        elif isec in [24, 30] and icam == 4 and iccd == 4:
             data[:400, 1600:] = np.nan
         elif isec == 26 and icam == 1 and iccd == 1:
             data[:350, :350] = np.nan
