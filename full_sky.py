@@ -124,15 +124,15 @@ corner_glow_plot = False
 adjfile = os.path.join(cornerdir, 'adjustments.txt')
 
 # flag indicating we're just testing things
-test = True
+test = False
 # create the output figure
-makefig = True
+makefig = False
 # the output figure in high or "full" resolution
-highres = False
+highres = True
 fullres = False
 
 # save the output figure
-savefig = False
+savefig = True
 # save every sector image for a gif in a subdirectory
 makegif = False
 if makegif:
@@ -256,10 +256,10 @@ if test:
     #files = glob(os.path.join(datadir, f'*s0003-1-1*fits'))
     #files = glob(os.path.join(datadir, f'*s0002-1-[12]*fits'))
     #files = glob(os.path.join(datadir, f'*s0001-2-2*fits'))
-    files = glob(os.path.join(datadir, f'*s0030-1-4*fits'))
+    files = glob(os.path.join(datadir, f'*s0013-4*fits'))
     #files += glob(os.path.join(datadir, f'*s0013-2-[34]*fits'))
     #files += glob(os.path.join(datadir, f'*s0028-1*fits'))
-    files += glob(os.path.join(datadir, f'*s0003-1-4*fits'))
+    #files += glob(os.path.join(datadir, f'*s0003-1-4*fits'))
     #files += glob(os.path.join(datadir, f'*s0002-1*fits'))
     #files = glob(os.path.join(datadir, f'*s0014*fits')) s26 weird lines: 2,4 3,3
     

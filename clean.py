@@ -114,7 +114,8 @@ def clean_corner(indata, cornerdir, adjustments, cleanplot=False, sec=None,
         raise Exception(f'Multiple adjustments for {sec}, {cam}, {ccd}')
 
     if len(srch) == 0:
-        adj = 0
+        # adj = 0
+        raise Exception(f'No adjustment found for {sec}, {cam}, {ccd}')
     else:
         adj = badj[srch[0]]
     # make the adjustment
