@@ -124,15 +124,15 @@ corner_glow_plot = False
 adjfile = os.path.join(cornerdir, 'adjustments.txt')
 
 # flag indicating we're just testing things
-test = False
+test = True
 # create the output figure
 makefig = True
 # the output figure in high or "full" resolution
-highres = True
+highres = False
 fullres = False
 
 # save the output figure
-savefig = True
+savefig = False
 # save every sector image for a gif in a subdirectory
 makegif = False
 if makegif:
@@ -256,10 +256,10 @@ if test:
     #files = glob(os.path.join(datadir, f'*s0003-1-1*fits'))
     #files = glob(os.path.join(datadir, f'*s0002-1-[12]*fits'))
     #files = glob(os.path.join(datadir, f'*s0001-2-2*fits'))
-    files = glob(os.path.join(datadir, f'*s0030-4-*fits'))
+    files = glob(os.path.join(datadir, f'*s0030-1-4*fits'))
     #files += glob(os.path.join(datadir, f'*s0013-2-[34]*fits'))
     #files += glob(os.path.join(datadir, f'*s0028-1*fits'))
-    #files += glob(os.path.join(datadir, f'*s0001-1*fits'))
+    files += glob(os.path.join(datadir, f'*s0003-1-4*fits'))
     #files += glob(os.path.join(datadir, f'*s0002-1*fits'))
     #files = glob(os.path.join(datadir, f'*s0014*fits')) s26 weird lines: 2,4 3,3
     
@@ -618,7 +618,8 @@ for ii, ifile in enumerate(files):
             data[:150, 300:550] = np.nan
         elif isec == 29 and icam == 1 and iccd == 1:
             data[:200, :350] = np.nan
-
+        elif isec == 30 and icam == 1 and iccd == 4:
+            data[350:650, 1900:] = np.nan
             
         # remove weird saturated columns that don't have obvious sources
         if isec == 26 and icam == 3 and iccd == 3:
