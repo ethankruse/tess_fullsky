@@ -126,7 +126,7 @@ adjfile = os.path.join(cornerdir, 'adjustments.txt')
 # flag indicating we're just testing things
 test = False
 # create the output figure
-makefig = False
+makefig = True
 # the output figure in high or "full" resolution
 highres = True
 fullres = False
@@ -252,12 +252,12 @@ if makegif:
 if test:
     # files = files[187:188]
     #files = glob(os.path.join(datadir, f'*s0029-4-*fits'))
-    
+    corner_glow_plot = False
     #files = glob(os.path.join(datadir, f'*s0003-1-1*fits'))
     #files = glob(os.path.join(datadir, f'*s0002-1-[12]*fits'))
     #files = glob(os.path.join(datadir, f'*s0001-2-2*fits'))
-    files = glob(os.path.join(datadir, f'*s0013-4*fits'))
-    #files += glob(os.path.join(datadir, f'*s0013-2-[34]*fits'))
+    files = glob(os.path.join(datadir, f'*s0008-3-2*fits'))
+    files += glob(os.path.join(datadir, f'*s0007-2-2*fits'))
     #files += glob(os.path.join(datadir, f'*s0028-1*fits'))
     #files += glob(os.path.join(datadir, f'*s0003-1-4*fits'))
     #files += glob(os.path.join(datadir, f'*s0002-1*fits'))
@@ -620,6 +620,26 @@ for ii, ifile in enumerate(files):
             data[:200, :350] = np.nan
         elif isec == 30 and icam == 1 and iccd == 4:
             data[350:650, 1900:] = np.nan
+        elif isec == 5 and icam == 2 and iccd == 1:
+            data[:200, :350] = np.nan
+        elif isec == 28 and icam == 2 and iccd == 1:
+            data[450:650, :100] = np.nan
+        elif isec == 28 and icam == 3 and iccd == 2:
+            data[250:450, 1900:] = np.nan
+        elif isec == 13 and icam == 4 and iccd == 3:
+            data[:400, :125] = np.nan
+        elif isec == 13 and icam == 2 and iccd == 1:
+            data[:100, 500:665] = np.nan
+        elif isec == 11 and icam == 2 and iccd == 1:
+            data[:150, 300:665] = np.nan        
+        elif isec == 10 and icam == 2 and iccd == 1:
+            data[:250, 100:350] = np.nan 
+        elif isec == 9 and icam == 2 and iccd == 1:
+            data[:100, :100] = np.nan 
+        elif isec == 9 and icam == 3 and iccd == 2:
+            data[300:700, 1750:] = np.nan 
+        elif isec == 8 and icam == 3 and iccd == 2:
+            data[:100, 1700:1950] = np.nan 
             
         # remove weird saturated columns that don't have obvious sources
         if isec == 26 and icam == 3 and iccd == 3:
