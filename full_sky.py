@@ -113,7 +113,7 @@ cmap = truncate_colormap(plt.get_cmap(cmap), minval=0.18, maxval=1.0)
 
 # do we need to create the empirical corner glow correction for a sector?
 makecorner = False
-cornersec = 30
+cornersec = 31
 
 # remove the corner glow from the final image
 remove_corner_glow = True
@@ -252,12 +252,12 @@ if makegif:
 if test:
     # files = files[187:188]
     #files = glob(os.path.join(datadir, f'*s0029-4-*fits'))
-    corner_glow_plot = False
+    # corner_glow_plot = False
     #files = glob(os.path.join(datadir, f'*s0003-1-1*fits'))
     #files = glob(os.path.join(datadir, f'*s0002-1-[12]*fits'))
     #files = glob(os.path.join(datadir, f'*s0001-2-2*fits'))
-    files = glob(os.path.join(datadir, f'*s0008-3-2*fits'))
-    files += glob(os.path.join(datadir, f'*s0007-2-2*fits'))
+    files = glob(os.path.join(datadir, f'*s0031-4-*fits'))
+    #files += glob(os.path.join(datadir, f'*s0007-2-2*fits'))
     #files += glob(os.path.join(datadir, f'*s0028-1*fits'))
     #files += glob(os.path.join(datadir, f'*s0003-1-4*fits'))
     #files += glob(os.path.join(datadir, f'*s0002-1*fits'))
