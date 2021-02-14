@@ -113,7 +113,7 @@ cmap = truncate_colormap(plt.get_cmap(cmap), minval=0.18, maxval=1.0)
 
 # do we need to create the empirical corner glow correction for a sector?
 makecorner = False
-cornersec = 31
+cornersec = 32
 
 # remove the corner glow from the final image
 remove_corner_glow = True
@@ -250,25 +250,9 @@ if makegif:
 
 # anything we want to test
 if test:
-    # files = files[187:188]
-    #files = glob(os.path.join(datadir, f'*s0029-4-*fits'))
-    # corner_glow_plot = False
-    #files = glob(os.path.join(datadir, f'*s0003-1-1*fits'))
-    #files = glob(os.path.join(datadir, f'*s0002-1-[12]*fits'))
-    #files = glob(os.path.join(datadir, f'*s0001-2-2*fits'))
-    files = glob(os.path.join(datadir, f'*s0031-4-4*fits'))
+    files = glob(os.path.join(datadir, f'*s0032-4-*fits'))
     #files += glob(os.path.join(datadir, f'*s0005-1-4*fits'))
     #files += glob(os.path.join(datadir, f'*s0004-1-3*fits'))
-    #files += glob(os.path.join(datadir, f'*s0003-1-4*fits'))
-    #files += glob(os.path.join(datadir, f'*s0002-1*fits'))
-    #files = glob(os.path.join(datadir, f'*s0014*fits')) s26 weird lines: 2,4 3,3
-    
-    #files = glob(os.path.join(datadir, f'*s0026-1-3*fits'))
-    #files += glob(os.path.join(datadir, f'*s0025-1-4*fits'))
-    #files += glob(os.path.join(datadir, f'*s0020-2-2*fits'))
-    #files += glob(os.path.join(datadir, f'*s0016-1-2*fits'))
-    #files += glob(os.path.join(datadir, f'*s0016-1-3*fits'))
-    #files += glob(os.path.join(datadir, f'*s0018-2-1*fits'))
     files.sort()
     
     kepfiles = []
