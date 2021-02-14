@@ -256,9 +256,9 @@ if test:
     #files = glob(os.path.join(datadir, f'*s0003-1-1*fits'))
     #files = glob(os.path.join(datadir, f'*s0002-1-[12]*fits'))
     #files = glob(os.path.join(datadir, f'*s0001-2-2*fits'))
-    files = glob(os.path.join(datadir, f'*s0031-4-*fits'))
-    #files += glob(os.path.join(datadir, f'*s0007-2-2*fits'))
-    #files += glob(os.path.join(datadir, f'*s0028-1*fits'))
+    files = glob(os.path.join(datadir, f'*s0031-4-4*fits'))
+    #files += glob(os.path.join(datadir, f'*s0005-1-4*fits'))
+    #files += glob(os.path.join(datadir, f'*s0004-1-3*fits'))
     #files += glob(os.path.join(datadir, f'*s0003-1-4*fits'))
     #files += glob(os.path.join(datadir, f'*s0002-1*fits'))
     #files = glob(os.path.join(datadir, f'*s0014*fits')) s26 weird lines: 2,4 3,3
@@ -640,6 +640,16 @@ for ii, ifile in enumerate(files):
             data[300:700, 1750:] = np.nan 
         elif isec == 8 and icam == 3 and iccd == 2:
             data[:100, 1700:1950] = np.nan 
+        elif isec == 31 and icam == 1 and iccd == 1:
+            data[50:300, 150:400] = np.nan
+        elif isec == 31 and icam == 1 and iccd == 2:
+            data[50:300, 1850:] = np.nan
+        elif isec == 31 and icam == 2 and iccd == 3:
+            data[150:300, :100] = np.nan
+        elif isec == 31 and icam == 3 and iccd == 4:
+            data[:300, 1300:1700] = np.nan
+        elif isec == 31 and icam == 4 and iccd == 4:
+            data[:500, 1400:] = np.nan
             
         # remove weird saturated columns that don't have obvious sources
         if isec == 26 and icam == 3 and iccd == 3:
