@@ -250,9 +250,10 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s0032-4-*fits'))
-    #files += glob(os.path.join(datadir, f'*s0005-1-4*fits'))
-    #files += glob(os.path.join(datadir, f'*s0004-1-3*fits'))
+    files = glob(os.path.join(datadir, f'*s0032-2-4*fits'))
+    #files += glob(os.path.join(datadir, f'*s0032-1-2*fits'))
+    #files += glob(os.path.join(datadir, f'*s0006-2-4*fits'))
+    #files += glob(os.path.join(datadir, f'*s0006-1-1*fits'))
     files.sort()
     
     kepfiles = []
@@ -634,6 +635,14 @@ for ii, ifile in enumerate(files):
             data[:300, 1300:1700] = np.nan
         elif isec == 31 and icam == 4 and iccd == 4:
             data[:500, 1400:] = np.nan
+        elif isec == 32 and icam == 2 and iccd == 3:
+            data[:150, 200:700] = np.nan
+        elif isec == 32 and icam == 2 and iccd == 4:
+            # saturated column
+            data[:2010, 771:774] = np.nan
+        elif isec == 32 and icam == 3 and iccd == 4:
+            data[:150, 1200:1500] = np.nan
+            data[:200, 1900:] = np.nan
             
         # remove weird saturated columns that don't have obvious sources
         if isec == 26 and icam == 3 and iccd == 3:
