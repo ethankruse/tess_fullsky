@@ -250,9 +250,9 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s0033-4*fits'))
+    files = glob(os.path.join(datadir, f'*s0032-2-4*fits'))
     #files += glob(os.path.join(datadir, f'*s0032-1-2*fits'))
-    #files += glob(os.path.join(datadir, f'*s0006-2-4*fits'))
+    #files += glob(os.path.join(datadir, f'*s0005-1-[34]*fits'))
     #files += glob(os.path.join(datadir, f'*s0006-1-1*fits'))
     files.sort()
     
@@ -635,11 +635,15 @@ for ii, ifile in enumerate(files):
             data[:300, 1300:1700] = np.nan
         elif isec == 31 and icam == 4 and iccd == 4:
             data[:500, 1400:] = np.nan
+        elif isec == 32 and icam == 1 and iccd == 4:
+            data[500:700, 1800:] = np.nan
+            data[:300, 1200:1700] = np.nan
         elif isec == 32 and icam == 2 and iccd == 3:
             data[:150, 200:700] = np.nan
         elif isec == 32 and icam == 2 and iccd == 4:
-            # saturated column
-            data[:2010, 771:774] = np.nan
+            # remove saturated columns
+            data[:2010, 772] = data[:2010, 771]
+            data[:2010, 773] = data[:2010, 774]
         elif isec == 32 and icam == 3 and iccd == 4:
             data[:150, 1200:1500] = np.nan
             data[:200, 1900:] = np.nan
