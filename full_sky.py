@@ -250,11 +250,13 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s0032-2-4*fits'))
-    #files += glob(os.path.join(datadir, f'*s0032-1-2*fits'))
+    files = glob(os.path.join(datadir, f'*s0033-2-2*fits'))
+    files += glob(os.path.join(datadir, f'*s0033-3-1*fits'))
     #files += glob(os.path.join(datadir, f'*s0005-1-[34]*fits'))
-    #files += glob(os.path.join(datadir, f'*s0006-1-1*fits'))
+    files += glob(os.path.join(datadir, f'*s0007-2-1*fits'))
+    #files += glob(os.path.join(datadir, f'*s0007-2-4*fits'))
     files.sort()
+    
     
     kepfiles = []
     #kepfiles = glob(os.path.join(datadir, f'k*c08*fits'))
@@ -647,6 +649,16 @@ for ii, ifile in enumerate(files):
         elif isec == 32 and icam == 3 and iccd == 4:
             data[:150, 1200:1500] = np.nan
             data[:200, 1900:] = np.nan
+        elif isec == 33 and icam == 1 and iccd == 1:
+            data[:150, 450:750] = np.nan
+        elif isec == 33 and icam == 2 and iccd == 4:
+            data[:600, 1750:] = np.nan
+        elif isec == 33 and icam == 1 and iccd == 3:
+            data[:350, :300] = np.nan
+        elif isec == 33 and icam == 1 and iccd == 2:
+            data[:200, 1800:] = np.nan
+        elif isec == 33 and icam == 3 and iccd == 1:
+            data[:40, :60] = np.nan
             
         # remove weird saturated columns that don't have obvious sources
         if isec == 26 and icam == 3 and iccd == 3:
@@ -681,6 +693,8 @@ for ii, ifile in enumerate(files):
             data += 15
         if isec == 1 and icam == 2 and iccd == 2:
             data -= 30
+        if isec == 6 and icam == 1 and iccd == 1:
+            data -= 15
             
         if corner_glow_plot:
             plt.figure()
