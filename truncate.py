@@ -24,7 +24,7 @@ def truncate_colormap(origmap, minval=0.0, maxval=1.0, n=-1):
     import numpy as np
     if n == -1:
         n = origmap.N
-    new_cmap = mcolors.LinearSegmentedColormap.from_list(
-         f'trunc({origmap.name},{minval:.2f},{maxval:.2f})',
-         origmap(np.linspace(minval, maxval, n)))
+    newname = f'trunc({origmap.name},{minval:.2f},{maxval:.2f})'
+    values = origmap(np.linspace(minval, maxval, n))
+    new_cmap = mcolors.LinearSegmentedColormap.from_list(newname, values)
     return new_cmap

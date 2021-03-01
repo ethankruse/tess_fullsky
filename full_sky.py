@@ -23,7 +23,7 @@ figdir = os.path.join(os.path.split(__file__)[0], 'figs')
 cornerdir = os.path.join(os.path.split(__file__)[0], 'corners')
 
 # options are 'north', 'south', or 'both'
-hemisphere = 'south'
+hemisphere = 'north'
 # for full-sky Mollweide projections, do we want to use ecliptic coordinates
 # if False, uses celestial coordinates (ICRS, right ascension/declination)
 ecliptic_coords = True
@@ -134,7 +134,7 @@ fullres = False
 # save the output figure
 savefig = True
 # save every sector image for a gif in a subdirectory
-makegif = False
+makegif = True
 if makegif:
     figdir = os.path.join(figdir, f'gif_{fbase}')
 # use a transparent background instead of white
@@ -250,10 +250,10 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s0033-2-2*fits'))
-    files += glob(os.path.join(datadir, f'*s0033-3-1*fits'))
+    files = glob(os.path.join(datadir, f'*s0026-1-3*fits'))
+    files += glob(os.path.join(datadir, f'*s0025-1-4*fits'))
     #files += glob(os.path.join(datadir, f'*s0005-1-[34]*fits'))
-    files += glob(os.path.join(datadir, f'*s0007-2-1*fits'))
+    #files += glob(os.path.join(datadir, f'*s0007-2-1*fits'))
     #files += glob(os.path.join(datadir, f'*s0007-2-4*fits'))
     files.sort()
     
@@ -659,6 +659,17 @@ for ii, ifile in enumerate(files):
             data[:200, 1800:] = np.nan
         elif isec == 33 and icam == 3 and iccd == 1:
             data[:40, :60] = np.nan
+        elif isec == 17 and icam == 3 and iccd == 4:
+            data[:200, 1750:] = np.nan
+        elif isec == 20 and icam == 3 and iccd == 3:
+            data[200:450, :200] = np.nan
+        elif isec == 20 and icam == 4 and iccd == 4:
+            data[:200, 1700:] = np.nan
+        elif isec == 23 and icam == 4 and iccd == 3:
+            data[:150, :300] = np.nan
+        elif isec == 26 and icam == 1 and iccd == 3:
+            data[20:130, 250:400] = np.nan
+            data[300:450, 400:650] = np.nan
             
         # remove weird saturated columns that don't have obvious sources
         if isec == 26 and icam == 3 and iccd == 3:
