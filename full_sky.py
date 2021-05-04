@@ -124,7 +124,7 @@ corner_glow_plot = False
 adjfile = os.path.join(cornerdir, 'adjustments.txt')
 
 # flag indicating we're just testing things
-test = True
+test = False
 # create the output figure
 makefig = True
 # the output figure in high or "full" resolution
@@ -250,10 +250,11 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s0007-[12]*fits'))
-    files += glob(os.path.join(datadir, f'*s003[34]-[12]*fits'))
+    files = glob(os.path.join(datadir, f'*s0035-2-1*fits'))
+    files += glob(os.path.join(datadir, f'*s0035-3-2*fits'))
     
-    #files += glob(os.path.join(datadir, f'*s0007-1-4*fits'))
+    files += glob(os.path.join(datadir, f'*s0008-2-1*fits'))
+    files += glob(os.path.join(datadir, f'*s0008-3-2*fits'))
 
     #files += glob(os.path.join(datadir, f'*s0007-2-1*fits'))
     #files += glob(os.path.join(datadir, f'*s0007-2-4*fits'))
@@ -679,6 +680,10 @@ for ii, ifile in enumerate(files):
             data[:600, :700] = np.nan
         elif isec == 34 and icam == 2 and iccd == 4:
             data[:700, 1500:] = np.nan
+        elif isec == 35 and icam == 2 and iccd == 1:
+            data[:600, :700] = np.nan
+        elif isec == 35 and icam == 3 and iccd == 2:
+            data[:400, 1300:] = np.nan
         # remove weird saturated columns that don't have obvious sources
         if isec == 26 and icam == 3 and iccd == 3:
             data[:, 1195] = data[:, 1194]
