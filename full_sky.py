@@ -124,7 +124,7 @@ corner_glow_plot = False
 adjfile = os.path.join(cornerdir, 'adjustments.txt')
 
 # flag indicating we're just testing things
-test = False
+test = True
 # create the output figure
 makefig = True
 # the output figure in high or "full" resolution
@@ -250,9 +250,11 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s0035-4*fits'))
-    #files += glob(os.path.join(datadir, f'*s0007-1-[34]*fits'))
-    #files += glob(os.path.join(datadir, f'*s0005-1-[34]*fits'))
+    files = glob(os.path.join(datadir, f'*s0007-[12]*fits'))
+    files += glob(os.path.join(datadir, f'*s003[34]-[12]*fits'))
+    
+    #files += glob(os.path.join(datadir, f'*s0007-1-4*fits'))
+
     #files += glob(os.path.join(datadir, f'*s0007-2-1*fits'))
     #files += glob(os.path.join(datadir, f'*s0007-2-4*fits'))
     files.sort()
@@ -657,6 +659,7 @@ for ii, ifile in enumerate(files):
             data[:350, :300] = np.nan
         elif isec == 33 and icam == 1 and iccd == 2:
             data[:200, 1800:] = np.nan
+            data[:140, 1440:1550] = np.nan
         elif isec == 33 and icam == 3 and iccd == 1:
             data[:40, :60] = np.nan
         elif isec == 17 and icam == 3 and iccd == 4:
@@ -672,7 +675,10 @@ for ii, ifile in enumerate(files):
             data[300:450, 400:650] = np.nan
         elif isec == 34 and icam == 1 and iccd == 4:
             data[:600, 1400:] = np.nan
-            
+        elif isec == 34 and icam == 1 and iccd == 1:
+            data[:600, :700] = np.nan
+        elif isec == 34 and icam == 2 and iccd == 4:
+            data[:700, 1500:] = np.nan
         # remove weird saturated columns that don't have obvious sources
         if isec == 26 and icam == 3 and iccd == 3:
             data[:, 1195] = data[:, 1194]
@@ -708,6 +714,10 @@ for ii, ifile in enumerate(files):
             data -= 30
         if isec == 6 and icam == 1 and iccd == 1:
             data -= 15
+        if isec == 7 and icam == 1 and iccd == 1:
+            data -= 15
+        if isec == 7 and icam == 1 and iccd == 4:
+            data -= 10
             
         if corner_glow_plot:
             plt.figure()
