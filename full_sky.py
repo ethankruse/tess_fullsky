@@ -103,14 +103,6 @@ else:
 vmin = 150
 vmax = 901.
 
-# set up our custom colormap, which is a subset of the matplotlib map 'gray'.
-# we use truncate_colormap() to remove the blackest part of the map
-# so that even the dark areas show up against a pure black background.
-cnorm = colors.LogNorm(vmin=vmin, vmax=vmax)
-cmap = 'gray'
-# use only the latter part of the original colormap
-cmap = truncate_colormap(plt.get_cmap(cmap), minval=0.18, maxval=1.0)
-
 # do we need to create the empirical corner glow correction for a sector?
 makecorner = False
 cornersec = 36
@@ -131,21 +123,28 @@ makefig = True
 highres = True
 fullres = False
 
+# which color bar to use
+color = 'blue'
+if color == 'blue':
+    cc = '_blue'
+else:
+    cc = ''
+
 # save the output figure
 savefig = True
 # save every sector image for a gif in a subdirectory
-makegif = False
+makegif = True
 if makegif:
-    figdir = os.path.join(figdir, f'gif_{fbase}')
+    figdir = os.path.join(figdir, f'gif_{fbase}{cc}')
 # use a transparent background instead of white
 transparent = False
 # the output figure file name
 if transparent:
     if makegif:
         figdir += '_transp'
-    fname = f'transp_{fbase}.png'
+    fname = f'transp_{fbase}{cc}.png'
 else:
-    fname = f'{fbase}.png'
+    fname = f'{fbase}{cc}.png'
 savefile = os.path.join(figdir, fname)
 
 # credit text in lower left
@@ -182,6 +181,21 @@ secends = {1: 'Aug 2018', 2: 'Sep 2018', 3: 'Oct 2018', 4: 'Nov 2018',
            37: 'Apr 2021', 38: 'May 2021', 39: 'Jun 2021'}
 
 ##################################################################
+
+cnorm = colors.LogNorm(vmin=vmin, vmax=vmax)
+if color == 'gray':
+    # set up our custom colormap, which is a subset of the matplotlib map 'gray'.
+    # we use truncate_colormap() to remove the blackest part of the map
+    # so that even the dark areas show up against a pure black background.
+    cmap = 'gray'
+    # use only the latter part of the original colormap
+    cmap = truncate_colormap(plt.get_cmap(cmap), minval=0.18, maxval=1.0)
+elif color == 'blue':
+    from matplotlib.colors import LinearSegmentedColormap
+    carr = np.loadtxt('blue_cbar.txt')
+    cmap = LinearSegmentedColormap.from_list('my_cmap', carr)
+else:
+    raise Exception('not recognized color')
 
 if fullres and highres:
     raise Exception('Must choose either full or high resolution.')
