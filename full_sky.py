@@ -105,7 +105,7 @@ vmax = 901.
 
 # do we need to create the empirical corner glow correction for a sector?
 makecorner = False
-cornersec = 36
+cornersec = 37
 
 # remove the corner glow from the final image
 remove_corner_glow = True
@@ -124,7 +124,7 @@ highres = True
 fullres = False
 
 # which color bar to use
-color = 'blue'
+color = 'gray'
 if color == 'blue':
     cc = '_blue'
 else:
@@ -133,7 +133,7 @@ else:
 # save the output figure
 savefig = True
 # save every sector image for a gif in a subdirectory
-makegif = True
+makegif = False
 if makegif:
     figdir = os.path.join(figdir, f'gif_{fbase}{cc}')
 # use a transparent background instead of white
@@ -264,7 +264,7 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s0036-3-1*fits'))
+    files = glob(os.path.join(datadir, f'*s0037-4-*fits'))
     #files = glob(os.path.join(datadir, f'*s0035-2-1*fits'))
     #files += glob(os.path.join(datadir, f'*s0035-3-[23]*fits'))
     
