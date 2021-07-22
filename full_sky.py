@@ -264,12 +264,12 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s0037-4-*fits'))
+    files = glob(os.path.join(datadir, f'*s0037-2-2*fits'))
     #files = glob(os.path.join(datadir, f'*s0035-2-1*fits'))
-    #files += glob(os.path.join(datadir, f'*s0035-3-[23]*fits'))
+    files += glob(os.path.join(datadir, f'*s0037-3-1*fits'))
     
-    #files += glob(os.path.join(datadir, f'*s0008-[23]*fits'))
-    #files += glob(os.path.join(datadir, f'*s0008-3-[23]*fits'))
+    files += glob(os.path.join(datadir, f'*s0011-2-1*fits'))
+    files += glob(os.path.join(datadir, f'*s0011-3-2*fits'))
 
     #files += glob(os.path.join(datadir, f'*s0007-2-1*fits'))
     #files += glob(os.path.join(datadir, f'*s0007-2-4*fits'))
@@ -710,6 +710,19 @@ for ii, ifile in enumerate(files):
             data[:800, 1500:] = np.nan
         elif isec == 36 and icam == 3 and iccd == 3:
             data[:400, :400] = np.nan
+        elif isec == 37 and icam == 1 and iccd == 1:
+            data[:250, :300] = np.nan
+        elif isec == 37 and icam == 2 and iccd == 1:
+            data[:275, :900] = np.nan
+        elif isec == 37 and icam == 3 and iccd == 2:
+            data[:300, 1700:] = np.nan
+        elif isec == 37 and icam == 3 and iccd == 3:
+            data[250:350, 400:600] = np.nan
+        elif isec == 37 and icam == 2 and iccd == 2:
+            data[:600, 1400:] = np.nan
+        elif isec == 37 and icam == 3 and iccd == 1:
+            data[:200, :500] = np.nan
+            
         # remove weird saturated columns that don't have obvious sources
         if isec == 26 and icam == 3 and iccd == 3:
             data[:, 1195] = data[:, 1194]
