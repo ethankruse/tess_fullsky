@@ -110,17 +110,17 @@ cornersec = 37
 # remove the corner glow from the final image
 remove_corner_glow = True
 # make a plot of the corner glow for every CCD to check how removal is working
-corner_glow_plot = False
+corner_glow_plot = True
 
 # manual adjustments to the strength of corner glow corrections
 adjfile = os.path.join(cornerdir, 'adjustments.txt')
 
 # flag indicating we're just testing things
-test = False
+test = True
 # create the output figure
-makefig = True
+makefig = False
 # the output figure in high or "full" resolution
-highres = True
+highres = False
 fullres = False
 
 # which color bar to use
@@ -131,7 +131,7 @@ else:
     cc = ''
 
 # save the output figure
-savefig = True
+savefig = False
 # save every sector image for a gif in a subdirectory
 makegif = False
 if makegif:
@@ -264,12 +264,12 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s0037-2-2*fits'))
+    files = glob(os.path.join(datadir, f'*s0037-2-4*fits'))
     #files = glob(os.path.join(datadir, f'*s0035-2-1*fits'))
-    files += glob(os.path.join(datadir, f'*s0037-3-1*fits'))
+    #files += glob(os.path.join(datadir, f'*s0037-3-1*fits'))
     
-    files += glob(os.path.join(datadir, f'*s0011-2-1*fits'))
-    files += glob(os.path.join(datadir, f'*s0011-3-2*fits'))
+    #files += glob(os.path.join(datadir, f'*s0011-2-1*fits'))
+    #files += glob(os.path.join(datadir, f'*s0011-3-2*fits'))
 
     #files += glob(os.path.join(datadir, f'*s0007-2-1*fits'))
     #files += glob(os.path.join(datadir, f'*s0007-2-4*fits'))
@@ -722,6 +722,8 @@ for ii, ifile in enumerate(files):
             data[:600, 1400:] = np.nan
         elif isec == 37 and icam == 3 and iccd == 1:
             data[:200, :500] = np.nan
+        elif isec == 37 and icam == 2 and iccd == 4:
+            data[250:360, 1500:1625] = np.nan
             
         # remove weird saturated columns that don't have obvious sources
         if isec == 26 and icam == 3 and iccd == 3:
