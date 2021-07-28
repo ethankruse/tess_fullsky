@@ -264,9 +264,9 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s0038-3-2*fits'))
+    files = glob(os.path.join(datadir, f'*s0037-3-3*fits'))
     #files = glob(os.path.join(datadir, f'*s0035-2-1*fits'))
-    files += glob(os.path.join(datadir, f'*s0038-2-1*fits'))
+    files += glob(os.path.join(datadir, f'*s0038-3-3*fits'))
     
     #files += glob(os.path.join(datadir, f'*s0011-1-3*fits'))
     #files += glob(os.path.join(datadir, f'*s0011-3-2*fits'))
@@ -774,6 +774,10 @@ for ii, ifile in enumerate(files):
             data -= 15
         if isec == 7 and icam == 1 and iccd == 4:
             data -= 10
+        if isec == 38 and icam == 2 and iccd == 1:
+            data += 15
+        if isec == 38 and icam == 3 and iccd == 3:
+            data += 10
         """
         if isec == 35 and icam == 2 and iccd == 1:
             data += 15
