@@ -334,7 +334,7 @@ plt.close('all')
 
 # get font sizes right for the output image size
 if highres:
-    fscl = 80
+    fscl = 90
     if hemisphere == 'both':
         xinch = 150
         yinch = 75
