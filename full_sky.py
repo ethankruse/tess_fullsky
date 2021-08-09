@@ -133,7 +133,7 @@ else:
 # save the output figure
 savefig = True
 # save every sector image for a gif in a subdirectory
-makegif = False
+makegif = True
 if makegif:
     figdir = os.path.join(figdir, f'gif_{fbase}{cc}')
 # use a transparent background instead of white
@@ -334,13 +334,13 @@ plt.close('all')
 
 # get font sizes right for the output image size
 if highres:
-    fscl = 200
+    fscl = 100
     if hemisphere == 'both':
-        xinch = 300
-        yinch = 150
+        xinch = 150
+        yinch = 75
     else:
-        xinch = 200
-        yinch = 200
+        xinch = 100
+        yinch = 100
     fsz = int(160 * fscl/100.)
     sfsz = int(175 * fscl/100.)
     tfsz = int(200 * fscl/100.)
