@@ -105,7 +105,7 @@ vmax = 901.
 
 # do we need to create the empirical corner glow correction for a sector?
 makecorner = False
-cornersec = 38
+cornersec = 39
 
 # remove the corner glow from the final image
 remove_corner_glow = True
@@ -133,7 +133,7 @@ else:
 # save the output figure
 savefig = True
 # save every sector image for a gif in a subdirectory
-makegif = True
+makegif = False
 if makegif:
     figdir = os.path.join(figdir, f'gif_{fbase}{cc}')
 # use a transparent background instead of white
@@ -264,9 +264,9 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s0037-3-3*fits'))
+    files = glob(os.path.join(datadir, f'*s0039-4-*fits'))
     #files = glob(os.path.join(datadir, f'*s0035-2-1*fits'))
-    files += glob(os.path.join(datadir, f'*s0038-3-3*fits'))
+    #files += glob(os.path.join(datadir, f'*s0038-3-3*fits'))
     
     #files += glob(os.path.join(datadir, f'*s0011-1-3*fits'))
     #files += glob(os.path.join(datadir, f'*s0011-3-2*fits'))
@@ -861,7 +861,7 @@ if makecorner:
     plt.close('all')
     from mpl_toolkits.mplot3d import Axes3D
     fig = plt.figure()
-    ax = fig.gca(projection='3d')
+    ax = plt.axes(projection='3d')
 
     xs = xxs[0]
     ys = yys[0]

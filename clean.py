@@ -125,7 +125,7 @@ def clean_corner(indata, cornerdir, adjustments, cleanplot=False, sec=None,
     if cleanplot:
         from mpl_toolkits.mplot3d import Axes3D
         fig = plt.figure()
-        ax = fig.gca(projection='3d')
+        ax = plt.axes(projection='3d')
         # plot the smoothed data
         ax.plot_surface(lat, lon, fdata, cmap='gray',
                         linewidth=0, antialiased=False, alpha=0.3)
