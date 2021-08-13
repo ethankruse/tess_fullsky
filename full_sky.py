@@ -264,12 +264,12 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s0039-4-*fits'))
+    files = glob(os.path.join(datadir, f'*s0039-1-4*fits'))
     #files = glob(os.path.join(datadir, f'*s0035-2-1*fits'))
-    #files += glob(os.path.join(datadir, f'*s0038-3-3*fits'))
+    files += glob(os.path.join(datadir, f'*s0038-1-3*fits'))
     
-    #files += glob(os.path.join(datadir, f'*s0011-1-3*fits'))
-    #files += glob(os.path.join(datadir, f'*s0011-3-2*fits'))
+    files += glob(os.path.join(datadir, f'*s0012-1-4*fits'))
+    #files += glob(os.path.join(datadir, f'*s0012-2-4*fits'))
 
     #files += glob(os.path.join(datadir, f'*s0007-2-1*fits'))
     #files += glob(os.path.join(datadir, f'*s0007-2-4*fits'))
@@ -734,6 +734,18 @@ for ii, ifile in enumerate(files):
             data[:600, :700] = np.nan
         elif isec == 38 and icam == 3 and iccd == 2:
             data[:500, 1500:] = np.nan
+        elif isec == 39 and icam == 3 and iccd == 2:
+            data[:1000, 1300:] = np.nan
+        elif isec == 39 and icam == 2 and iccd == 1:
+            data[:800, :1000] = np.nan
+        elif isec == 39 and icam == 1 and iccd == 2:
+            data[:250, 1850:] = np.nan
+        elif isec == 39 and icam == 1 and iccd == 1:
+            data[:500, :800] = np.nan
+        elif isec == 39 and icam == 2 and iccd == 4:
+            data[:750, 1450:] = np.nan
+        elif isec == 39 and icam == 1 and iccd == 4:
+            data[:750, 1200:] = np.nan
             
         # remove weird saturated columns that don't have obvious sources
         if isec == 26 and icam == 3 and iccd == 3:
@@ -778,6 +790,11 @@ for ii, ifile in enumerate(files):
             data += 15
         if isec == 38 and icam == 3 and iccd == 3:
             data += 10
+        if isec == 39 and icam == 3 and iccd in [2, 3]:
+            data += 10
+        # galactic center is too bright
+        if isec in [12, 13, 39] and icam == 1:
+            data -= 20
         """
         if isec == 35 and icam == 2 and iccd == 1:
             data += 15
