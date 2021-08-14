@@ -264,12 +264,12 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s0039-1-4*fits'))
+    files = glob(os.path.join(datadir, f'*s0039-1-2*fits'))
     #files = glob(os.path.join(datadir, f'*s0035-2-1*fits'))
-    files += glob(os.path.join(datadir, f'*s0038-1-3*fits'))
+    files += glob(os.path.join(datadir, f'*s0039-1-3*fits'))
     
-    files += glob(os.path.join(datadir, f'*s0012-1-4*fits'))
-    #files += glob(os.path.join(datadir, f'*s0012-2-4*fits'))
+    files += glob(os.path.join(datadir, f'*s0013-1-4*fits'))
+    files += glob(os.path.join(datadir, f'*s0013-1-1*fits'))
 
     #files += glob(os.path.join(datadir, f'*s0007-2-1*fits'))
     #files += glob(os.path.join(datadir, f'*s0007-2-4*fits'))
@@ -793,8 +793,10 @@ for ii, ifile in enumerate(files):
         if isec == 39 and icam == 3 and iccd in [2, 3]:
             data += 10
         # galactic center is too bright
-        if isec in [12, 13, 39] and icam == 1:
+        if isec in [12, 39] and icam == 1:
             data -= 20
+        if isec == 13 and icam == 1 and iccd in [1, 4]:
+            data -= 30
         """
         if isec == 35 and icam == 2 and iccd == 1:
             data += 15
