@@ -264,12 +264,12 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s0039-1-2*fits'))
+    files = glob(os.path.join(datadir, f'*s0039-2-3*fits'))
     #files = glob(os.path.join(datadir, f'*s0035-2-1*fits'))
-    files += glob(os.path.join(datadir, f'*s0039-1-3*fits'))
+    #files += glob(os.path.join(datadir, f'*s0039-1-3*fits'))
     
-    files += glob(os.path.join(datadir, f'*s0013-1-4*fits'))
-    files += glob(os.path.join(datadir, f'*s0013-1-1*fits'))
+    #files += glob(os.path.join(datadir, f'*s0013-1-4*fits'))
+    files += glob(os.path.join(datadir, f'*s0013-2-4*fits'))
 
     #files += glob(os.path.join(datadir, f'*s0007-2-1*fits'))
     #files += glob(os.path.join(datadir, f'*s0007-2-4*fits'))
@@ -739,11 +739,13 @@ for ii, ifile in enumerate(files):
         elif isec == 39 and icam == 2 and iccd == 1:
             data[:800, :1000] = np.nan
         elif isec == 39 and icam == 1 and iccd == 2:
-            data[:250, 1850:] = np.nan
+            data[:2000, 1850:] = np.nan
         elif isec == 39 and icam == 1 and iccd == 1:
             data[:500, :800] = np.nan
         elif isec == 39 and icam == 2 and iccd == 4:
             data[:750, 1450:] = np.nan
+        elif isec == 39 and icam == 2 and iccd == 3:
+            data[250:, :500] = np.nan
         elif isec == 39 and icam == 1 and iccd == 4:
             data[:750, 1200:] = np.nan
             
