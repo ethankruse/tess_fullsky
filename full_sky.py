@@ -115,6 +115,9 @@ corner_glow_plot = False
 # manual adjustments to the strength of corner glow corrections
 adjfile = os.path.join(cornerdir, 'adjustments.txt')
 
+# save data/processing time by binning the images 2x2
+binning = True
+
 # flag indicating we're just testing things
 test = False
 # create the output figure
@@ -255,6 +258,7 @@ if makecorner:
     remove_corner_glow = True
     test = False
     kepfiles = []
+    binning = False
 
 # remove any previous images in the gif subdirectory
 if makegif:
@@ -812,6 +816,11 @@ for ii, ifile in enumerate(files):
             plt.imshow(data, norm=cnorm, cmap=cmap)
 
         if makefig:
+            if binning:
+                shape = (data.shape[0]//2, 2, data.shape[1]//2, 2)
+                data = data.reshape(shape).mean(-1).mean(1)
+                lon = lon[::2, ::2]
+                lat = lat[::2, ::2]
             if ii == 0:
                 sectxt = f'Sector {isec}\n{secstarts[isec]}\u2013{secends[isec]}'
                 if printdate:
