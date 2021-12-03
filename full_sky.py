@@ -598,9 +598,9 @@ for ii, ifile in enumerate(files):
             lon = lon[360:, :]
         elif isec == 21 and icam == 2 and iccd == 1:
             # a reflection in the CVZ only in S21
-            data = data[225:, :]
-            lat = lat[225:, :]
-            lon = lon[225:, :]
+            data = data[226:, :]
+            lat = lat[226:, :]
+            lon = lon[226:, :]
         elif isec == 23 and icam == 3 and iccd == 4:
             # bad corner glow
             data[:200, -100:] = np.nan
