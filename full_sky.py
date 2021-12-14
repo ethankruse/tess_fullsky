@@ -9,11 +9,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 from astropy.io import fits
-from astropy.wcs import WCS
+from astropy.wcs import WCS, FITSFixedWarning
 import cartopy.crs as ccrs
 from truncate import truncate_colormap
 from clean import clean_corner
 from astropy.coordinates import SkyCoord, BarycentricTrueEcliptic
+import warnings
 
 ##################################################################
 # Configuration parameters
@@ -23,7 +24,7 @@ figdir = os.path.join(os.path.split(__file__)[0], 'figs')
 cornerdir = os.path.join(os.path.split(__file__)[0], 'corners')
 
 # options are 'north', 'south', or 'both'
-hemisphere = 'south'
+hemisphere = 'north'
 # for full-sky Mollweide projections, do we want to use ecliptic coordinates
 # if False, uses celestial coordinates (ICRS, right ascension/declination)
 ecliptic_coords = True
@@ -105,7 +106,7 @@ vmax = 901.
 
 # do we need to create the empirical corner glow correction for a sector?
 makecorner = False
-cornersec = 39
+cornersec = 40
 
 # remove the corner glow from the final image
 remove_corner_glow = True
@@ -171,7 +172,10 @@ secstarts = {1: 'Jul 2018', 2: 'Aug 2018', 3: 'Sep 2018', 4: 'Oct 2018',
              25: 'May 2020', 26: 'Jun 2020', 27: 'Jul 2020', 28: 'Jul 2020',
              29: 'Aug 2020', 30: 'Sep 2020', 31: 'Oct 2020', 32: 'Nov 2020',
              33: 'Dec 2020', 34: 'Jan 2021', 35: 'Feb 2021', 36: 'Mar 2021', 
-             37: 'Apr 2021', 38: 'Apr 2021', 39: 'May 2021'}
+             37: 'Apr 2021', 38: 'Apr 2021', 39: 'May 2021', 40: 'Jun 2021',
+             41: 'Jul 2021', 42: 'Aug 2021', 43: 'Sep 2021', 44: 'Oct 2021', 
+             45: 'Nov 2021', 46: 'Dec 2021', 47: 'Dec 2021', 48: 'Jan 2022',
+             49: 'Feb 2022', 50: 'Mar 2022', 51: 'Apr 2022', 52: 'May 2022'}
 secends = {1: 'Aug 2018', 2: 'Sep 2018', 3: 'Oct 2018', 4: 'Nov 2018',
            5: 'Dec 2018', 6: 'Jan 2019', 7: 'Feb 2019', 8: 'Feb 2019',
            9: 'Mar 2019', 10: 'Apr 2019', 11: 'May 2019', 12: 'Jun 2019',
@@ -181,9 +185,14 @@ secends = {1: 'Aug 2018', 2: 'Sep 2018', 3: 'Oct 2018', 4: 'Nov 2018',
            25: 'Jun 2020', 26: 'Jul 2020', 27: 'Jul 2020', 28: 'Aug 2020',
            29: 'Sep 2020', 30: 'Oct 2020', 31: 'Nov 2020', 32: 'Dec 2020',
            33: 'Jan 2021', 34: 'Feb 2021', 35: 'Mar 2021', 36: 'Apr 2021', 
-           37: 'Apr 2021', 38: 'May 2021', 39: 'Jun 2021'}
+           37: 'Apr 2021', 38: 'May 2021', 39: 'Jun 2021', 40: 'Jul 2021',
+           41: 'Aug 2021', 42: 'Sep 2021', 43: 'Oct 2021', 44: 'Nov 2021', 
+           45: 'Dec 2021', 46: 'Dec 2021', 47: 'Jan 2022', 48: 'Feb 2022',
+           49: 'Mar 2022', 50: 'Apr 2022', 51: 'May 2022', 52: 'Jun 2022'}
 
 ##################################################################
+
+warnings.filterwarnings("ignore", category=FITSFixedWarning)
 
 cnorm = colors.LogNorm(vmin=vmin, vmax=vmax)
 if color == 'gray':
@@ -268,12 +277,12 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s0039-2-3*fits'))
+    files = glob(os.path.join(datadir, f'*s0040-4*fits'))
     #files = glob(os.path.join(datadir, f'*s0035-2-1*fits'))
     #files += glob(os.path.join(datadir, f'*s0039-1-3*fits'))
     
     #files += glob(os.path.join(datadir, f'*s0013-1-4*fits'))
-    files += glob(os.path.join(datadir, f'*s0013-2-4*fits'))
+    #files += glob(os.path.join(datadir, f'*s0013-2-4*fits'))
 
     #files += glob(os.path.join(datadir, f'*s0007-2-1*fits'))
     #files += glob(os.path.join(datadir, f'*s0007-2-4*fits'))
@@ -855,8 +864,11 @@ for ii, ifile in enumerate(files):
                     sectxt = f'Sectors 1\u201313; 27\n{secstarts[1]}\u2013{secends[13]}\n{secstarts[27]}\u2013{secends[27]}'
                 else:
                     sectxt = f'Sectors 1\u201313; 27\u2013{isec}\n{secstarts[1]}\u2013{secends[13]}\n{secstarts[27]}\u2013{secends[isec]}'
-            else:
-                raise Exception('need to handle this')
+            elif hemisphere == 'north':
+                if isec == 40:
+                    sectxt = f'Sectors 14\u201326; 40\n{secstarts[14]}\u2013{secends[26]}\n{secstarts[40]}\u2013{secends[40]}'
+                else:
+                    sectxt = f'Sectors 14\u201326; 40\u2013{isec}\n{secstarts[14]}\u2013{secends[26]}\n{secstarts[40]}\u2013{secends[isec]}'
             text = plt.text(0.98, 0.02, sectxt, transform=fig.transFigure,
                             ha='right', va='bottom', multialignment='right',
                             fontsize=sfsz, fontname='Carlito')
