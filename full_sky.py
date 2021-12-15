@@ -194,6 +194,9 @@ secends = {1: 'Aug 2018', 2: 'Sep 2018', 3: 'Oct 2018', 4: 'Nov 2018',
 
 warnings.filterwarnings("ignore", category=FITSFixedWarning)
 
+if not test and not savefig:
+    warnings.warn('Not testing but not saving any output.')
+
 cnorm = colors.LogNorm(vmin=vmin, vmax=vmax)
 if color == 'gray':
     # set up our custom colormap, which is a subset of the matplotlib map 'gray'.
@@ -277,11 +280,11 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s0040-4*fits'))
+    files = glob(os.path.join(datadir, f'*s0040-4-3*fits'))
     #files = glob(os.path.join(datadir, f'*s0035-2-1*fits'))
-    #files += glob(os.path.join(datadir, f'*s0039-1-3*fits'))
+    #files += glob(os.path.join(datadir, f'*s0015-2-3*fits'))
     
-    #files += glob(os.path.join(datadir, f'*s0013-1-4*fits'))
+    #files += glob(os.path.join(datadir, f'*s0014-1-1*fits'))
     #files += glob(os.path.join(datadir, f'*s0013-2-4*fits'))
 
     #files += glob(os.path.join(datadir, f'*s0007-2-1*fits'))
@@ -761,6 +764,10 @@ for ii, ifile in enumerate(files):
             data[250:, :500] = np.nan
         elif isec == 39 and icam == 1 and iccd == 4:
             data[:750, 1200:] = np.nan
+        elif isec == 40 and icam == 4 and iccd == 3:
+            data[:300, :800] = np.nan
+        elif isec == 40 and icam == 4 and iccd == 4:
+            data[:300, 1400:] = np.nan
             
         # remove weird saturated columns that don't have obvious sources
         if isec == 26 and icam == 3 and iccd == 3:
