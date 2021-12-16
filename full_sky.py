@@ -280,14 +280,15 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s0041-4*fits'))
+    files = glob(os.path.join(datadir, f'*s0041-1-3*fits'))
+    #files += glob(os.path.join(datadir, f'*s0041-2-4*fits'))
     #files = glob(os.path.join(datadir, f'*s0035-2-1*fits'))
-    #files += glob(os.path.join(datadir, f'*s0015-2-3*fits'))
+    #files += glob(os.path.join(datadir, f'*s0016-2-3*fits'))
     
-    #files += glob(os.path.join(datadir, f'*s0014-1-1*fits'))
-    #files += glob(os.path.join(datadir, f'*s0013-2-4*fits'))
+    files += glob(os.path.join(datadir, f'*s0040-1-4*fits'))
+    #files += glob(os.path.join(datadir, f'*s0015-2-4*fits'))
 
-    #files += glob(os.path.join(datadir, f'*s0007-2-1*fits'))
+    #files += glob(os.path.join(datadir, f'*s0015-1-1*fits'))
     #files += glob(os.path.join(datadir, f'*s0007-2-4*fits'))
     files.sort()
     
@@ -768,6 +769,20 @@ for ii, ifile in enumerate(files):
             data[:300, :800] = np.nan
         elif isec == 40 and icam == 4 and iccd == 4:
             data[:300, 1400:] = np.nan
+        elif isec == 41 and icam == 1 and iccd == 1:
+            data[50:300, :100] = np.nan
+        elif isec == 41 and icam == 1 and iccd == 2:
+            data[:200, 1700:1900] = np.nan
+        elif isec == 41 and icam == 2 and iccd == 3:
+            data[:300, :300] = np.nan
+        elif isec == 41 and icam == 2 and iccd == 4:
+            data[175:400, 1830:] = np.nan
+        elif isec == 41 and icam == 3 and iccd == 1:
+            data[:300, :400] = np.nan
+        elif isec == 41 and icam == 4 and iccd == 3:
+            data[200:400, :100] = np.nan
+        elif isec == 41 and icam == 4 and iccd == 4:
+            data[:100, 1400:] = np.nan
             
         # remove weird saturated columns that don't have obvious sources
         if isec == 26 and icam == 3 and iccd == 3:
@@ -819,6 +834,10 @@ for ii, ifile in enumerate(files):
             data -= 20
         if isec == 13 and icam == 1 and iccd in [1, 4]:
             data -= 30
+        if isec == 40 and icam == 1 and iccd == 3:
+            data[:200, 250:550] -= 40
+        if isec == 41 and icam == 1 and iccd == 4:
+            data[:200, 1600:1950] -= 40
         """
         if isec == 35 and icam == 2 and iccd == 1:
             data += 15
