@@ -245,9 +245,9 @@ for ifile in allfiles:
     if os.path.split(ifile)[1][0] == 't':
         fsec = int(os.path.split(ifile)[1].split('-')[1][1:])
         # decide if we want to use it
-        if ((fsec < 14) or (fsec > 26)) and hemisphere in ['both', 'south']:
+        if ((fsec < 14) or ((fsec > 26) and (fsec < 40)) and hemisphere in ['both', 'south']:
             files.append(ifile)
-        elif 13 < fsec < 27 and hemisphere in ['both', 'north']:
+        elif (((fsec > 13) and (fsec < 27)) or (fsec > 39)) and hemisphere in ['both', 'north']:
             files.append(ifile)
     else:
         if addkepler and hemisphere == 'both':
