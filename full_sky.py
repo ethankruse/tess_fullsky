@@ -24,7 +24,7 @@ figdir = os.path.join(os.path.split(__file__)[0], 'figs')
 cornerdir = os.path.join(os.path.split(__file__)[0], 'corners')
 
 # options are 'north', 'south', or 'both'
-hemisphere = 'north'
+hemisphere = 'both'
 # for full-sky Mollweide projections, do we want to use ecliptic coordinates
 # if False, uses celestial coordinates (ICRS, right ascension/declination)
 ecliptic_coords = True
@@ -106,7 +106,7 @@ vmax = 901.
 
 # do we need to create the empirical corner glow correction for a sector?
 makecorner = False
-cornersec = 41
+cornersec = 42
 
 # remove the corner glow from the final image
 remove_corner_glow = True
@@ -247,8 +247,10 @@ for ifile in allfiles:
         # decide if we want to use it
         if ((fsec < 14) or ((fsec > 26) and (fsec < 40))) and hemisphere in ['both', 'south']:
             files.append(ifile)
-        elif (((fsec > 13) and (fsec < 27)) or (fsec > 39)) and hemisphere in ['both', 'north']:
+        elif (((fsec > 13) and (fsec < 27)) or ((fsec > 39) and (fsec < 42))) and hemisphere in ['both', 'north']:
             files.append(ifile)
+        elif (fsec > 41) and hemisphere in ['both']:
+            files.apppend(ifile)   
     else:
         if addkepler and hemisphere == 'both':
             kepfiles.append(ifile)
@@ -280,12 +282,12 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s0041-1-3*fits'))
+    files = glob(os.path.join(datadir, f'*s0042-4*fits'))
     #files += glob(os.path.join(datadir, f'*s0041-2-4*fits'))
     #files = glob(os.path.join(datadir, f'*s0035-2-1*fits'))
     #files += glob(os.path.join(datadir, f'*s0016-2-3*fits'))
     
-    files += glob(os.path.join(datadir, f'*s0040-1-4*fits'))
+    #files += glob(os.path.join(datadir, f'*s0040-1-4*fits'))
     #files += glob(os.path.join(datadir, f'*s0015-2-4*fits'))
 
     #files += glob(os.path.join(datadir, f'*s0015-1-1*fits'))
