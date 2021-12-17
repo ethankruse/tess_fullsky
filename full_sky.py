@@ -283,12 +283,12 @@ if makegif:
 # anything we want to test
 if test:
     files = glob(os.path.join(datadir, f'*s0043-4*fits'))
-    #files += glob(os.path.join(datadir, f'*s0041-2-4*fits'))
+    #files += glob(os.path.join(datadir, f'*s0043-4-2*fits'))
     #files = glob(os.path.join(datadir, f'*s0035-2-1*fits'))
-    #files += glob(os.path.join(datadir, f'*s0016-2-3*fits'))
+    #files += glob(os.path.join(datadir, f'*s0032-1-3*fits'))
     
-    #files += glob(os.path.join(datadir, f'*s0040-1-4*fits'))
-    #files += glob(os.path.join(datadir, f'*s0015-2-4*fits'))
+    #files += glob(os.path.join(datadir, f'*s0033-1-[34]*fits'))
+    #files += glob(os.path.join(datadir, f'*s0006-1-4*fits'))
 
     #files += glob(os.path.join(datadir, f'*s0015-1-1*fits'))
     #files += glob(os.path.join(datadir, f'*s0007-2-4*fits'))
@@ -785,6 +785,16 @@ for ii, ifile in enumerate(files):
             data[200:400, :100] = np.nan
         elif isec == 41 and icam == 4 and iccd == 4:
             data[:100, 1400:] = np.nan
+        elif isec == 42 and icam == 3 and iccd == 3:
+            data[:150, :200] = np.nan
+        elif isec == 42 and icam == 4 and iccd == 4:
+            data[:1500, -1000:] = np.nan
+        elif isec == 43 and icam == 1 and iccd == 4:
+            data[:300, 1700:] = np.nan
+        elif isec == 43 and icam == 2 and iccd == 2:
+            data[1800:, :400] = np.nan
+        elif isec == 43 and icam == 3 and iccd == 1:
+            data[-1900:, :1100] = np.nan
             
         # remove weird saturated columns that don't have obvious sources
         if isec == 26 and icam == 3 and iccd == 3:
@@ -840,6 +850,40 @@ for ii, ifile in enumerate(files):
             data[:200, 250:550] -= 40
         if isec == 41 and icam == 1 and iccd == 4:
             data[:200, 1600:1950] -= 40
+        if isec == 42 and icam == 1 and iccd == 2:
+            data[:200, 1900:] -= 80
+        if isec == 42 and icam == 4 and iccd in [2, 3]:
+            data -= 25
+        if isec == 42 and icam == 4 and iccd in [1, 4]:
+            data += 15
+        if isec == 43 and icam == 3 and iccd in [1]:
+            data[:-1900, :1100] += 30
+        if isec == 43 and icam == 3 and iccd in [4]:
+            data += (np.ones_like(data) * np.linspace(0, 25, data.shape[0])).T
+        if isec == 43 and icam == 4 and iccd in [1]:
+            data += (np.ones_like(data) * np.linspace(10,-40, data.shape[0])).T
+            data += np.ones_like(data) * np.linspace(10,-10, data.shape[0])
+        if isec == 43 and icam == 4 and iccd in [4]:
+            data -= 30
+            data += np.ones_like(data) * np.linspace(-30, 0, data.shape[0])
+            data += (np.ones_like(data) * np.linspace(-15, 0, data.shape[0])).T
+        if isec == 43 and icam == 3 and iccd in [2]:
+            data += (np.ones_like(data) * np.linspace(0, -8, data.shape[0])).T
+        if isec == 43 and icam == 3 and iccd in [3]:
+            data += np.ones_like(data) * np.linspace(7, -25, data.shape[0])
+            data += (np.ones_like(data) * np.linspace(-20, -5, data.shape[0])).T
+        if isec == 43 and icam == 4 and iccd in [2]:
+            data -= 20
+            # top, bottom
+            data += np.ones_like(data) * np.linspace(-10, 0, data.shape[0])
+            # right, left
+            data += (np.ones_like(data) * np.linspace(0, -25, data.shape[0])).T
+        if isec == 43 and icam == 4 and iccd in [3]:
+            data -= 40
+            # bottom, top
+            data += np.ones_like(data) * np.linspace(5, -20, data.shape[0])
+            # left, right
+            data += (np.ones_like(data) * np.linspace(-40, -5, data.shape[0])).T
         """
         if isec == 35 and icam == 2 and iccd == 1:
             data += 15
