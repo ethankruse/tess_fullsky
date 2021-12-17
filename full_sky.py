@@ -106,12 +106,12 @@ vmax = 901.
 
 # do we need to create the empirical corner glow correction for a sector?
 makecorner = False
-cornersec = 42
+cornersec = 43
 
 # remove the corner glow from the final image
 remove_corner_glow = True
 # make a plot of the corner glow for every CCD to check how removal is working
-corner_glow_plot = False
+corner_glow_plot = True
 
 # manual adjustments to the strength of corner glow corrections
 adjfile = os.path.join(cornerdir, 'adjustments.txt')
@@ -120,9 +120,9 @@ adjfile = os.path.join(cornerdir, 'adjustments.txt')
 binning = True
 
 # flag indicating we're just testing things
-test = False
+test = True
 # create the output figure
-makefig = True
+makefig = False
 # the output figure in high or "full" resolution
 highres = True
 fullres = False
@@ -135,7 +135,7 @@ else:
     cc = ''
 
 # save the output figure
-savefig = True
+savefig = False
 # save every sector image for a gif in a subdirectory
 makegif = False
 if makegif:
@@ -282,7 +282,7 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s0042-4*fits'))
+    files = glob(os.path.join(datadir, f'*s0043-4*fits'))
     #files += glob(os.path.join(datadir, f'*s0041-2-4*fits'))
     #files = glob(os.path.join(datadir, f'*s0035-2-1*fits'))
     #files += glob(os.path.join(datadir, f'*s0016-2-3*fits'))
