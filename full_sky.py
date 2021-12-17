@@ -250,7 +250,7 @@ for ifile in allfiles:
         elif (((fsec > 13) and (fsec < 27)) or ((fsec > 39) and (fsec < 42))) and hemisphere in ['both', 'north']:
             files.append(ifile)
         elif (fsec > 41) and hemisphere in ['both']:
-            files.apppend(ifile)   
+            files.append(ifile)   
     else:
         if addkepler and hemisphere == 'both':
             kepfiles.append(ifile)
