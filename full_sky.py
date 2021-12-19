@@ -292,7 +292,7 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s0043-4-4*fits'))
+    files = glob(os.path.join(datadir, f'*s0021-1-1*fits'))
     #files += glob(os.path.join(datadir, f'*s0042-2-[34]*fits'))
     #files = glob(os.path.join(datadir, f'*s0035-2-1*fits'))
     #files += glob(os.path.join(datadir, f'*s0032-1-3*fits'))
@@ -955,7 +955,9 @@ for ii, ifile in enumerate(files):
                                     fontsize=sfsz, fontname='Carlito')
                 ssec = isec
             # for wraparounds:
-            if wrap and lon.max() > cenlon + 178 and lon.min() < cenlon - 178:                    
+            lmin = (((cenlon - 178) + 180) % 360) - 180
+            lmax = (((cenlon + 178) + 180) % 360) - 180
+            if wrap and (lon.max() > lmax) and (lon.min() < lmin):                      
                 # find the problem areas that wrap around in longitude
                 bad = ((np.abs(lon[:-1,:-1] - lon[:-1,1:]) > 355.)|
                        (np.abs(lon[:-1,:-1] - lon[1:,:-1]) > 355.)|
