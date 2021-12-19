@@ -13,7 +13,7 @@ from astropy.wcs import WCS, FITSFixedWarning
 import cartopy.crs as ccrs
 from truncate import truncate_colormap
 from clean import clean_corner
-from astropy.coordinates import SkyCoord, BarycentricTrueEcliptic
+from astropy.coordinates import SkyCoord, BarycentricTrueEcliptic, Galactic
 import warnings
 
 ##################################################################
@@ -27,7 +27,8 @@ cornerdir = os.path.join(os.path.split(__file__)[0], 'corners')
 hemisphere = 'both'
 # for full-sky Mollweide projections, do we want to use ecliptic coordinates
 # if False, uses celestial coordinates (ICRS, right ascension/declination)
-ecliptic_coords = True
+ecliptic_coords = False
+galactic_coords = True
 # make a Plate Caree image instead of Mollweide
 platecarree = False
 
@@ -57,6 +58,8 @@ if hemisphere == 'both':
                  os.path.join(os.path.split(__file__)[0], 'edges_north.txt')]
     if ecliptic_coords:
         fbase += '_ecliptic'
+    if galactic_coords:
+        fbase += '_galactic'
     if addkepler:
         fbase += '_kepler'
     #  title text in upper left
@@ -79,6 +82,7 @@ elif hemisphere == 'south':
         title = "NASA TESS's View\nof the Southern\nHemisphere"
     # turn off ecliptic coordinates since it doesn't matter
     ecliptic_coords = False
+    galactic_coords = False
     # for now, don't try to put Kepler/K2 on the hemisphere maps
     addkepler = False
 elif hemisphere == 'north':
@@ -95,6 +99,7 @@ elif hemisphere == 'north':
         title = "NASA TESS's View\nof the Northern\nHemisphere"
     # turn off ecliptic coordinates since it doesn't matter
     ecliptic_coords = False
+    galactic_coords = False
     # for now, don't try to put Kepler/K2 on the hemisphere maps
     addkepler = False
 else:
@@ -196,6 +201,9 @@ warnings.filterwarnings("ignore", category=FITSFixedWarning)
 
 if not test and not savefig:
     warnings.warn('Not testing but not saving any output.')
+    
+if ecliptic_coords and galactic_coords:
+    raise Exception("can't use both ecliptic and galactic coords.")
 
 cnorm = colors.LogNorm(vmin=vmin, vmax=vmax)
 if color == 'gray':
@@ -474,6 +482,11 @@ for ict, ifile in enumerate(kepfiles):
                 ecliptic = icrs.transform_to(BarycentricTrueEcliptic)
                 lon = ecliptic.lon.value * 1
                 lat = ecliptic.lat.value * 1
+            if galactic_coords:
+                icrs = SkyCoord(ra=lon, dec=lat, frame='icrs', unit='deg')
+                galactic = icrs.transform_to(Galactic)
+                lon = galactic.l.value * 1
+                lat = galactic.b.value * 1
         
             # lon must be between -180 and 180 instead of 0 to 360
             lon -= 180.
@@ -552,7 +565,12 @@ for ii, ifile in enumerate(files):
             ecliptic = icrs.transform_to(BarycentricTrueEcliptic)
             lon = ecliptic.lon.value * 1
             lat = ecliptic.lat.value * 1
-
+        if galactic_coords:
+            icrs = SkyCoord(ra=lon, dec=lat, frame='icrs', unit='deg')
+            galactic = icrs.transform_to(Galactic)
+            lon = galactic.l.value * 1
+            lat = galactic.b.value * 1
+            
         # lon must be between -180 and 180 instead of 0 to 360
         lon -= 180.
         # because in astronomy images, plots have east on the left,
