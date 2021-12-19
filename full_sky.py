@@ -43,6 +43,8 @@ if hemisphere == 'both':
     # coordinates at the center of the projection
     cenlon = 0.
     cenlat = 0.
+    if galactic_coords:
+        cenlon += 180
     # if the projection has a dividing line where we have to wrap data around
     wrap = True
     # set up our desired map projection
