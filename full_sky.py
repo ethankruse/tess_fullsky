@@ -497,9 +497,16 @@ for ict, ifile in enumerate(kepfiles):
             lon *= -1.
         
             # rebin from Kepler's 4 arcsec to 16 arcsec pixels, closer to TESS
-            data = rebin(data, (data.shape[0]//4, data.shape[1]//4))
-            lat = lat[::4, ::4]
-            lon = lon[::4, ::4]
+            if binning:
+                bb = 8
+                data = data[:, :-4]
+                lon = lon[:,:-4]
+                lat = lat[:,:-4]
+            else:
+                bb = 4
+            data = rebin(data, (data.shape[0]//bb, data.shape[1]//bb))
+            lat = lat[::bb, ::bb]
+            lon = lon[::bb, ::bb]
             
             # make adjustments to match the TESS intersections and each other
             # campaigns 10 and 11 were split into two pieces and these ints
@@ -519,11 +526,12 @@ for ict, ifile in enumerate(kepfiles):
                 # for wraparounds:
                 lmin = (((cenlon - 178) + 180) % 360) - 180
                 lmax = (((cenlon + 178) + 180) % 360) - 180
+                wlon = ((lon - cenlon + 180) % 360) - 180
                 if wrap and (lon.max() > lmax) and (lon.min() < lmin):                    
                     # find the problem areas that wrap around in longitude
-                    bad = ((np.abs(lon[:-1,:-1] - lon[:-1,1:]) > 355.)|
-                           (np.abs(lon[:-1,:-1] - lon[1:,:-1]) > 355.)|
-                           (np.abs(lon[:-1,:-1] - lon[1:,1:]) > 355.))
+                    bad = ((np.abs(wlon[:-1,:-1] - wlon[:-1,1:]) > 355.)|
+                           (np.abs(wlon[:-1,:-1] - wlon[1:,:-1]) > 355.)|
+                           (np.abs(wlon[:-1,:-1] - wlon[1:,1:]) > 355.))
                     # mask them and just don't plot these pixels
                     maskeddata = np.ma.masked_where(bad, data)
                     plt.pcolormesh(lon, lat, maskeddata, norm=cnorm, alpha=1,
@@ -942,8 +950,7 @@ for ii, ifile in enumerate(files):
 
         if makefig:
             if binning:
-                shape = (data.shape[0]//2, 2, data.shape[1]//2, 2)
-                data = data.reshape(shape).mean(-1).mean(1)
+                data = rebin(data, (data.shape[0]//2, data.shape[1]//2))
                 lon = lon[::2, ::2]
                 lat = lat[::2, ::2]
             if ii == 0:
@@ -957,11 +964,12 @@ for ii, ifile in enumerate(files):
             # for wraparounds:
             lmin = (((cenlon - 178) + 180) % 360) - 180
             lmax = (((cenlon + 178) + 180) % 360) - 180
+            wlon = ((lon - cenlon + 180) % 360) - 180
             if wrap and (lon.max() > lmax) and (lon.min() < lmin):                      
                 # find the problem areas that wrap around in longitude
-                bad = ((np.abs(lon[:-1,:-1] - lon[:-1,1:]) > 355.)|
-                       (np.abs(lon[:-1,:-1] - lon[1:,:-1]) > 355.)|
-                       (np.abs(lon[:-1,:-1] - lon[1:,1:]) > 355.))
+                bad = ((np.abs(wlon[:-1,:-1] - wlon[:-1,1:]) > 355.)|
+                       (np.abs(wlon[:-1,:-1] - wlon[1:,:-1]) > 355.)|
+                       (np.abs(wlon[:-1,:-1] - wlon[1:,1:]) > 355.))
                 # mask them and just don't plot these pixels
                 maskeddata = np.ma.masked_where(bad, data)
                 plt.pcolormesh(lon, lat, maskeddata, norm=cnorm, alpha=1,
