@@ -282,13 +282,13 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s0043-4*fits'))
-    #files += glob(os.path.join(datadir, f'*s0043-4-2*fits'))
+    files = glob(os.path.join(datadir, f'*s0042-1*fits'))
+    files += glob(os.path.join(datadir, f'*s0042-2-[34]*fits'))
     #files = glob(os.path.join(datadir, f'*s0035-2-1*fits'))
     #files += glob(os.path.join(datadir, f'*s0032-1-3*fits'))
     
-    #files += glob(os.path.join(datadir, f'*s0033-1-[34]*fits'))
-    #files += glob(os.path.join(datadir, f'*s0006-1-4*fits'))
+    files += glob(os.path.join(datadir, f'*s002[98]-1-[34]*fits'))
+    #files += glob(os.path.join(datadir, f'*s001[89]-1-[34]*fits'))
 
     #files += glob(os.path.join(datadir, f'*s0015-1-1*fits'))
     #files += glob(os.path.join(datadir, f'*s0007-2-4*fits'))
@@ -793,8 +793,6 @@ for ii, ifile in enumerate(files):
             data[:300, 1700:] = np.nan
         elif isec == 43 and icam == 2 and iccd == 2:
             data[1800:, :400] = np.nan
-        elif isec == 43 and icam == 3 and iccd == 1:
-            data[-1900:, :1100] = np.nan
             
         # remove weird saturated columns that don't have obvious sources
         if isec == 26 and icam == 3 and iccd == 3:
@@ -856,26 +854,50 @@ for ii, ifile in enumerate(files):
             data -= 25
         if isec == 42 and icam == 4 and iccd in [1, 4]:
             data += 15
+        if isec == 42 and icam == 1 and iccd in [1, 2, 3]:
+            data -= 30
+        if isec == 42 and icam == 1 and iccd in [4]:
+            # top, bottom
+            data += np.ones_like(data) * np.linspace(-15, 5, data.shape[0])
+            # right, left
+            data += (np.ones_like(data) * np.linspace(20, -5, data.shape[0])).T
+            
+            
         if isec == 43 and icam == 3 and iccd in [1]:
-            data[:-1900, :1100] += 30
+            # right, left
+            data += (np.ones_like(data) * np.linspace(0, -15, data.shape[0])).T
+            # top, bottom
+            data += np.ones_like(data) * np.linspace(30, 0, data.shape[0])
+                
         if isec == 43 and icam == 3 and iccd in [4]:
-            data += (np.ones_like(data) * np.linspace(0, 25, data.shape[0])).T
+            # left, right
+            data += (np.ones_like(data) * np.linspace(-10, -5, data.shape[0])).T
+            # bottom, top
+            data += np.ones_like(data) * np.linspace(-15, 20, data.shape[0])
         if isec == 43 and icam == 4 and iccd in [1]:
-            data += (np.ones_like(data) * np.linspace(10,-40, data.shape[0])).T
-            data += np.ones_like(data) * np.linspace(10,-10, data.shape[0])
+            # right, left
+            data += (np.ones_like(data) * np.linspace(-5,-50, data.shape[0])).T
+            # top, bottom
+            data += np.ones_like(data) * np.linspace(20,-15, data.shape[0])
+            
         if isec == 43 and icam == 4 and iccd in [4]:
             data -= 30
             data += np.ones_like(data) * np.linspace(-30, 0, data.shape[0])
             data += (np.ones_like(data) * np.linspace(-15, 0, data.shape[0])).T
         if isec == 43 and icam == 3 and iccd in [2]:
+            # right, left
             data += (np.ones_like(data) * np.linspace(0, -8, data.shape[0])).T
+            # top, bottom
+            data += np.ones_like(data) * np.linspace(0, 5, data.shape[0])
         if isec == 43 and icam == 3 and iccd in [3]:
-            data += np.ones_like(data) * np.linspace(7, -25, data.shape[0])
-            data += (np.ones_like(data) * np.linspace(-20, -5, data.shape[0])).T
+            # bottom, top 
+            data += np.ones_like(data) * np.linspace(7, -20, data.shape[0])
+            # left, right 
+            data += (np.ones_like(data) * np.linspace(-15, -5, data.shape[0])).T
         if isec == 43 and icam == 4 and iccd in [2]:
             data -= 20
             # top, bottom
-            data += np.ones_like(data) * np.linspace(-10, 0, data.shape[0])
+            data += np.ones_like(data) * np.linspace(-10, 5, data.shape[0])
             # right, left
             data += (np.ones_like(data) * np.linspace(0, -25, data.shape[0])).T
         if isec == 43 and icam == 4 and iccd in [3]:
