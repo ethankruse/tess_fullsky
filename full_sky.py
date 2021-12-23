@@ -27,8 +27,8 @@ cornerdir = os.path.join(os.path.split(__file__)[0], 'corners')
 hemisphere = 'both'
 # for full-sky Mollweide projections, do we want to use ecliptic coordinates
 # if False, uses celestial coordinates (ICRS, right ascension/declination)
-ecliptic_coords = False
-galactic_coords = True
+ecliptic_coords = True
+galactic_coords = False
 # make a Plate Caree image instead of Mollweide
 platecarree = False
 
@@ -113,7 +113,7 @@ vmax = 901.
 
 # do we need to create the empirical corner glow correction for a sector?
 makecorner = False
-cornersec = 43
+cornersec = 44
 
 # remove the corner glow from the final image
 remove_corner_glow = True
@@ -292,13 +292,20 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s0021-1-1*fits'))
-    #files += glob(os.path.join(datadir, f'*s0042-2-[34]*fits'))
+    files = glob(os.path.join(datadir, f'*s004[34]*fits'))
+    #files += glob(os.path.join(datadir, f'*s0043-3-1*fits'))
+    #files += glob(os.path.join(datadir, f'*s0043-4-3*fits'))
     #files = glob(os.path.join(datadir, f'*s0035-2-1*fits'))
+    #files += glob(os.path.join(datadir, f'*s0018-1-[34]*fits'))
     #files += glob(os.path.join(datadir, f'*s0032-1-3*fits'))
+    #files += glob(os.path.join(datadir, f'*s0033-1-3*fits'))
+    #files += glob(os.path.join(datadir, f'*s0034-1-4*fits'))
     
-    #files += glob(os.path.join(datadir, f'*s002[98]-1-[34]*fits'))
-    #files += glob(os.path.join(datadir, f'*s001[89]-1-[34]*fits'))
+    
+    files += glob(os.path.join(datadir, f'*s003[1234]-1-[34]*fits'))
+    files += glob(os.path.join(datadir, f'*s002[01]-1-[34]*fits'))
+    files += glob(os.path.join(datadir, f'*s001[89]-1-[34]*fits'))
+
 
     #files += glob(os.path.join(datadir, f'*s0015-1-1*fits'))
     #files += glob(os.path.join(datadir, f'*s0007-2-4*fits'))
@@ -823,6 +830,26 @@ for ii, ifile in enumerate(files):
             data[:300, 1700:] = np.nan
         elif isec == 43 and icam == 2 and iccd == 2:
             data[1800:, :400] = np.nan
+        elif isec == 44 and icam == 1 and iccd == 1:
+            data[:300, 200:800] = np.nan
+        elif isec == 44 and icam == 2 and iccd == 1:
+            data[600:1100, :400] = np.nan
+        elif isec == 44 and icam == 2 and iccd == 4:
+            data[:350, 1400:] = np.nan
+        elif isec == 44 and icam == 3 and iccd == 1:
+            data[:400, :200] = np.nan
+        elif isec == 44 and icam == 3 and iccd == 2:
+            data[300:1000, 1600:] = np.nan
+        elif isec == 44 and icam == 3 and iccd == 3:
+            data[200:400, :200] = np.nan
+        elif isec == 44 and icam == 3 and iccd == 4:
+            data[100:300, 1900:] = np.nan
+        elif isec == 44 and icam == 4 and iccd == 2:
+            data[:500, 1600:] = np.nan
+        elif isec == 44 and icam == 4 and iccd == 3:
+            data[:400, :700] = np.nan
+        elif isec == 44 and icam == 4 and iccd == 4:
+            data[:200, 1400:1800] = np.nan
             
         # remove weird saturated columns that don't have obvious sources
         if isec == 26 and icam == 3 and iccd == 3:
@@ -897,7 +924,7 @@ for ii, ifile in enumerate(files):
             # right, left
             data += (np.ones_like(data) * np.linspace(0, -15, data.shape[0])).T
             # top, bottom
-            data += np.ones_like(data) * np.linspace(30, 0, data.shape[0])
+            data += np.ones_like(data) * np.linspace(40, 0, data.shape[0])
                 
         if isec == 43 and icam == 3 and iccd in [4]:
             # left, right
@@ -936,14 +963,91 @@ for ii, ifile in enumerate(files):
             data += np.ones_like(data) * np.linspace(5, -20, data.shape[0])
             # left, right
             data += (np.ones_like(data) * np.linspace(-40, -5, data.shape[0])).T
-        """
-        if isec == 35 and icam == 2 and iccd == 1:
-            data += 15
-        if isec == 35 and icam == 3 and iccd == 2:
-            data += 15
-        if isec == 35 and icam == 3 and iccd == 3:
-            data += 15
-        """
+
+        if isec == 44 and icam == 1 and iccd == 1:
+            # left, right
+            data += (np.ones_like(data) * np.linspace(5, -25, data.shape[0])).T
+            # bottom, top
+            data += np.ones_like(data) * np.linspace(15, -10, data.shape[0])
+        if isec == 44 and icam == 1 and iccd == 2:
+            # left, right
+            data += (np.ones_like(data) * np.linspace(0, -15, data.shape[0])).T
+            # bottom, top
+            data += np.ones_like(data) * np.linspace(-10, 30, data.shape[0])
+        if isec == 44 and icam == 1 and iccd == 3:
+            # top, bottom
+            data += np.ones_like(data) * np.linspace(20, -30, data.shape[0])
+            # right, left
+            data += (np.ones_like(data) * np.linspace(0, -5, data.shape[0])).T
+        if isec == 44 and icam == 1 and iccd == 4:
+            # right, left
+            data += (np.ones_like(data) * np.linspace(-5, -10, data.shape[0])).T
+            # top, bottom
+            data += np.ones_like(data) * np.linspace(-25, 0, data.shape[0])
+            
+        if isec == 44 and icam == 2 and iccd == 1:
+            # left, right
+            data += (np.ones_like(data) * np.linspace(-15, -10, data.shape[0])).T
+            # bottom, top
+            data += np.ones_like(data) * np.linspace(19, 0, data.shape[0])
+        if isec == 44 and icam == 2 and iccd == 2:
+            # left, right
+            data += (np.ones_like(data) * np.linspace(-5, 0, data.shape[0])).T
+            # bottom, top
+            data += np.ones_like(data) * np.linspace(-10, 25, data.shape[0])
+        if isec == 44 and icam == 2 and iccd == 3:
+            # top, bottom
+            data += np.ones_like(data) * np.linspace(30, -10, data.shape[0])
+            # right, left
+            data += (np.ones_like(data) * np.linspace(-5, 0, data.shape[0])).T
+        if isec == 44 and icam == 2 and iccd == 4:
+            # right, left
+            data += (np.ones_like(data) * np.linspace(0, -10, data.shape[0])).T
+            # top, bottom
+            data += np.ones_like(data) * np.linspace(0, 26, data.shape[0])
+        
+        if isec == 44 and icam == 3 and iccd == 1:
+            # right, left
+            data += (np.ones_like(data) * np.linspace(0, -15, data.shape[0])).T
+            # top, bottom
+            data += np.ones_like(data) * np.linspace(30, 0, data.shape[0])
+        if isec == 44 and icam == 3 and iccd == 2:
+            # top, bottom
+            data += np.ones_like(data) * np.linspace(-15, 0, data.shape[0])
+            # right, left
+            data += (np.ones_like(data) * np.linspace(5, 5, data.shape[0])).T
+        if isec == 44 and icam == 3 and iccd == 3:
+            # bottom, top 
+            data += np.ones_like(data) * np.linspace(0, -20, data.shape[0])
+            # left, right 
+            data += (np.ones_like(data) * np.linspace(-5, 0, data.shape[0])).T
+        if isec == 44 and icam == 3 and iccd == 4:
+            # left, right
+            data += (np.ones_like(data) * np.linspace(-10, -5, data.shape[0])).T
+            # bottom, top
+            data += np.ones_like(data) * np.linspace(-10, 20, data.shape[0])
+            
+        if isec == 44 and icam == 4 and iccd == 1:
+            # right, left
+            data += (np.ones_like(data) * np.linspace(0, -20, data.shape[0])).T
+            # top, bottom
+            data += np.ones_like(data) * np.linspace(0, -30, data.shape[0])
+        if isec == 44 and icam == 4 and iccd == 2:
+            # top, bottom
+            data += np.ones_like(data) * np.linspace(-30, 10, data.shape[0])
+            # right, left
+            data += (np.ones_like(data) * np.linspace(0, -20, data.shape[0])).T
+        if isec == 44 and icam == 4 and iccd == 3:
+            # bottom, top 
+            data += np.ones_like(data) * np.linspace(-10, -50, data.shape[0])
+            # left, right 
+            data += (np.ones_like(data) * np.linspace(-10, 0, data.shape[0])).T
+        if isec == 44 and icam == 4 and iccd == 4:
+            # left, right
+            data += (np.ones_like(data) * np.linspace(-20, 0, data.shape[0])).T
+            # bottom, top
+            data += np.ones_like(data) * np.linspace(-60, 0, data.shape[0])
+                
         if corner_glow_plot:
             plt.figure()
             plt.imshow(data, norm=cnorm, cmap=cmap)
