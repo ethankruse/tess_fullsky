@@ -56,7 +56,7 @@ if hemisphere == 'both':
         # what the output file name base should be
         fbase = 'mollweide'
     # the coordinates of the corners of the CCDs
-    edgefiles = [os.path.join(os.path.split(__file__)[0], 'edges_south.txt'), 
+    edgefiles = [os.path.join(os.path.split(__file__)[0], 'edges_south.txt'),
                  os.path.join(os.path.split(__file__)[0], 'edges_north.txt')]
     if ecliptic_coords:
         fbase += '_ecliptic'
@@ -113,7 +113,7 @@ vmax = 901.
 
 # do we need to create the empirical corner glow correction for a sector?
 makecorner = False
-cornersec = 44
+cornersec = 45
 
 # remove the corner glow from the final image
 remove_corner_glow = True
@@ -173,27 +173,27 @@ if notext:
 secstarts = {1: 'Jul 2018', 2: 'Aug 2018', 3: 'Sep 2018', 4: 'Oct 2018',
              5: 'Nov 2018', 6: 'Dec 2018', 7: 'Jan 2019', 8: 'Feb 2019',
              9: 'Feb 2019', 10: 'Mar 2019', 11: 'Apr 2019', 12: 'May 2019',
-             13: 'Jun 2019', 14: 'Jul 2019', 15: 'Aug 2019', 16: 'Sep 2019', 
+             13: 'Jun 2019', 14: 'Jul 2019', 15: 'Aug 2019', 16: 'Sep 2019',
              17: 'Oct 2019', 18: 'Nov 2019', 19: 'Nov 2019', 20: 'Dec 2019',
-             21: 'Jan 2020', 22: 'Feb 2020', 23: 'Mar 2020', 24: 'Apr 2020', 
+             21: 'Jan 2020', 22: 'Feb 2020', 23: 'Mar 2020', 24: 'Apr 2020',
              25: 'May 2020', 26: 'Jun 2020', 27: 'Jul 2020', 28: 'Jul 2020',
              29: 'Aug 2020', 30: 'Sep 2020', 31: 'Oct 2020', 32: 'Nov 2020',
-             33: 'Dec 2020', 34: 'Jan 2021', 35: 'Feb 2021', 36: 'Mar 2021', 
+             33: 'Dec 2020', 34: 'Jan 2021', 35: 'Feb 2021', 36: 'Mar 2021',
              37: 'Apr 2021', 38: 'Apr 2021', 39: 'May 2021', 40: 'Jun 2021',
-             41: 'Jul 2021', 42: 'Aug 2021', 43: 'Sep 2021', 44: 'Oct 2021', 
+             41: 'Jul 2021', 42: 'Aug 2021', 43: 'Sep 2021', 44: 'Oct 2021',
              45: 'Nov 2021', 46: 'Dec 2021', 47: 'Dec 2021', 48: 'Jan 2022',
              49: 'Feb 2022', 50: 'Mar 2022', 51: 'Apr 2022', 52: 'May 2022'}
 secends = {1: 'Aug 2018', 2: 'Sep 2018', 3: 'Oct 2018', 4: 'Nov 2018',
            5: 'Dec 2018', 6: 'Jan 2019', 7: 'Feb 2019', 8: 'Feb 2019',
            9: 'Mar 2019', 10: 'Apr 2019', 11: 'May 2019', 12: 'Jun 2019',
-           13: 'Jul 2019', 14: 'Aug 2019', 15: 'Sep 2019', 16: 'Oct 2019', 
+           13: 'Jul 2019', 14: 'Aug 2019', 15: 'Sep 2019', 16: 'Oct 2019',
            17: 'Nov 2019', 18: 'Nov 2019', 19: 'Dec 2019', 20: 'Jan 2020',
-           21: 'Feb 2020', 22: 'Mar 2020', 23: 'Apr 2020', 24: 'May 2020', 
+           21: 'Feb 2020', 22: 'Mar 2020', 23: 'Apr 2020', 24: 'May 2020',
            25: 'Jun 2020', 26: 'Jul 2020', 27: 'Jul 2020', 28: 'Aug 2020',
            29: 'Sep 2020', 30: 'Oct 2020', 31: 'Nov 2020', 32: 'Dec 2020',
-           33: 'Jan 2021', 34: 'Feb 2021', 35: 'Mar 2021', 36: 'Apr 2021', 
+           33: 'Jan 2021', 34: 'Feb 2021', 35: 'Mar 2021', 36: 'Apr 2021',
            37: 'Apr 2021', 38: 'May 2021', 39: 'Jun 2021', 40: 'Jul 2021',
-           41: 'Aug 2021', 42: 'Sep 2021', 43: 'Oct 2021', 44: 'Nov 2021', 
+           41: 'Aug 2021', 42: 'Sep 2021', 43: 'Oct 2021', 44: 'Nov 2021',
            45: 'Dec 2021', 46: 'Dec 2021', 47: 'Jan 2022', 48: 'Feb 2022',
            49: 'Mar 2022', 50: 'Apr 2022', 51: 'May 2022', 52: 'Jun 2022'}
 
@@ -203,13 +203,13 @@ warnings.filterwarnings("ignore", category=FITSFixedWarning)
 
 if not test and not savefig:
     warnings.warn('Not testing but not saving any output.')
-    
+
 if ecliptic_coords and galactic_coords:
     raise Exception("can't use both ecliptic and galactic coords.")
 
 cnorm = colors.LogNorm(vmin=vmin, vmax=vmax)
 if color == 'gray':
-    # set up our custom colormap, which is a subset of the matplotlib map 'gray'.
+    # set up our custom colormap, which is a subset of the mpl map 'gray'.
     # we use truncate_colormap() to remove the blackest part of the map
     # so that even the dark areas show up against a pure black background.
     cmap = 'gray'
@@ -232,7 +232,7 @@ with open(download, 'r') as ff:
         fname = os.path.join(datadir, line.split()[5])
         if not os.path.exists(fname):
             subprocess.run(line, shell=True, cwd=datadir)
-            
+
 if addkepler:
     download2 = os.path.join(datadir, 'kepler_k2.sh')
     with open(download2, 'r') as ff:
@@ -255,12 +255,15 @@ for ifile in allfiles:
     if os.path.split(ifile)[1][0] == 't':
         fsec = int(os.path.split(ifile)[1].split('-')[1][1:])
         # decide if we want to use it
-        if ((fsec < 14) or ((fsec > 26) and (fsec < 40))) and hemisphere in ['both', 'south']:
+        if (((fsec < 14) or ((fsec > 26) and (fsec < 40))) and
+                hemisphere in ['both', 'south']):
             files.append(ifile)
-        elif (((fsec > 13) and (fsec < 27)) or ((fsec > 39) and (fsec < 42))) and hemisphere in ['both', 'north']:
+        elif ((((fsec > 13) and (fsec < 27)) or
+               ((fsec > 39) and (fsec < 42))) and
+              hemisphere in ['both', 'north']):
             files.append(ifile)
         elif (fsec > 41) and hemisphere in ['both']:
-            files.append(ifile)   
+            files.append(ifile)
     else:
         if addkepler and hemisphere == 'both':
             kepfiles.append(ifile)
@@ -292,29 +295,23 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s004[34]*fits'))
-    #files += glob(os.path.join(datadir, f'*s0043-3-1*fits'))
-    #files += glob(os.path.join(datadir, f'*s0043-4-3*fits'))
-    #files = glob(os.path.join(datadir, f'*s0035-2-1*fits'))
-    #files += glob(os.path.join(datadir, f'*s0018-1-[34]*fits'))
-    #files += glob(os.path.join(datadir, f'*s0032-1-3*fits'))
-    #files += glob(os.path.join(datadir, f'*s0033-1-3*fits'))
-    #files += glob(os.path.join(datadir, f'*s0034-1-4*fits'))
-    
-    
-    files += glob(os.path.join(datadir, f'*s003[1234]-1-[34]*fits'))
-    files += glob(os.path.join(datadir, f'*s002[01]-1-[34]*fits'))
-    files += glob(os.path.join(datadir, f'*s001[89]-1-[34]*fits'))
+    files = glob(os.path.join(datadir, f'*s0045-1*fits'))
+    files += glob(os.path.join(datadir, f'*s0045-2-[34]*fits'))
+    files += glob(os.path.join(datadir, f'*s0044-[23]*fits'))
 
+    files += glob(os.path.join(datadir, f'*s0020-1-3*fits'))
+    files += glob(os.path.join(datadir, f'*s0019-1-[34]*fits'))
+    files += glob(os.path.join(datadir, f'*s0033-1-4*fits'))
+    files += glob(os.path.join(datadir, f'*s0032-1-[34]*fits'))
 
-    #files += glob(os.path.join(datadir, f'*s0015-1-1*fits'))
-    #files += glob(os.path.join(datadir, f'*s0007-2-4*fits'))
+    # files += glob(os.path.join(datadir, f'*s003[23456]-1-[34]*fits'))
+    # files += glob(os.path.join(datadir, f'*s002[012]-1-[34]*fits'))
+    # files += glob(os.path.join(datadir, f'*s0019-1-[34]*fits'))
+
     files.sort()
-    
-    
+
     kepfiles = []
-    #kepfiles = glob(os.path.join(datadir, f'k*c08*fits'))
-    #kepfiles += glob(os.path.join(datadir, f'k*c13*fits'))
+    # kepfiles = glob(os.path.join(datadir, f'k*c08*fits'))
     kepfiles.sort()
 
 
@@ -405,6 +402,8 @@ else:
 # for creating the empirical corner models
 xxs, yys, dats, ccds = [], [], [], []
 
+# the data coordinates are lat/lon in a grid
+data_tr = ccrs.PlateCarree()
 
 # create the figure
 if makefig:
@@ -420,8 +419,6 @@ if makefig:
     # set transparency
     if transparent:
         ax.background_patch.set_alpha(0)
-    # the data coordinates are lat/lon in a grid
-    data_tr = ccrs.PlateCarree()
     # load the edges of all the outer CCDs and invisibly plot them
     # so that after just 1 sector, the plot isn't artificially
     # zoomed to just that one sector.
@@ -430,10 +427,6 @@ if makefig:
         if not test:
             plt.scatter(elon, elat, c='w', alpha=0.01, zorder=-5,
                         marker='.', s=1, transform=data_tr)
-        else:
-            pass
-            #plt.scatter(elon, elat, c='r', alpha=1, zorder=5,
-            #            s=20, transform=data_tr)
 
     # add the labels
     plt.text(0.02, 0.02, credit, transform=fig.transFigure,
@@ -442,7 +435,7 @@ if makefig:
     plt.text(0.02, 0.98, title, transform=fig.transFigure,
              ha='left', va='top', multialignment='left',
              fontsize=tfsz, fontname='Carlito')
-    
+
 
 def rebin(arr, new_shape):
     """Rebin 2D array arr to shape new_shape by averaging."""
@@ -452,7 +445,7 @@ def rebin(arr, new_shape):
 
 
 for ict, ifile in enumerate(kepfiles):
-    now = datetime.now().strftime("%d.%m.%Y %H:%M:%S") 
+    now = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
     print(f'{now}. Processing Kepler/K2 image {ict+1} of {len(kepfiles)}.')
     with fits.open(ifile) as ffi:
         if 'campaign' in ffi[0].header:
@@ -465,26 +458,27 @@ for ict, ifile in enumerate(kepfiles):
             data = ffi[ii].data * 1
             # convert from max Kepler counts to max TESS counts
             data *= 0.6
-            
+
             # get the coordinates of every data point in CCD coordinates
             xinds = np.arange(-0.5, data.shape[0]-0.4)
             yinds = np.arange(-0.5, data.shape[1]-0.4)
             mesh = np.meshgrid(xinds, yinds, indexing='ij')
-            
+
             # transofrm to actual sky coordinates
-            lon, lat = wcs.all_pix2world(mesh[1].flatten(), mesh[0].flatten(), 0)
+            lon, lat = wcs.all_pix2world(mesh[1].flatten(),
+                                         mesh[0].flatten(), 0)
             lon = lon.reshape(mesh[0].shape)
             lat = lat.reshape(mesh[1].shape)
-            
+
             # detect bad modules
-            if (lon[0,0] == 0.5) and (lat[0,0] == 0.5):
+            if (lon[0, 0] == 0.5) and (lat[0, 0] == 0.5):
                 continue
-            
+
             # chop out unexposed rows/columns
             data = data[20:1044, 12:1112]
             lon = lon[20:1045, 12:1113]
             lat = lat[20:1045, 12:1113]
-        
+
             # transform to ecliptic coordinates if desired
             if ecliptic_coords:
                 icrs = SkyCoord(ra=lon, dec=lat, frame='icrs', unit='deg')
@@ -496,25 +490,25 @@ for ict, ifile in enumerate(kepfiles):
                 galactic = icrs.transform_to(Galactic)
                 lon = galactic.l.value * 1
                 lat = galactic.b.value * 1
-        
+
             # lon must be between -180 and 180 instead of 0 to 360
             lon -= 180.
             # because in astronomy images, plots have east on the left,
             # switch east and west
             lon *= -1.
-        
+
             # rebin from Kepler's 4 arcsec to 16 arcsec pixels, closer to TESS
             if binning:
                 bb = 8
                 data = data[:, :-4]
-                lon = lon[:,:-4]
-                lat = lat[:,:-4]
+                lon = lon[:, :-4]
+                lat = lat[:, :-4]
             else:
                 bb = 4
             data = rebin(data, (data.shape[0]//bb, data.shape[1]//bb))
             lat = lat[::bb, ::bb]
             lon = lon[::bb, ::bb]
-            
+
             # make adjustments to match the TESS intersections and each other
             # campaigns 10 and 11 were split into two pieces and these ints
             # work (111/112 and 101/102)
@@ -528,17 +522,17 @@ for ict, ifile in enumerate(kepfiles):
                 data -= 40
             elif camp in [3, 12]:
                 data -= 50.
-            
+
             if makefig:
                 # for wraparounds:
                 lmin = (((cenlon - 178) + 180) % 360) - 180
                 lmax = (((cenlon + 178) + 180) % 360) - 180
                 wlon = ((lon - cenlon + 180) % 360) - 180
-                if wrap and (lon.max() > lmax) and (lon.min() < lmin):                    
+                if wrap and (lon.max() > lmax) and (lon.min() < lmin):
                     # find the problem areas that wrap around in longitude
-                    bad = ((np.abs(wlon[:-1,:-1] - wlon[:-1,1:]) > 355.)|
-                           (np.abs(wlon[:-1,:-1] - wlon[1:,:-1]) > 355.)|
-                           (np.abs(wlon[:-1,:-1] - wlon[1:,1:]) > 355.))
+                    bad = ((np.abs(wlon[:-1, :-1] - wlon[:-1, 1:]) > 355.) |
+                           (np.abs(wlon[:-1, :-1] - wlon[1:, :-1]) > 355.) |
+                           (np.abs(wlon[:-1, :-1] - wlon[1:, 1:]) > 355.))
                     # mask them and just don't plot these pixels
                     maskeddata = np.ma.masked_where(bad, data)
                     plt.pcolormesh(lon, lat, maskeddata, norm=cnorm, alpha=1,
@@ -547,7 +541,7 @@ for ict, ifile in enumerate(kepfiles):
                     # plot the actual image from this CCD
                     plt.pcolormesh(lon, lat, data, norm=cnorm, alpha=1,
                                    transform=data_tr, cmap=cmap)
-                    
+
 # save the plot after each sector for the gif
 if makegif and savefig and makefig and len(kepfiles) > 0:
     if transparent:
@@ -577,7 +571,7 @@ for ii, ifile in enumerate(files):
         data = data[:2048, 44:2092]
         lon = lon[:2049, 44:2093]
         lat = lat[:2049, 44:2093]
-        
+
         # transform to ecliptic coordinates if desired
         if ecliptic_coords:
             icrs = SkyCoord(ra=lon, dec=lat, frame='icrs', unit='deg')
@@ -589,7 +583,7 @@ for ii, ifile in enumerate(files):
             galactic = icrs.transform_to(Galactic)
             lon = galactic.l.value * 1
             lat = galactic.b.value * 1
-            
+
         # lon must be between -180 and 180 instead of 0 to 360
         lon -= 180.
         # because in astronomy images, plots have east on the left,
@@ -600,7 +594,7 @@ for ii, ifile in enumerate(files):
         icam = ff[1].header['camera']
         iccd = ff[1].header['ccd']
         isec = int(ifile.split('-s0')[1][:3])
-        now = datetime.now().strftime("%d.%m.%Y %H:%M:%S") 
+        now = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
         print(f'{now}. Processing image {ii+1} of {len(files)}: Sector {isec} '
               f'Camera {icam} CCD {iccd}')
 
@@ -621,7 +615,6 @@ for ii, ifile in enumerate(files):
                 data = clean_corner(data, cornerdir, adjustments,
                                     cleanplot=corner_glow_plot, ccd=iccd,
                                     sec=isec, cam=icam)
-                
 
         # some special processing to avoid problem areas.
         # these are all in overlap zones, so removing contaminated chunks
@@ -692,15 +685,15 @@ for ii, ifile in enumerate(files):
         elif isec == 13 and icam == 2 and iccd == 1:
             data[:100, 500:665] = np.nan
         elif isec == 11 and icam == 2 and iccd == 1:
-            data[:150, 300:665] = np.nan        
+            data[:150, 300:665] = np.nan
         elif isec == 10 and icam == 2 and iccd == 1:
-            data[:250, 100:350] = np.nan 
+            data[:250, 100:350] = np.nan
         elif isec == 9 and icam == 2 and iccd == 1:
-            data[:100, :100] = np.nan 
+            data[:100, :100] = np.nan
         elif isec == 9 and icam == 3 and iccd == 2:
-            data[300:700, 1750:] = np.nan 
+            data[300:700, 1750:] = np.nan
         elif isec == 8 and icam == 3 and iccd == 2:
-            data[:100, 1700:1950] = np.nan 
+            data[:100, 1700:1950] = np.nan
         elif isec == 31 and icam == 1 and iccd == 1:
             data[50:300, 150:400] = np.nan
         elif isec == 31 and icam == 1 and iccd == 2:
@@ -850,7 +843,39 @@ for ii, ifile in enumerate(files):
             data[:400, :700] = np.nan
         elif isec == 44 and icam == 4 and iccd == 4:
             data[:200, 1400:1800] = np.nan
-            
+        elif isec == 45 and icam == 1 and iccd == 1:
+            data[:200, :300] = np.nan
+        elif isec == 45 and icam == 1 and iccd == 2:
+            #data[:150, 1900:] = np.nan
+            data[:1100, 1000:] = np.nan
+        elif isec == 45 and icam == 1 and iccd == 3:
+            data[:400, :400] = np.nan
+        elif isec == 45 and icam == 1 and iccd == 4:
+            data[:800, 1700:] = np.nan
+            data[:200, 1350:1550] = np.nan
+        elif isec == 45 and icam == 2 and iccd == 1:
+            data[:250, 150:450] = np.nan
+        elif isec == 45 and icam == 2 and iccd == 2:
+            data[:300, 1600:1950] = np.nan
+        elif isec == 45 and icam == 2 and iccd == 3:
+            data[:350, :350] = np.nan
+            data[:150, 450:750] = np.nan
+        elif isec == 45 and icam == 2 and iccd == 4:
+            data[:200, 1350:1550] = np.nan
+            data[100:800, 1800:] = np.nan
+        elif isec == 45 and icam == 3 and iccd == 2:
+            data[:200, 1300:1600] = np.nan
+            data[200:400, 1900:] = np.nan
+        elif isec == 45 and icam == 3 and iccd == 3:
+            data[:200, 500:650] = np.nan
+            data[:350, :150] = np.nan
+        elif isec == 45 and icam == 4 and iccd == 3:
+            data[:200, 500:700] = np.nan
+            data[190:350, :100] = np.nan
+        elif isec == 45 and icam == 4 and iccd == 4:
+            data[:200, 1300:1600] = np.nan
+            data[:300, 1900:] = np.nan
+
         # remove weird saturated columns that don't have obvious sources
         if isec == 26 and icam == 3 and iccd == 3:
             data[:, 1195] = data[:, 1194]
@@ -858,7 +883,7 @@ for ii, ifile in enumerate(files):
         if isec == 26 and icam == 2 and iccd == 4:
             data[:, 507] = data[:, 506]
             data[:, 508] = data[:, 509]
-        
+
         # this camera in this sector is too bright and doesn't match the rest
         if isec == 24 and icam == 4:
             if iccd in [3, 4]:
@@ -918,14 +943,13 @@ for ii, ifile in enumerate(files):
             data += np.ones_like(data) * np.linspace(-15, 5, data.shape[0])
             # right, left
             data += (np.ones_like(data) * np.linspace(20, -5, data.shape[0])).T
-            
-            
+
         if isec == 43 and icam == 3 and iccd in [1]:
             # right, left
             data += (np.ones_like(data) * np.linspace(0, -15, data.shape[0])).T
             # top, bottom
             data += np.ones_like(data) * np.linspace(40, 0, data.shape[0])
-                
+
         if isec == 43 and icam == 3 and iccd in [4]:
             # left, right
             data += (np.ones_like(data) * np.linspace(-10, -5, data.shape[0])).T
@@ -933,10 +957,10 @@ for ii, ifile in enumerate(files):
             data += np.ones_like(data) * np.linspace(-15, 20, data.shape[0])
         if isec == 43 and icam == 4 and iccd in [1]:
             # right, left
-            data += (np.ones_like(data) * np.linspace(-5,-50, data.shape[0])).T
+            data += (np.ones_like(data) * np.linspace(-5, -50, data.shape[0])).T
             # top, bottom
-            data += np.ones_like(data) * np.linspace(20,-15, data.shape[0])
-            
+            data += np.ones_like(data) * np.linspace(20, -15, data.shape[0])
+
         if isec == 43 and icam == 4 and iccd in [4]:
             data -= 30
             data += np.ones_like(data) * np.linspace(-30, 0, data.shape[0])
@@ -947,9 +971,9 @@ for ii, ifile in enumerate(files):
             # top, bottom
             data += np.ones_like(data) * np.linspace(0, 5, data.shape[0])
         if isec == 43 and icam == 3 and iccd in [3]:
-            # bottom, top 
+            # bottom, top
             data += np.ones_like(data) * np.linspace(7, -20, data.shape[0])
-            # left, right 
+            # left, right
             data += (np.ones_like(data) * np.linspace(-15, -5, data.shape[0])).T
         if isec == 43 and icam == 4 and iccd in [2]:
             data -= 20
@@ -984,10 +1008,11 @@ for ii, ifile in enumerate(files):
             data += (np.ones_like(data) * np.linspace(-5, -10, data.shape[0])).T
             # top, bottom
             data += np.ones_like(data) * np.linspace(-25, 0, data.shape[0])
-            
+
         if isec == 44 and icam == 2 and iccd == 1:
             # left, right
-            data += (np.ones_like(data) * np.linspace(-15, -10, data.shape[0])).T
+            data += (np.ones_like(data) * np.linspace(-15, -10,
+                                                      data.shape[0])).T
             # bottom, top
             data += np.ones_like(data) * np.linspace(19, 0, data.shape[0])
         if isec == 44 and icam == 2 and iccd == 2:
@@ -1005,7 +1030,7 @@ for ii, ifile in enumerate(files):
             data += (np.ones_like(data) * np.linspace(0, -10, data.shape[0])).T
             # top, bottom
             data += np.ones_like(data) * np.linspace(0, 26, data.shape[0])
-        
+
         if isec == 44 and icam == 3 and iccd == 1:
             # right, left
             data += (np.ones_like(data) * np.linspace(0, -15, data.shape[0])).T
@@ -1017,16 +1042,16 @@ for ii, ifile in enumerate(files):
             # right, left
             data += (np.ones_like(data) * np.linspace(5, 5, data.shape[0])).T
         if isec == 44 and icam == 3 and iccd == 3:
-            # bottom, top 
+            # bottom, top
             data += np.ones_like(data) * np.linspace(0, -20, data.shape[0])
-            # left, right 
+            # left, right
             data += (np.ones_like(data) * np.linspace(-5, 0, data.shape[0])).T
         if isec == 44 and icam == 3 and iccd == 4:
             # left, right
             data += (np.ones_like(data) * np.linspace(-10, -5, data.shape[0])).T
             # bottom, top
             data += np.ones_like(data) * np.linspace(-10, 20, data.shape[0])
-            
+
         if isec == 44 and icam == 4 and iccd == 1:
             # right, left
             data += (np.ones_like(data) * np.linspace(0, -20, data.shape[0])).T
@@ -1038,16 +1063,101 @@ for ii, ifile in enumerate(files):
             # right, left
             data += (np.ones_like(data) * np.linspace(0, -20, data.shape[0])).T
         if isec == 44 and icam == 4 and iccd == 3:
-            # bottom, top 
+            # bottom, top
             data += np.ones_like(data) * np.linspace(-10, -50, data.shape[0])
-            # left, right 
+            # left, right
             data += (np.ones_like(data) * np.linspace(-10, 0, data.shape[0])).T
         if isec == 44 and icam == 4 and iccd == 4:
             # left, right
             data += (np.ones_like(data) * np.linspace(-20, 0, data.shape[0])).T
             # bottom, top
             data += np.ones_like(data) * np.linspace(-60, 0, data.shape[0])
-                
+
+        if isec == 45 and icam == 1 and iccd == 1:
+            # left, right
+            data += (np.ones_like(data) * np.linspace(10, -10, data.shape[0])).T
+            # bottom, top
+            data += np.ones_like(data) * np.linspace(20, -10, data.shape[0])
+        if isec == 45 and icam == 1 and iccd == 2:
+            # left, right
+            data += (np.ones_like(data) * np.linspace(10, -10, data.shape[0])).T
+            # bottom, top
+            data += np.ones_like(data) * np.linspace(0, 20, data.shape[0])
+        if isec == 45 and icam == 1 and iccd == 3:
+            # top, bottom
+            data += np.ones_like(data) * np.linspace(10, 0, data.shape[0])
+            # right, left
+            data += (np.ones_like(data) * np.linspace(0, -10, data.shape[0])).T
+        if isec == 45 and icam == 1 and iccd == 4:
+            # right, left
+            data += (np.ones_like(data) * np.linspace(10, -10, data.shape[0])).T
+            # top, bottom
+            data += np.ones_like(data) * np.linspace(-20, 10, data.shape[0])
+
+        if isec == 45 and icam == 2 and iccd == 1:
+            # left, right
+            data += (np.ones_like(data) * np.linspace(0, -10, data.shape[0])).T
+            # bottom, top
+            data += np.ones_like(data) * np.linspace(0, -10, data.shape[0])
+        if isec == 45 and icam == 2 and iccd == 2:
+            # left, right
+            data += (np.ones_like(data) * np.linspace(0, -10, data.shape[0])).T
+            # bottom, top
+            data += np.ones_like(data) * np.linspace(-10, 0, data.shape[0])
+        if isec == 45 and icam == 2 and iccd == 3:
+            # top, bottom
+            data += np.ones_like(data) * np.linspace(20, 0, data.shape[0])
+            # right, left
+            data += (np.ones_like(data) * np.linspace(10, -20, data.shape[0])).T
+        if isec == 45 and icam == 2 and iccd == 4:
+            # right, left
+            data += (np.ones_like(data) * np.linspace(10, -10, data.shape[0])).T
+            # top, bottom
+            data += np.ones_like(data) * np.linspace(0, 20, data.shape[0])
+
+        if isec == 45 and icam == 3 and iccd == 1:
+            # right, left
+            data += (np.ones_like(data) * np.linspace(0, -10, data.shape[0])).T
+            # top, bottom
+            data += np.ones_like(data) * np.linspace(0, -10, data.shape[0])
+        if isec == 45 and icam == 3 and iccd == 2:
+            # top, bottom
+            data += np.ones_like(data) * np.linspace(-10, 0, data.shape[0])
+            # right, left
+            data += (np.ones_like(data) * np.linspace(0, -10, data.shape[0])).T
+        if isec == 45 and icam == 3 and iccd == 3:
+            # bottom, top
+            data += np.ones_like(data) * np.linspace(0, -40, data.shape[0])
+            # left, right
+            data += (np.ones_like(data) * np.linspace(0, 0, data.shape[0])).T
+        if isec == 45 and icam == 3 and iccd == 4:
+            # left, right
+            data += (np.ones_like(data) * np.linspace(0, 0, data.shape[0])).T
+            # bottom, top
+            data += np.ones_like(data) * np.linspace(-40, 0, data.shape[0])
+
+        if isec == 45 and icam == 4 and iccd == 1:
+            # right, left
+            data += (np.ones_like(data) * np.linspace(0, -50, data.shape[0])).T
+            # top, bottom
+            data += np.ones_like(data) * np.linspace(0, -40, data.shape[0])
+        if isec == 45 and icam == 4 and iccd == 2:
+            # top, bottom
+            data += np.ones_like(data) * np.linspace(-40, 0, data.shape[0])
+            # right, left
+            data += (np.ones_like(data) * np.linspace(0, -50, data.shape[0])).T
+        if isec == 45 and icam == 4 and iccd == 3:
+            # bottom, top
+            data += np.ones_like(data) * np.linspace(-20, -90, data.shape[0])
+            # left, right
+            data += (np.ones_like(data) * np.linspace(-40, -20, data.shape[0])).T
+        if isec == 45 and icam == 4 and iccd == 4:
+            data -= 50
+            # left, right
+            data += (np.ones_like(data) * np.linspace(-20, -10, data.shape[0])).T
+            # bottom, top
+            data += np.ones_like(data) * np.linspace(-60, 0, data.shape[0])
+
         if corner_glow_plot:
             plt.figure()
             plt.imshow(data, norm=cnorm, cmap=cmap)
@@ -1058,7 +1168,8 @@ for ii, ifile in enumerate(files):
                 lon = lon[::2, ::2]
                 lat = lat[::2, ::2]
             if ii == 0:
-                sectxt = f'Sector {isec}\n{secstarts[isec]}\u2013{secends[isec]}'
+                sectxt = f'Sector {isec}\n{secstarts[isec]}' \
+                         f'\u2013{secends[isec]}'
                 if printdate:
                     text = plt.text(0.98, 0.02, sectxt,
                                     transform=fig.transFigure, ha='right',
@@ -1069,11 +1180,11 @@ for ii, ifile in enumerate(files):
             lmin = (((cenlon - 178) + 180) % 360) - 180
             lmax = (((cenlon + 178) + 180) % 360) - 180
             wlon = ((lon - cenlon + 180) % 360) - 180
-            if wrap and (lon.max() > lmax) and (lon.min() < lmin):                      
+            if wrap and (lon.max() > lmax) and (lon.min() < lmin):
                 # find the problem areas that wrap around in longitude
-                bad = ((np.abs(wlon[:-1,:-1] - wlon[:-1,1:]) > 355.)|
-                       (np.abs(wlon[:-1,:-1] - wlon[1:,:-1]) > 355.)|
-                       (np.abs(wlon[:-1,:-1] - wlon[1:,1:]) > 355.))
+                bad = ((np.abs(wlon[:-1, :-1] - wlon[:-1, 1:]) > 355.) |
+                       (np.abs(wlon[:-1, :-1] - wlon[1:, :-1]) > 355.) |
+                       (np.abs(wlon[:-1, :-1] - wlon[1:, 1:]) > 355.))
                 # mask them and just don't plot these pixels
                 maskeddata = np.ma.masked_where(bad, data)
                 plt.pcolormesh(lon, lat, maskeddata, norm=cnorm, alpha=1,
@@ -1088,17 +1199,26 @@ for ii, ifile in enumerate(files):
         if (ii % 16) == 0 and ii > 0 and printdate and makefig:
             text.remove()
             if hemisphere == 'both' or isec < 27:
-                sectxt = f'Sectors {ssec}\u2013{isec}\n{secstarts[ssec]}\u2013{secends[isec]}'
+                sectxt = f'Sectors {ssec}\u2013{isec}\n{secstarts[ssec]}' \
+                         f'\u2013{secends[isec]}'
             elif hemisphere == 'south':
                 if isec == 27:
-                    sectxt = f'Sectors 1\u201313; 27\n{secstarts[1]}\u2013{secends[13]}\n{secstarts[27]}\u2013{secends[27]}'
+                    sectxt = f'Sectors 1\u201313; 27\n{secstarts[1]}' \
+                             f'\u2013{secends[13]}\n{secstarts[27]}' \
+                             f'\u2013{secends[27]}'
                 else:
-                    sectxt = f'Sectors 1\u201313; 27\u2013{isec}\n{secstarts[1]}\u2013{secends[13]}\n{secstarts[27]}\u2013{secends[isec]}'
+                    sectxt = f'Sectors 1\u201313; 27\u2013{isec}\n' \
+                             f'{secstarts[1]}\u2013{secends[13]}\n' \
+                             f'{secstarts[27]}\u2013{secends[isec]}'
             elif hemisphere == 'north':
                 if isec == 40:
-                    sectxt = f'Sectors 14\u201326; 40\n{secstarts[14]}\u2013{secends[26]}\n{secstarts[40]}\u2013{secends[40]}'
+                    sectxt = f'Sectors 14\u201326; 40\n{secstarts[14]}' \
+                             f'\u2013{secends[26]}\n{secstarts[40]}' \
+                             f'\u2013{secends[40]}'
                 else:
-                    sectxt = f'Sectors 14\u201326; 40\u2013{isec}\n{secstarts[14]}\u2013{secends[26]}\n{secstarts[40]}\u2013{secends[isec]}'
+                    sectxt = f'Sectors 14\u201326; 40\u2013{isec}\n' \
+                             f'{secstarts[14]}\u2013{secends[26]}\n' \
+                             f'{secstarts[40]}\u2013{secends[isec]}'
             text = plt.text(0.98, 0.02, sectxt, transform=fig.transFigure,
                             ha='right', va='bottom', multialignment='right',
                             fontsize=sfsz, fontname='Carlito')
@@ -1120,8 +1240,8 @@ if makefig and savefig and not makegif:
                     os.path.splitext(orig)[1])
         inum += 1
     plt.savefig(savefile, transparent=transparent)
-    
-now = datetime.now().strftime("%d.%m.%Y %H:%M:%S") 
+
+now = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
 print(f'{now}. Finished.')
 
 # if we're creating the empirical corner model, look at all the corners from
@@ -1176,5 +1296,3 @@ if makecorner:
     cfig = os.path.join(cornerdir, f'sector{cornersec:02d}.corner.png')
     np.savetxt(ctxt, avg)
     plt.savefig(cfig)
-
-
