@@ -110,7 +110,7 @@ vmax = 901.
 
 # do we need to create the empirical corner glow correction for a sector?
 makecorner = False
-cornersec = 46
+cornersec = 47
 
 # remove the corner glow from the final image
 remove_corner_glow = True
@@ -256,10 +256,11 @@ for ifile in allfiles:
                 hemisphere in ['both', 'south']):
             files.append(ifile)
         elif ((((fsec > 13) and (fsec < 27)) or
-               ((fsec > 39) and (fsec < 42))) and
+               ((fsec > 39) and (fsec < 42)) or
+               ((fsec > 46) and (fsec < 61))) and
               hemisphere in ['both', 'north']):
             files.append(ifile)
-        elif (fsec > 41) and hemisphere in ['both']:
+        elif ((fsec > 41) and (fsec < 47)) and hemisphere in ['both']:
             files.append(ifile)
     else:
         if addkepler and hemisphere == 'both':
@@ -292,18 +293,12 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s0046*fits'))
-    files += glob(os.path.join(datadir, f'*s0045-[234]-*fits'))
-    # files += glob(os.path.join(datadir, f'*s0045-2-[14]*fits'))
+    files = glob(os.path.join(datadir, f'*s0047*fits'))
+    # files += glob(os.path.join(datadir, f'*s0045-[234]-*fits'))
 
-    # files += glob(os.path.join(datadir, f'*s0023-1-3*fits'))
-    # files += glob(os.path.join(datadir, f'*s0037-1-4*fits'))
-    # files += glob(os.path.join(datadir, f'*s0036-1-3*fits'))
-    # files += glob(os.path.join(datadir, f'*s0033-1-[34]*fits'))
-
-    files += glob(os.path.join(datadir, f'*s003[34567]-1-[34]*fits'))
-    files += glob(os.path.join(datadir, f'*s002[0123]-1-[34]*fits'))
-
+    files += glob(os.path.join(datadir, f'*s0020*fits'))
+    # files += glob(os.path.join(datadir, f'*s0046-1*fits'))
+    files += glob(os.path.join(datadir, f'*s0021*fits'))
     files.sort()
 
     kepfiles = []
@@ -886,6 +881,12 @@ for ii, ifile in enumerate(files):
         elif isec == 46 and icam == 4 and iccd == 4:
             data[:200, 1400:1850] = np.nan
             data[500:700, 1900:] = np.nan
+        elif isec == 47 and icam == 1 and iccd == 3:
+            data[:200, :600] = np.nan
+        elif isec == 47 and icam == 1 and iccd == 4:
+            data[:200, 1700:] = np.nan
+        elif isec == 47 and icam == 3 and iccd == 2:
+            data[:350, 1700:] = np.nan
 
         # remove weird saturated columns that don't have obvious sources
         if isec == 26 and icam == 3 and iccd == 3:
@@ -1233,6 +1234,27 @@ for ii, ifile in enumerate(files):
             data += (np.ones_like(data) * np.linspace(-30, 0, data.shape[0])).T
             # bottom, top
             data += np.ones_like(data) * np.linspace(-60, 0, data.shape[0])
+
+        if isec == 47 and icam == 1 and iccd == 1:
+            # top, bottom
+            data += (np.ones_like(data) * np.linspace(0, 0, data.shape[0])).T
+            # right, left
+            data += np.ones_like(data) * np.linspace(0, 0, data.shape[0])
+        if isec == 47 and icam == 1 and iccd == 2:
+            # right, left
+            data += (np.ones_like(data) * np.linspace(10, 0, data.shape[0])).T
+            # bottom, top
+            data += np.ones_like(data) * np.linspace(0, 0, data.shape[0])
+        if isec == 47 and icam == 1 and iccd == 3:
+            # right, left
+            data += np.ones_like(data) * np.linspace(20, 0, data.shape[0])
+            # bottom, top
+            data += (np.ones_like(data) * np.linspace(0, 0, data.shape[0])).T
+        if isec == 47 and icam == 1 and iccd == 4:
+            # bottom, top
+            data += (np.ones_like(data) * np.linspace(0, 0, data.shape[0])).T
+            # right, left
+            data += np.ones_like(data) * np.linspace(0, 0, data.shape[0])
 
         if corner_glow_plot:
             plt.figure()
