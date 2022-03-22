@@ -21,7 +21,7 @@ figdir = os.path.join(os.path.split(__file__)[0], 'figs')
 cornerdir = os.path.join(os.path.split(__file__)[0], 'corners')
 
 # options are 'north', 'south', or 'both'
-hemisphere = 'both'
+hemisphere = 'north'
 # for full-sky Mollweide projections, do we want to use ecliptic coordinates
 # if False, uses celestial coordinates (ICRS, right ascension/declination)
 ecliptic_coords = True
@@ -110,7 +110,7 @@ vmax = 901.
 
 # do we need to create the empirical corner glow correction for a sector?
 makecorner = False
-cornersec = 47
+cornersec = 48
 
 # remove the corner glow from the final image
 remove_corner_glow = True
@@ -293,12 +293,12 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s0047*fits'))
+    files = glob(os.path.join(datadir, f'*s0048-1-[34]*fits'))
     # files += glob(os.path.join(datadir, f'*s0045-[234]-*fits'))
 
-    files += glob(os.path.join(datadir, f'*s0020*fits'))
-    # files += glob(os.path.join(datadir, f'*s0046-1*fits'))
-    files += glob(os.path.join(datadir, f'*s0021*fits'))
+    files += glob(os.path.join(datadir, f'*s0046-[23]*fits'))
+    # files += glob(os.path.join(datadir, f'*s002[12]-1-[12]*fits'))
+    # files += glob(os.path.join(datadir, f'*s0021*fits'))
     files.sort()
 
     kepfiles = []
@@ -887,6 +887,9 @@ for ii, ifile in enumerate(files):
             data[:200, 1700:] = np.nan
         elif isec == 47 and icam == 3 and iccd == 2:
             data[:350, 1700:] = np.nan
+        elif isec == 48 and icam == 2 and iccd == 4:
+            xx = np.where(data[:160, 1570:1780] >= vmin)
+            data[:160, 1570:1780][xx] /= 2.5
 
         # remove weird saturated columns that don't have obvious sources
         if isec == 26 and icam == 3 and iccd == 3:
