@@ -1,17 +1,20 @@
 import os
 import subprocess
-from glob import glob
-from datetime import datetime
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.colors as colors
-from astropy.io import fits
-from astropy.wcs import WCS, FITSFixedWarning
-import cartopy.crs as ccrs
-from truncate import truncate_colormap
-from clean import clean_corner
-from astropy.coordinates import SkyCoord, BarycentricTrueEcliptic, Galactic
 import warnings
+from datetime import datetime
+from glob import glob
+
+import cartopy.crs as ccrs
+import matplotlib.colors as colors
+import matplotlib.pyplot as plt
+import numpy as np
+from astropy.coordinates import BarycentricTrueEcliptic, Galactic, SkyCoord
+from astropy.io import fits
+from astropy.wcs import FITSFixedWarning, WCS
+from matplotlib.image import imread
+
+from clean import clean_corner
+from truncate import truncate_colormap
 
 ##################################################################
 # Configuration parameters
@@ -109,13 +112,13 @@ vmin = 150
 vmax = 901.
 
 # do we need to create the empirical corner glow correction for a sector?
-makecorner = False
-cornersec = 48
+makecorner = True
+cornersec = 49
 
 # remove the corner glow from the final image
 remove_corner_glow = True
 # make a plot of the corner glow for every CCD to check how removal is working
-corner_glow_plot = False
+corner_glow_plot = True
 
 # manual adjustments to the strength of corner glow corrections
 adjfile = os.path.join(cornerdir, 'adjustments.txt')
@@ -124,22 +127,22 @@ adjfile = os.path.join(cornerdir, 'adjustments.txt')
 binning = True
 
 # flag indicating we're just testing things
-test = False
+test = True
 # create the output figure
-makefig = True
+makefig = False
 # the output figure in high or "full" resolution
-highres = True
+highres = False
 fullres = False
 
 # which color bar to use
-color = 'gray'
+color = 'blue'
 if color == 'blue':
     cc = '_blue'
 else:
     cc = ''
 
 # save the output figure
-savefig = True
+savefig = False
 # save every sector image for a gif in a subdirectory
 makegif = False
 if makegif:
@@ -213,9 +216,10 @@ if color == 'gray':
     # use only the latter part of the original colormap
     cmap = truncate_colormap(plt.get_cmap(cmap), minval=0.18, maxval=1.0)
 elif color == 'blue':
-    from matplotlib.colors import LinearSegmentedColormap
-    carr = np.loadtxt('blue_cbar.txt')
-    cmap = LinearSegmentedColormap.from_list('my_cmap', carr)
+    img = imread('bluecmap.png')
+    pic = img[:, 0, :]
+    cmap = colors.LinearSegmentedColormap.from_list('NASA_blue', pic[::-1, :],
+                                                    N=pic.shape[0])
 else:
     raise Exception('not recognized color')
 
@@ -293,10 +297,10 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s0048-1-[34]*fits'))
+    files = glob(os.path.join(datadir, f'*s0013-1-[34]*fits'))
     # files += glob(os.path.join(datadir, f'*s0045-[234]-*fits'))
 
-    files += glob(os.path.join(datadir, f'*s0046-[23]*fits'))
+    # files += glob(os.path.join(datadir, f'*s0046-[23]*fits'))
     # files += glob(os.path.join(datadir, f'*s002[12]-1-[12]*fits'))
     # files += glob(os.path.join(datadir, f'*s0021*fits'))
     files.sort()
@@ -1352,7 +1356,6 @@ if makecorner:
         os.makedirs(cornerdir, exist_ok=True)
 
     plt.close('all')
-    from mpl_toolkits.mplot3d import Axes3D
     fig = plt.figure()
     ax = plt.axes(projection='3d')
 
