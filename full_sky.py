@@ -297,11 +297,11 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s0049-4-[34]*fits'))
+    files = glob(os.path.join(datadir, f'*s0019-1-2*fits'))
     # files += glob(os.path.join(datadir, f'*s0045-[234]-*fits'))
 
-    # files += glob(os.path.join(datadir, f'*s0046-[23]*fits'))
-    # files += glob(os.path.join(datadir, f'*s002[12]-1-[12]*fits'))
+    # files += glob(os.path.join(datadir, f'*s0020-1-2*fits'))
+    # files += glob(os.path.join(datadir, f'*s0022-1-[12]*fits'))
     # files += glob(os.path.join(datadir, f'*s0021*fits'))
     files.sort()
 
@@ -631,11 +631,23 @@ for ii, ifile in enumerate(files):
             data = data[400:, :]
             lat = lat[400:, :]
             lon = lon[400:, :]
+        elif isec == 19 and icam == 1 and iccd == 2:
+            xx = np.where((data[200:450, 1750:2000] >= 1.1*vmin) &
+                          (data[200:450, 1750:2000] <= 450))
+            rr = np.random.rand(*data[200:450, 1750:2000].shape)
+            rr *= 0.15 * vmin
+            rr += vmin
+            mins = rr[xx]
+            data[200:450, 1750:2000][xx] = np.clip(data[200:450, 1750:2000][xx]
+                                                   - 250, mins, None)
         elif isec == 19 and icam == 3 and iccd == 3:
             # a reflection in the CVZ only in S19
             data = data[360:, :]
             lat = lat[360:, :]
             lon = lon[360:, :]
+        elif isec == 20 and icam == 1 and iccd == 2:
+            xx = np.where(data[100:350, 1700:1950] >= vmin)
+            data[100:350, 1700:1950][xx] /= 1.5
         elif isec == 21 and icam == 2 and iccd == 1:
             # a reflection in the CVZ only in S21
             data = data[226:, :]
@@ -841,7 +853,6 @@ for ii, ifile in enumerate(files):
         elif isec == 45 and icam == 1 and iccd == 1:
             data[:200, :300] = np.nan
         elif isec == 45 and icam == 1 and iccd == 2:
-            #data[:150, 1900:] = np.nan
             data[:1100, 1000:] = np.nan
         elif isec == 45 and icam == 1 and iccd == 3:
             data[:400, :400] = np.nan
@@ -894,6 +905,8 @@ for ii, ifile in enumerate(files):
         elif isec == 48 and icam == 2 and iccd == 4:
             xx = np.where(data[:160, 1570:1780] >= vmin)
             data[:160, 1570:1780][xx] /= 2.5
+        elif isec == 49 and icam == 2 and iccd == 3:
+            data[:200, 100:400] = np.nan
 
         # remove weird saturated columns that don't have obvious sources
         if isec == 26 and icam == 3 and iccd == 3:
@@ -1169,11 +1182,13 @@ for ii, ifile in enumerate(files):
             # bottom, top
             data += np.ones_like(data) * np.linspace(-20, -90, data.shape[0])
             # left, right
-            data += (np.ones_like(data) * np.linspace(-40, -20, data.shape[0])).T
+            data += (np.ones_like(data) *
+                     np.linspace(-40, -20, data.shape[0])).T
         if isec == 45 and icam == 4 and iccd == 4:
             data -= 50
             # left, right
-            data += (np.ones_like(data) * np.linspace(-20, -10, data.shape[0])).T
+            data += (np.ones_like(data) *
+                     np.linspace(-20, -10, data.shape[0])).T
             # bottom, top
             data += np.ones_like(data) * np.linspace(-60, 0, data.shape[0])
 
