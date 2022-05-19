@@ -297,10 +297,10 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s0050-4-3*fits'))
+    files = glob(os.path.join(datadir, f'*s0050-2-2*fits'))
     # files += glob(os.path.join(datadir, f'*s0045-[234]-*fits'))
 
-    # files += glob(os.path.join(datadir, f'*s0020-1-2*fits'))
+    files += glob(os.path.join(datadir, f'*s0023-2-[12]*fits'))
     # files += glob(os.path.join(datadir, f'*s0022-1-[12]*fits'))
     # files += glob(os.path.join(datadir, f'*s0021*fits'))
     files.sort()
@@ -907,6 +907,10 @@ for ii, ifile in enumerate(files):
             data[:160, 1570:1780][xx] /= 2.5
         elif isec == 49 and icam == 2 and iccd == 3:
             data[:200, 100:400] = np.nan
+        elif isec == 50 and icam == 1 and iccd == 2:
+            data[:200, 1650:1900] = np.nan
+        elif isec == 50 and icam == 2 and iccd == 2:
+            data[100:300, 1550:1800] = np.nan
 
         # remove weird saturated columns that don't have obvious sources
         if isec == 26 and icam == 3 and iccd == 3:
