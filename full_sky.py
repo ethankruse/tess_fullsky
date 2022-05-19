@@ -113,7 +113,7 @@ vmax = 901.
 
 # do we need to create the empirical corner glow correction for a sector?
 makecorner = False
-cornersec = 49
+cornersec = 50
 
 # remove the corner glow from the final image
 remove_corner_glow = True
@@ -297,7 +297,7 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s0019-1-2*fits'))
+    files = glob(os.path.join(datadir, f'*s0050-4-3*fits'))
     # files += glob(os.path.join(datadir, f'*s0045-[234]-*fits'))
 
     # files += glob(os.path.join(datadir, f'*s0020-1-2*fits'))
