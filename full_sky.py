@@ -113,7 +113,7 @@ vmax = 901.
 
 # do we need to create the empirical corner glow correction for a sector?
 makecorner = False
-cornersec = 50
+cornersec = 51
 
 # remove the corner glow from the final image
 remove_corner_glow = True
@@ -297,10 +297,10 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s0050-2-2*fits'))
+    files = glob(os.path.join(datadir, f'*s0051-1-4*fits'))
     # files += glob(os.path.join(datadir, f'*s0045-[234]-*fits'))
 
-    files += glob(os.path.join(datadir, f'*s0023-2-[12]*fits'))
+    # files += glob(os.path.join(datadir, f'*s0023-2-[12]*fits'))
     # files += glob(os.path.join(datadir, f'*s0022-1-[12]*fits'))
     # files += glob(os.path.join(datadir, f'*s0021*fits'))
     files.sort()
@@ -911,6 +911,13 @@ for ii, ifile in enumerate(files):
             data[:200, 1650:1900] = np.nan
         elif isec == 50 and icam == 2 and iccd == 2:
             data[100:300, 1550:1800] = np.nan
+        elif isec == 51 and icam == 3 and iccd == 3:
+            data[75:200, :150] = np.nan
+        elif isec == 51 and icam == 1 and iccd == 4:
+            xx = np.where(data[20:315, 1850:] >= 1.*vmin)
+            data[20:315, 1850:][xx] = np.clip(data[20:315, 1850:][xx]-100,a_min=1.*vmin, a_max=np.inf)+np.random.randint(-2,25,xx[0].size)
+            xx = np.where(data[20:50, 1970:] >= 1. * vmin)
+            data[20:50, 1970:][xx] = np.clip(data[20:50, 1970:][xx] - 200, a_min=1. * vmin, a_max=np.inf) + np.random.randint(-2,25,xx[0].size)
 
         # remove weird saturated columns that don't have obvious sources
         if isec == 26 and icam == 3 and iccd == 3:
