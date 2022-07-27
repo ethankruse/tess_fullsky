@@ -297,8 +297,9 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s0052-4-*fits'))
-    # files += glob(os.path.join(datadir, f'*s0045-[234]-*fits'))
+    files = glob(os.path.join(datadir, f'*s0052-4-[234]*fits'))
+    files += glob(os.path.join(datadir, f'*s0019-2-[12]*fits'))
+    files += glob(os.path.join(datadir, f'*s0019-3-[12]*fits'))
 
     # files += glob(os.path.join(datadir, f'*s0023-2-[12]*fits'))
     # files += glob(os.path.join(datadir, f'*s0022-1-[12]*fits'))
@@ -1296,6 +1297,27 @@ for ii, ifile in enumerate(files):
             data += (np.ones_like(data) * np.linspace(0, 0, data.shape[0])).T
             # right, left
             data += np.ones_like(data) * np.linspace(0, 0, data.shape[0])
+
+        if isec == 52 and icam == 4 and iccd == 1:
+            # bottom, top
+            data += (np.ones_like(data) * np.linspace(0, 0, data.shape[0])).T
+            # right, left
+            data += np.ones_like(data) * np.linspace(0, 0, data.shape[0])
+        if isec == 52 and icam == 4 and iccd == 2:
+            # bottom, top
+            data += (np.ones_like(data) * np.linspace(0, -20, data.shape[0])).T
+            # right, left
+            data += np.ones_like(data) * np.linspace(0, -10, data.shape[0])
+        if isec == 52 and icam == 4 and iccd == 3:
+            # left, right
+            data += np.ones_like(data) * np.linspace(-30, -10, data.shape[0])
+            # top, bottom
+            data += (np.ones_like(data) * np.linspace(-50, 0, data.shape[0])).T
+        if isec == 52 and icam == 4 and iccd == 4:
+            # top, bottom
+            data += (np.ones_like(data) * np.linspace(-40, 0, data.shape[0])).T
+            # left, right
+            data += np.ones_like(data) * np.linspace(-30, 0, data.shape[0])
 
         if corner_glow_plot:
             plt.figure()
