@@ -113,12 +113,12 @@ vmax = 901.
 
 # do we need to create the empirical corner glow correction for a sector?
 makecorner = False
-cornersec = 52
+cornersec = 53
 
 # remove the corner glow from the final image
 remove_corner_glow = True
 # make a plot of the corner glow for every CCD to check how removal is working
-corner_glow_plot = False
+corner_glow_plot = True
 
 # manual adjustments to the strength of corner glow corrections
 adjfile = os.path.join(cornerdir, 'adjustments.txt')
@@ -297,9 +297,9 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s0052-4-[234]*fits'))
-    files += glob(os.path.join(datadir, f'*s0019-2-[12]*fits'))
-    files += glob(os.path.join(datadir, f'*s0019-3-[12]*fits'))
+    files = glob(os.path.join(datadir, f'*s0053-4-*fits'))
+    # files += glob(os.path.join(datadir, f'*s0019-2-[12]*fits'))
+    # files += glob(os.path.join(datadir, f'*s0019-3-[12]*fits'))
 
     # files += glob(os.path.join(datadir, f'*s0023-2-[12]*fits'))
     # files += glob(os.path.join(datadir, f'*s0022-1-[12]*fits'))
@@ -927,6 +927,10 @@ for ii, ifile in enumerate(files):
                                                                xx[0].size)
         elif isec == 52 and icam == 3 and iccd == 2:
             data[50:200, 1850:] = np.nan
+        elif isec == 53 and icam == 3 and iccd == 3:
+            data[50:350, 30:300] = np.nan
+        elif isec == 53 and icam == 4 and iccd == 4:
+            data[:200, 1850:] = np.nan
 
         # remove weird saturated columns that don't have obvious sources
         if isec == 26 and icam == 3 and iccd == 3:
