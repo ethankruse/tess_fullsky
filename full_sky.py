@@ -313,7 +313,7 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s0053-4-*fits'))
+    files = glob(os.path.join(datadir, f'*s0053-4-[34]*fits'))
     # files += glob(os.path.join(datadir, f'*s0019-2-[12]*fits'))
     # files += glob(os.path.join(datadir, f'*s0019-3-[12]*fits'))
 
@@ -1010,6 +1010,8 @@ for ii, ifile in enumerate(files):
             data += 15
         if isec == 42 and icam == 1 and iccd in [1, 2, 3]:
             data -= 30
+        if isec == 53 and icam == 4 and iccd in [3, 4]:
+            data -= 20
         if isec == 42 and icam == 1 and iccd in [4]:
             # top, bottom
             data += np.ones_like(data) * np.linspace(-15, 5, data.shape[0])
