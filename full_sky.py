@@ -313,7 +313,7 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s0055-4-*fits'))
+    files = glob(os.path.join(datadir, f'*s0055-3-*fits'))
     # files += glob(os.path.join(datadir, f'*s0019-2-[12]*fits'))
     # files += glob(os.path.join(datadir, f'*s0019-3-[12]*fits'))
 
@@ -947,6 +947,12 @@ for ii, ifile in enumerate(files):
             data[50:350, 30:300] = np.nan
         elif isec == 53 and icam == 4 and iccd == 4:
             data[:200, 1850:] = np.nan
+        elif isec == 55 and icam == 2 and iccd == 1:
+            data[:150, :200] = np.nan
+        elif isec == 55 and icam == 3 and iccd == 4:
+            data[:150, 1600:1900] = np.nan
+        elif isec == 55 and icam == 3 and iccd == 1:
+            data[:500, :700] = np.nan
 
         # remove weird saturated columns that don't have obvious sources
         if isec == 26 and icam == 3 and iccd == 3:
