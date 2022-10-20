@@ -1394,8 +1394,15 @@ for ii, ifile in enumerate(files):
                 plt.pcolormesh(lon, lat, data, norm=cnorm, alpha=1,
                                transform=data_tr, cmap=cmap)
 
+        psec = 0
+        if ii > 0:
+            psec = int(files[ii-1].split('-s0')[1][:3])
+        if isec != psec and ii > 0:
+            newsec = True
+        else:
+            newsec = False
         # if we're starting to plot a new sector, update the date
-        if (ii % 16) == 0 and ii > 0 and printdate and makefig:
+        if newsec and printdate and makefig:
             text.remove()
             if hemisphere == 'both' or isec < 27:
                 sectxt = f'Sectors {ssec}\u2013{isec}\n{secstarts[ssec]}' \
@@ -1405,10 +1412,20 @@ for ii, ifile in enumerate(files):
                     sectxt = f'Sectors 1\u201313; 27\n{secstarts[1]}' \
                              f'\u2013{secends[13]}\n{secstarts[27]}' \
                              f'\u2013{secends[27]}'
-                else:
+                elif isec < 40:
                     sectxt = f'Sectors 1\u201313; 27\u2013{isec}\n' \
                              f'{secstarts[1]}\u2013{secends[13]}\n' \
                              f'{secstarts[27]}\u2013{secends[isec]}'
+                elif isec == 42:
+                    sectxt = f'Sectors 1\u201313; 27\u201339; 42\n' \
+                             f'{secstarts[1]}\u2013{secends[13]}\n' \
+                             f'{secstarts[27]}\u2013{secends[27]}\n' \
+                             f'{secstarts[42]}\u2013{secends[42]}\n'
+                else:
+                    sectxt = f'Sectors 1\u201313; 27\u201339; 42\u2013{isec}\n'\
+                             f'{secstarts[1]}\u2013{secends[13]}\n' \
+                             f'{secstarts[27]}\u2013{secends[39]}\n' \
+                             f'{secstarts[42]}\u2013{secends[isec]}\n'
             elif hemisphere == 'north':
                 if isec == 40:
                     sectxt = f'Sectors 14\u201326; 40\n{secstarts[14]}' \
@@ -1421,8 +1438,15 @@ for ii, ifile in enumerate(files):
             text = plt.text(0.98, 0.02, sectxt, transform=fig.transFigure,
                             ha='right', va='bottom', multialignment='right',
                             fontsize=sfsz, fontname='Carlito')
+        nsec = 0
+        if ii < len(files)-1:
+            nsec = int(files[ii+1].split('-s0')[1][:3])
+        if isec != nsec or ii == len(files) - 1:
+            endsec = True
+        else:
+            endsec = False
         # save the plot after each sector for the gif
-        if makegif and savefig and makefig and ii > 0 and ((ii + 1) % 16) == 0:
+        if makegif and savefig and makefig and endsec:
             if transparent:
                 outfig = os.path.join(figdir,
                                       f'transp_img{(ii + 1) // 16:04d}.png')
