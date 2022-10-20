@@ -271,6 +271,8 @@ for ifile in allfiles:
     # grab the sector from the file name
     if os.path.split(ifile)[1][0] == 't':
         fsec = int(os.path.split(ifile)[1].split('-')[1][1:])
+        fcam = int(os.path.split(ifile)[1].split('-')[2])
+        fccd = int(os.path.split(ifile)[1].split('-')[3])
         # decide if we want to use it
         if (((fsec < 14) or ((fsec > 26) and (fsec < 40))) and
                 hemisphere in ['both', 'south']):
@@ -280,8 +282,15 @@ for ifile in allfiles:
                ((fsec > 46) and (fsec < 61))) and
               hemisphere in ['both', 'north']):
             files.append(ifile)
-        elif ((fsec > 41) and (fsec < 47)) and hemisphere in ['both']:
-            files.append(ifile)
+        elif (fsec > 41) and (fsec < 47):
+            if (hemisphere in ['both', 'north'] and
+                    ((fcam in [1, 2] and fccd in [2, 3]) or
+                     (fcam in [3, 4] and fccd in [1, 4]))):
+                files.append(ifile)
+            if (hemisphere in ['both', 'south'] and
+                    ((fcam in [1, 2] and fccd in [1, 4]) or
+                     (fcam in [3, 4] and fccd in [2, 3]))):
+                files.append(ifile)
     else:
         if addkepler and hemisphere == 'both':
             kepfiles.append(ifile)
@@ -313,7 +322,7 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s0055-3-*fits'))
+    files = glob(os.path.join(datadir, f'*s0046-*fits'))
     # files += glob(os.path.join(datadir, f'*s0019-2-[12]*fits'))
     # files += glob(os.path.join(datadir, f'*s0019-3-[12]*fits'))
 
@@ -353,7 +362,7 @@ def grab_sector(sector, frac=0.95):
     lines.sort()
 
     # go to the right fraction of the way through the sector
-    fthru = int(len(lines)*frac)
+    fthru = int(len(lines) * frac)
     ll = lines[fthru]
     # figure out what timestamp this file has
     date = ll.split('tess')[1].split('-')[0]
@@ -386,9 +395,9 @@ if highres:
     else:
         xinch = 100
         yinch = 100
-    fsz = int(160 * fscl/100.)
-    sfsz = int(175 * fscl/100.)
-    tfsz = int(200 * fscl/100.)
+    fsz = int(160 * fscl / 100.)
+    sfsz = int(175 * fscl / 100.)
+    tfsz = int(200 * fscl / 100.)
 elif fullres:
     fscl = 400
     if hemisphere == 'both':
@@ -397,9 +406,9 @@ elif fullres:
     else:
         xinch = 400
         yinch = 400
-    fsz = int(160 * fscl/100.)
-    sfsz = int(175 * fscl/100.)
-    tfsz = int(200 * fscl/100.)
+    fsz = int(160 * fscl / 100.)
+    sfsz = int(175 * fscl / 100.)
+    tfsz = int(200 * fscl / 100.)
 else:
     if hemisphere == 'both':
         xinch = 12
@@ -458,7 +467,7 @@ def rebin(arr, new_shape):
 
 for ict, ifile in enumerate(kepfiles):
     now = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
-    print(f'{now}. Processing Kepler/K2 image {ict+1} of {len(kepfiles)}.')
+    print(f'{now}. Processing Kepler/K2 image {ict + 1} of {len(kepfiles)}.')
     with fits.open(ifile) as ffi:
         if 'campaign' in ffi[0].header:
             camp = ffi[0].header['campaign']
@@ -472,8 +481,8 @@ for ict, ifile in enumerate(kepfiles):
             data *= 0.6
 
             # get the coordinates of every data point in CCD coordinates
-            xinds = np.arange(-0.5, data.shape[0]-0.4)
-            yinds = np.arange(-0.5, data.shape[1]-0.4)
+            xinds = np.arange(-0.5, data.shape[0] - 0.4)
+            yinds = np.arange(-0.5, data.shape[1] - 0.4)
             mesh = np.meshgrid(xinds, yinds, indexing='ij')
 
             # transofrm to actual sky coordinates
@@ -517,7 +526,7 @@ for ict, ifile in enumerate(kepfiles):
                 lat = lat[:, :-4]
             else:
                 bb = 4
-            data = rebin(data, (data.shape[0]//bb, data.shape[1]//bb))
+            data = rebin(data, (data.shape[0] // bb, data.shape[1] // bb))
             lat = lat[::bb, ::bb]
             lon = lon[::bb, ::bb]
 
@@ -569,8 +578,8 @@ for ii, ifile in enumerate(files):
         data = ff[1].data * 1
 
         # get the coordinates of every data point in CCD coordinates
-        xinds = np.arange(-0.5, data.shape[0]-0.4)
-        yinds = np.arange(-0.5, data.shape[1]-0.4)
+        xinds = np.arange(-0.5, data.shape[0] - 0.4)
+        yinds = np.arange(-0.5, data.shape[1] - 0.4)
         mesh = np.meshgrid(xinds, yinds, indexing='ij')
 
         # transofrm to actual sky coordinates
@@ -607,8 +616,9 @@ for ii, ifile in enumerate(files):
         iccd = ff[1].header['ccd']
         isec = int(ifile.split('-s0')[1][:3])
         now = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
-        print(f'{now}. Processing image {ii+1} of {len(files)}: Sector {isec} '
-              f'Camera {icam} CCD {iccd}')
+        print(
+            f'{now}. Processing image {ii + 1} of {len(files)}: Sector {isec} '
+            f'Camera {icam} CCD {iccd}')
 
         if remove_corner_glow:
             # create the empirical corner glow model
@@ -649,7 +659,7 @@ for ii, ifile in enumerate(files):
             lat = lat[400:, :]
             lon = lon[400:, :]
         elif isec == 19 and icam == 1 and iccd == 2:
-            xx = np.where((data[200:450, 1750:2000] >= 1.1*vmin) &
+            xx = np.where((data[200:450, 1750:2000] >= 1.1 * vmin) &
                           (data[200:450, 1750:2000] <= 450))
             rr = np.random.rand(*data[200:450, 1750:2000].shape)
             rr *= 0.15 * vmin
@@ -931,8 +941,8 @@ for ii, ifile in enumerate(files):
         elif isec == 51 and icam == 3 and iccd == 3:
             data[75:200, :150] = np.nan
         elif isec == 51 and icam == 1 and iccd == 4:
-            xx = np.where(data[20:315, 1850:] >= 1.*vmin)
-            cclip = np.clip(data[20:315, 1850:][xx]-100, a_min=1.*vmin,
+            xx = np.where(data[20:315, 1850:] >= 1. * vmin)
+            cclip = np.clip(data[20:315, 1850:][xx] - 100, a_min=1. * vmin,
                             a_max=np.inf)
             data[20:315, 1850:][xx] = cclip + np.random.randint(-2, 25,
                                                                 xx[0].size)
@@ -1353,7 +1363,7 @@ for ii, ifile in enumerate(files):
 
         if makefig:
             if binning:
-                data = rebin(data, (data.shape[0]//2, data.shape[1]//2))
+                data = rebin(data, (data.shape[0] // 2, data.shape[1] // 2))
                 lon = lon[::2, ::2]
                 lat = lat[::2, ::2]
             if ii == 0:
@@ -1412,11 +1422,12 @@ for ii, ifile in enumerate(files):
                             ha='right', va='bottom', multialignment='right',
                             fontsize=sfsz, fontname='Carlito')
         # save the plot after each sector for the gif
-        if makegif and savefig and makefig and ii > 0 and ((ii+1) % 16) == 0:
+        if makegif and savefig and makefig and ii > 0 and ((ii + 1) % 16) == 0:
             if transparent:
-                outfig = os.path.join(figdir, f'transp_img{(ii+1)//16:04d}.png')
+                outfig = os.path.join(figdir,
+                                      f'transp_img{(ii + 1) // 16:04d}.png')
             else:
-                outfig = os.path.join(figdir, f'img{(ii+1)//16:04d}.png')
+                outfig = os.path.join(figdir, f'img{(ii + 1) // 16:04d}.png')
             plt.savefig(outfig, transparent=transparent)
 
 # save the figure if we haven't already as part of the gif
@@ -1465,7 +1476,7 @@ if makecorner:
         dx, dy = dat.shape
         # look at the 'baseline' noise level far enough from the corner to not
         # be strongly affected by the glow
-        imin = np.median(dat[3*dx//4:, 3*dy//4:])
+        imin = np.median(dat[3 * dx // 4:, 3 * dy // 4:])
         # plot and save the baseline adjusted corner glow
         ax.plot_surface(xs, ys, dat - imin, cmap='gray',
                         linewidth=0, antialiased=False, alpha=0.2)
