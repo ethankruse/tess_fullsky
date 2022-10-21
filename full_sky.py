@@ -322,7 +322,8 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s0046-*fits'))
+    files = glob(os.path.join(datadir, f'*s004[2-6]-[34]-[23]*fits'))
+    files += glob(os.path.join(datadir, f'*s004[2-6]-[12]-[14]*fits'))
     # files += glob(os.path.join(datadir, f'*s0019-2-[12]*fits'))
     # files += glob(os.path.join(datadir, f'*s0019-3-[12]*fits'))
 
@@ -571,6 +572,7 @@ if makegif and savefig and makefig and len(kepfiles) > 0:
         outfig = os.path.join(figdir, f'img{0:04d}.png')
     plt.savefig(outfig, transparent=transparent)
 
+imct = 0
 # loop through every image and create the mosaic
 for ii, ifile in enumerate(files):
     with fits.open(ifile) as ff:
@@ -1449,10 +1451,11 @@ for ii, ifile in enumerate(files):
         if makegif and savefig and makefig and endsec:
             if transparent:
                 outfig = os.path.join(figdir,
-                                      f'transp_img{(ii + 1) // 16:04d}.png')
+                                      f'transp_img{imct:04d}.png')
             else:
-                outfig = os.path.join(figdir, f'img{(ii + 1) // 16:04d}.png')
+                outfig = os.path.join(figdir, f'img{imct:04d}.png')
             plt.savefig(outfig, transparent=transparent)
+        imct += 1
 
 # save the figure if we haven't already as part of the gif
 # don't overwrite any previous file, increment the number
