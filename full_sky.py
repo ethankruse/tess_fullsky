@@ -1455,7 +1455,7 @@ for ii, ifile in enumerate(files):
             else:
                 outfig = os.path.join(figdir, f'img{imct:04d}.png')
             plt.savefig(outfig, transparent=transparent)
-        imct += 1
+            imct += 1
 
 # save the figure if we haven't already as part of the gif
 # don't overwrite any previous file, increment the number
