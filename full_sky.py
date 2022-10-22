@@ -1422,12 +1422,12 @@ for ii, ifile in enumerate(files):
                     sectxt = f'Sectors 1\u201313; 27\u201339; 42\n' \
                              f'{secstarts[1]}\u2013{secends[13]}\n' \
                              f'{secstarts[27]}\u2013{secends[27]}\n' \
-                             f'{secstarts[42]}\u2013{secends[42]}\n'
+                             f'{secstarts[42]}\u2013{secends[42]}'
                 else:
                     sectxt = f'Sectors 1\u201313; 27\u201339; 42\u2013{isec}\n'\
                              f'{secstarts[1]}\u2013{secends[13]}\n' \
                              f'{secstarts[27]}\u2013{secends[39]}\n' \
-                             f'{secstarts[42]}\u2013{secends[isec]}\n'
+                             f'{secstarts[42]}\u2013{secends[isec]}'
             elif hemisphere == 'north':
                 if isec == 40:
                     sectxt = f'Sectors 14\u201326; 40\n{secstarts[14]}' \
