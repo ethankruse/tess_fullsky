@@ -266,15 +266,17 @@ else:
     selcf = conf
 
 if highres:
-    sz = 600
+    cansz = 300
+    consz = 1300
 else:
-    sz = 5
+    cansz = 5
+    consz = 15
 
 plt.scatter(lon[selcn], lat[selcn], c='#F1A93B', alpha=1, zorder=1,
-            marker='o', s=sz, transform=data_tr)
+            marker='o', s=cansz, transform=data_tr)
 
 plt.scatter(lon[selcf], lat[selcf], c='#7BF9FC', alpha=1, zorder=1,
-            marker='o', s=sz, transform=data_tr)
+            marker='o', s=consz, transform=data_tr)
 
 if savefig:
     plt.savefig(os.path.join(figdir, hemisphere+'.png'),
