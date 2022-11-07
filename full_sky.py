@@ -322,9 +322,9 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s0056-4*fits'))
-    # files += glob(os.path.join(datadir, f'*s004[2-6]-[12]-[14]*fits'))
-    # files += glob(os.path.join(datadir, f'*s0019-2-[12]*fits'))
+    files = glob(os.path.join(datadir, f'*s0056-3-[21]*fits'))
+    files += glob(os.path.join(datadir, f'*s0056-2-[12]*fits'))
+    files += glob(os.path.join(datadir, f'*s001[56]-1-[12]*fits'))
     # files += glob(os.path.join(datadir, f'*s0019-3-[12]*fits'))
 
     # files += glob(os.path.join(datadir, f'*s0023-2-[12]*fits'))
@@ -965,6 +965,15 @@ for ii, ifile in enumerate(files):
             data[:150, 1600:1900] = np.nan
         elif isec == 55 and icam == 3 and iccd == 1:
             data[:500, :700] = np.nan
+        elif isec == 56 and icam == 1 and iccd == 3:
+            data[:150, 50:200] = np.nan
+        elif isec == 56 and icam == 1 and iccd == 4:
+            data[50:150, 1900:] = np.nan
+        elif isec == 56 and icam == 2 and iccd == 4:
+            data[:10, 940:1120] = np.nan
+            data[:50, 940:1120] -= 150.
+            data[:50, 940:1120] = np.clip(data[:50, 940:1120], a_min=50.,
+                                          a_max=None)
 
         # remove weird saturated columns that don't have obvious sources
         if isec == 26 and icam == 3 and iccd == 3:
