@@ -113,7 +113,7 @@ vmax = 901.
 
 # do we need to create the empirical corner glow correction for a sector?
 makecorner = False
-cornersec = 58
+cornersec = 59
 
 # remove the corner glow from the final image
 remove_corner_glow = True
@@ -322,8 +322,8 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s0058-2-2*fits'))
-    files += glob(os.path.join(datadir, f'*s0058-3-1*fits'))
+    files = glob(os.path.join(datadir, f'*s0059-4*fits'))
+    # files += glob(os.path.join(datadir, f'*s0058-3-1*fits'))
     # files += glob(os.path.join(datadir, f'*s001[56]-1-[12]*fits'))
     # files += glob(os.path.join(datadir, f'*s0019-3-[12]*fits'))
 
@@ -983,6 +983,8 @@ for ii, ifile in enumerate(files):
             data[:250, 1400:] = np.nan
         elif isec == 58 and icam == 3 and iccd == 1:
             data[:400, :800] = np.nan
+        elif isec == 59 and icam == 3 and iccd == 3:
+            data[250:600, :200] = np.nan
 
         # remove weird saturated columns that don't have obvious sources
         if isec == 26 and icam == 3 and iccd == 3:
