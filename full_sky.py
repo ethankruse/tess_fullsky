@@ -24,7 +24,7 @@ figdir = os.path.join(os.path.split(__file__)[0], 'figs')
 cornerdir = os.path.join(os.path.split(__file__)[0], 'corners')
 
 # options are 'north', 'south', or 'both'
-hemisphere = 'north'
+hemisphere = 'south'
 # for full-sky Mollweide projections, do we want to use ecliptic coordinates
 # if False, uses celestial coordinates (ICRS, right ascension/declination)
 ecliptic_coords = True
@@ -113,7 +113,7 @@ vmax = 901.
 
 # do we need to create the empirical corner glow correction for a sector?
 makecorner = False
-cornersec = 60
+cornersec = 61
 
 # remove the corner glow from the final image
 remove_corner_glow = True
@@ -274,7 +274,7 @@ for ifile in allfiles:
         fcam = int(os.path.split(ifile)[1].split('-')[2])
         fccd = int(os.path.split(ifile)[1].split('-')[3])
         # decide if we want to use it
-        if (((fsec < 14) or ((fsec > 26) and (fsec < 40))) and
+        if (((fsec < 14) or ((fsec > 26) and (fsec < 40)) or (fsec > 60)) and
                 hemisphere in ['both', 'south']):
             files.append(ifile)
         elif ((((fsec > 13) and (fsec < 27)) or
@@ -322,7 +322,7 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s0060-4-*fits'))
+    files = glob(os.path.join(datadir, f'*s0061-4-*fits'))
     # files += glob(os.path.join(datadir, f'*s0059-2-3*fits'))
     # files += glob(os.path.join(datadir, f'*s001[56]-1-[12]*fits'))
     # files += glob(os.path.join(datadir, f'*s0019-3-[12]*fits'))
