@@ -1453,11 +1453,25 @@ for ii, ifile in enumerate(files):
                              f'{secstarts[1]}\u2013{secends[13]}\n' \
                              f'{secstarts[27]}\u2013{secends[27]}\n' \
                              f'{secstarts[42]}\u2013{secends[42]}'
-                else:
+                elif isec <= 46:
                     sectxt = f'Sectors 1\u201313; 27\u201339; 42\u2013{isec}\n'\
                              f'{secstarts[1]}\u2013{secends[13]}\n' \
                              f'{secstarts[27]}\u2013{secends[39]}\n' \
                              f'{secstarts[42]}\u2013{secends[isec]}'
+                elif isec == 61:
+                    sectxt = f'Sectors 1\u201313; 27\u201339;\n' \
+                             f'42\u201346; {isec}\n' \
+                             f'{secstarts[1]}\u2013{secends[13]}\n' \
+                             f'{secstarts[27]}\u2013{secends[39]}\n' \
+                             f'{secstarts[42]}\u2013{secends[46]}\n' \
+                             f'{secstarts[61]}\u2013{secends[61]}\n'
+                else:
+                    sectxt = f'Sectors 1\u201313; 27\u201339;\n' \
+                             f'42\u201346; 61\u2013{isec}\n' \
+                             f'{secstarts[1]}\u2013{secends[13]}\n' \
+                             f'{secstarts[27]}\u2013{secends[39]}\n' \
+                             f'{secstarts[42]}\u2013{secends[46]}\n' \
+                             f'{secstarts[61]}\u2013{secends[isec]}\n'
             elif hemisphere == 'north':
                 if isec == 40:
                     sectxt = f'Sectors 14\u201326; 40\n{secstarts[14]}' \
