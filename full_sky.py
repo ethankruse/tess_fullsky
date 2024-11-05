@@ -5,6 +5,8 @@ from datetime import datetime
 from glob import glob
 
 import cartopy.crs as ccrs
+import matplotlib
+# matplotlib.use('TkAgg')
 import matplotlib.colors as colors
 import matplotlib.pyplot as plt
 import numpy as np
@@ -24,7 +26,7 @@ figdir = os.path.join(os.path.split(__file__)[0], 'figs')
 cornerdir = os.path.join(os.path.split(__file__)[0], 'corners')
 
 # options are 'north', 'south', or 'both'
-hemisphere = 'south'
+hemisphere = 'north'
 # for full-sky Mollweide projections, do we want to use ecliptic coordinates
 # if False, uses celestial coordinates (ICRS, right ascension/declination)
 ecliptic_coords = True
@@ -37,7 +39,6 @@ addkepler = True
 
 # option to not print any text on the images
 notext = False
-
 # parameters that change depending on the hemisphere
 if hemisphere == 'both':
     # coordinates at the center of the projection
@@ -113,12 +114,12 @@ vmax = 901.
 
 # do we need to create the empirical corner glow correction for a sector?
 makecorner = False
-cornersec = 67
+cornersec = 82
 
 # remove the corner glow from the final image
 remove_corner_glow = True
 # make a plot of the corner glow for every CCD to check how removal is working
-corner_glow_plot = False
+corner_glow_plot = True
 
 # manual adjustments to the strength of corner glow corrections
 adjfile = os.path.join(cornerdir, 'adjustments.txt')
@@ -127,11 +128,11 @@ adjfile = os.path.join(cornerdir, 'adjustments.txt')
 binning = True
 
 # flag indicating we're just testing things
-test = False
+test = True
 # create the output figure
-makefig = True
+makefig = False
 # the output figure in high or "full" resolution
-highres = True
+highres = False
 fullres = False
 
 # which color bar to use
@@ -142,7 +143,7 @@ else:
     cc = ''
 
 # save the output figure
-savefig = True
+savefig = False
 # save every sector image for a gif in a subdirectory
 makegif = False
 if makegif:
@@ -246,6 +247,8 @@ if fullres and highres:
 download = os.path.join(datadir, 'download.sh')
 with open(download, 'r') as ff:
     for line in ff.readlines():
+        if line[0] == '#':
+            continue
         fname = os.path.join(datadir, line.split()[5])
         if not os.path.exists(fname):
             subprocess.run(line, shell=True, cwd=datadir)
@@ -274,15 +277,19 @@ for ifile in allfiles:
         fcam = int(os.path.split(ifile)[1].split('-')[2])
         fccd = int(os.path.split(ifile)[1].split('-')[3])
         # decide if we want to use it
-        if (((fsec < 14) or ((fsec > 26) and (fsec < 40)) or (fsec > 60)) and
+        if fsec > 86:
+            raise Exception('Need to figure out hemispheres of future sectors.')
+        if (((fsec < 14) or ((fsec > 26) and (fsec < 40)) or
+             ((fsec > 60) and (fsec < 70))) and
                 hemisphere in ['both', 'south']):
             files.append(ifile)
         elif ((((fsec > 13) and (fsec < 27)) or
                ((fsec > 39) and (fsec < 42)) or
-               ((fsec > 46) and (fsec < 61))) and
+               ((fsec > 46) and (fsec < 61)) or
+               ((fsec > 72) and (fsec < 87))) and
               hemisphere in ['both', 'north']):
             files.append(ifile)
-        elif (fsec > 41) and (fsec < 47):
+        elif ((fsec > 41) and (fsec < 47)) or ((fsec > 69) and (fsec < 73)):
             if (hemisphere in ['both', 'north'] and
                     ((fcam in [1, 2] and fccd in [2, 3]) or
                      (fcam in [3, 4] and fccd in [1, 4]))):
@@ -322,8 +329,9 @@ if makegif:
 
 # anything we want to test
 if test:
-    files = glob(os.path.join(datadir, f'*s0066-2*fits'))
-    # files += glob(os.path.join(datadir, f'*s0059-2-3*fits'))
+    # ecliptic needs white balance adjustments
+    files = glob(os.path.join(datadir, f'*s0082-4*fits'))
+    # files += glob(os.path.join(datadir, f'*s0043-3*fits'))
     # files += glob(os.path.join(datadir, f'*s001[56]-1-[12]*fits'))
     # files += glob(os.path.join(datadir, f'*s0019-3-[12]*fits'))
 
@@ -621,6 +629,15 @@ for ii, ifile in enumerate(files):
         print(
             f'{now}. Processing image {ii + 1} of {len(files)}: Sector {isec} '
             f'Camera {icam} CCD {iccd}')
+
+        # deal with Jupiter ruining one quarter of this image
+        if isec == 71 and icam == 1 and iccd == 4:
+            fix = glob('data/jupiter/*fits')
+            assert len(fix) == 1
+            with fits.open(fix[0]) as gg:
+                data2 = gg[1].data * 1
+                data2 = data2[:2048, 44:2092]
+                data[:, :512] = data2[:, :512] + 10
 
         if remove_corner_glow:
             # create the empirical corner glow model
@@ -1050,6 +1067,46 @@ for ii, ifile in enumerate(files):
             data[:800, 1650:] = np.nan
         elif isec == 66 and icam == 4 and iccd == 2:
             data[250:650, 1800:] = np.nan
+        elif isec == 69 and icam == 1 and iccd == 3:
+            data[:450, :400] = np.nan
+        elif isec == 69 and icam == 1 and iccd == 4:
+            data[:200, 1450:1700] = np.nan
+        elif isec == 69 and icam == 2 and iccd == 3:
+            data[1550:1700, 1900:] = np.nan
+        elif isec == 70 and icam == 4 and iccd == 4:
+            data[:400, 1800:] = np.nan
+        elif isec == 73 and icam == 3 and iccd == 4:
+            data[100:500, 1800:] = np.nan
+        elif isec == 73 and icam == 4 and iccd == 2:
+            data[:150, 1800:] = np.nan
+        elif isec == 73 and icam == 4 and iccd == 3:
+            data[:300, :400] = np.nan
+        elif isec == 75 and icam == 3 and iccd == 3:
+            data[:200, 400:800] = np.nan
+        elif isec == 76 and icam == 3 and iccd == 4:
+            data[:200, 1300:1900] = np.nan
+        elif isec == 77 and icam == 1 and iccd == 3:
+            data[:250, :400] = np.nan
+        elif isec == 77 and icam == 2 and iccd == 1:
+            data[200:600, :300] = np.nan
+        elif isec == 77 and icam == 2 and iccd == 2:
+            data[400:800, 1900:] = np.nan
+        elif isec == 77 and icam == 2 and iccd == 3:
+            data[:250, 200:500] = np.nan
+        elif isec == 77 and icam == 3 and iccd == 1:
+            data[200:600, :200] = np.nan
+        elif isec == 77 and icam == 3 and iccd == 4:
+            data[:250, 1600:1900] = np.nan
+        elif isec == 78 and icam == 2 and iccd == 3:
+            data[:200, 100:400] = np.nan
+        elif isec == 79 and icam == 3 and iccd == 2:
+            data[100:400, 1800:] = np.nan
+        elif isec == 80 and icam == 2 and iccd == 3:
+            data[:300, 200:600] = np.nan
+        elif isec == 82 and icam == 1 and iccd == 3:
+            data[:350, :400] = np.nan
+        elif isec == 82 and icam == 3 and iccd == 4:
+            data[:200, 1400:1900] = np.nan
 
         # remove weird saturated columns that don't have obvious sources
         if isec == 26 and icam == 3 and iccd == 3:
