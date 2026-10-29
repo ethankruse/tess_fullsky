@@ -21,7 +21,9 @@ from truncate import truncate_colormap
 ##################################################################
 # Configuration parameters
 
-datadir = os.path.join(os.path.split(__file__)[0], 'data')
+datadir = os.path.join(os.path.split(__file__)[0], 'data/downloads')
+if not os.path.exists(datadir):
+    os.mkdir(datadir)
 figdir = os.path.join(os.path.split(__file__)[0], 'figs')
 cornerdir = os.path.join(os.path.split(__file__)[0], 'corners')
 
@@ -128,9 +130,9 @@ adjfile = os.path.join(cornerdir, 'adjustments.txt')
 binning = True
 
 # flag indicating we're just testing things
-test = False
+test = True
 # create the output figure
-makefig = True
+makefig = False
 # the output figure in high or "full" resolution
 highres = True
 fullres = False
@@ -143,7 +145,7 @@ else:
     cc = ''
 
 # save the output figure
-savefig = True
+savefig = False
 # save every sector image for a gif in a subdirectory
 makegif = False
 if makegif:
@@ -244,7 +246,7 @@ if fullres and highres:
     raise Exception('Must choose either full or high resolution.')
 
 # download the necessary files if they don't already exist
-download = os.path.join(datadir, 'download.sh')
+download = 'data/download.sh'
 with open(download, 'r') as ff:
     for line in ff.readlines():
         if line[0] == '#':
@@ -254,7 +256,7 @@ with open(download, 'r') as ff:
             subprocess.run(line, shell=True, cwd=datadir)
 
 if addkepler:
-    download2 = os.path.join(datadir, 'kepler_k2.sh')
+    download2 = 'data/kepler_k2.sh'
     with open(download2, 'r') as ff:
         for line in ff.readlines():
             fname = os.path.join(datadir, line.split()[-2][1:-1])
@@ -658,7 +660,7 @@ for ii, ifile in enumerate(files):
 
         # deal with Jupiter ruining one quarter of this image
         if isec == 71 and icam == 1 and iccd == 4:
-            fix = glob('data/jupiter/*fits')
+            fix = glob(os.path.join(datadir, 'jupiter/*fits'))
             assert len(fix) == 1
             with fits.open(fix[0]) as gg:
                 data2 = gg[1].data * 1
