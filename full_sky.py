@@ -21,11 +21,14 @@ from truncate import truncate_colormap
 ##################################################################
 # Configuration parameters
 
-datadir = os.path.join(os.path.split(__file__)[0], 'data/downloads')
+curfile = os.path.split(__file__)[0]
+datadir = os.path.join(curfile, 'data/downloads')
 if not os.path.exists(datadir):
     os.mkdir(datadir)
-figdir = os.path.join(os.path.split(__file__)[0], 'figs')
-cornerdir = os.path.join(os.path.split(__file__)[0], 'corners')
+    os.mkdir(os.path.join(datadir, 'jupiter'))
+
+figdir = os.path.join(curfile, 'figs')
+cornerdir = os.path.join(curfile, 'corners')
 
 # options are 'north', 'south', or 'both'
 hemisphere = 'north'
@@ -59,8 +62,8 @@ if hemisphere == 'both':
         # what the output file name base should be
         fbase = 'mollweide'
     # the coordinates of the corners of the CCDs
-    edgefiles = [os.path.join(os.path.split(__file__)[0], 'edges_south.txt'),
-                 os.path.join(os.path.split(__file__)[0], 'edges_north.txt')]
+    edgefiles = [os.path.join(curfile, 'edges_south.txt'),
+                 os.path.join(curfile, 'edges_north.txt')]
     if ecliptic_coords:
         fbase += '_ecliptic'
     if galactic_coords:
@@ -79,7 +82,7 @@ elif hemisphere == 'south':
     wrap = False
     tr = ccrs.AzimuthalEquidistant(central_longitude=cenlon,
                                    central_latitude=cenlat)
-    edgefiles = [os.path.join(os.path.split(__file__)[0], 'edges_south.txt')]
+    edgefiles = [os.path.join(curfile, 'edges_south.txt')]
     fbase = 'azeq_south'
     if notext:
         title = ''
@@ -96,7 +99,7 @@ elif hemisphere == 'north':
     wrap = False
     tr = ccrs.AzimuthalEquidistant(central_longitude=cenlon,
                                    central_latitude=cenlat)
-    edgefiles = [os.path.join(os.path.split(__file__)[0], 'edges_north.txt')]
+    edgefiles = [os.path.join(curfile, 'edges_north.txt')]
     fbase = 'azeq_north'
     if notext:
         title = ''
@@ -116,7 +119,7 @@ vmax = 901.
 
 # do we need to create the empirical corner glow correction for a sector?
 makecorner = False
-cornersec = 82
+cornersec = 83
 
 # remove the corner glow from the final image
 remove_corner_glow = True
@@ -132,7 +135,7 @@ binning = True
 # flag indicating we're just testing things
 test = True
 # create the output figure
-makefig = False
+makefig = True
 # the output figure in high or "full" resolution
 highres = True
 fullres = False
@@ -145,7 +148,7 @@ else:
     cc = ''
 
 # save the output figure
-savefig = False
+savefig = True
 # save every sector image for a gif in a subdirectory
 makegif = False
 if makegif:
@@ -332,6 +335,7 @@ if makegif:
 # anything we want to test
 if test:
     # XXX: this is the ecliptic to fix
+    """
     files = glob(os.path.join(datadir, f'*s007[21]*fits'))
     files += glob(os.path.join(datadir, f'*s004[345]*fits'))
     files += glob(os.path.join(datadir, f'*s0070-[234]*fits'))
@@ -340,32 +344,12 @@ if test:
     files += glob(os.path.join(datadir, f'*s006[012]-1*fits'))
     files += glob(os.path.join(datadir, f'*s004[78]-1*fits'))
     files += glob(os.path.join(datadir, f'*s003[0123]-1*fits'))
+    """
+    # files = glob(os.path.join(datadir, f'*s0083-2-[12]*fits'))
 
-    files = glob(os.path.join(datadir, f'*s007[89]-1*fits'))
-    # files += glob(os.path.join(datadir, f'*s0060-[23]*fits'))
-    # files += glob(os.path.join(datadir, f'*s0060-1*fits'))
-    # files += glob(os.path.join(datadir, f'*s003[34]-1*fits'))
-    # files += glob(os.path.join(datadir, f'*s0045-1*fits'))
-    # files += glob(os.path.join(datadir, f'*s0043-3-[34]*fits'))
-    # files += glob(os.path.join(datadir, f'*s0043-4-[12]*fits'))
-    """
-    files += glob(os.path.join(datadir, f'*s003[34]-1-[34]*fits'))
-    files += glob(os.path.join(datadir, f'*s0059-1-[34]*fits'))
-    files += glob(os.path.join(datadir, f'*s006[0123]-1-[34]*fits'))
-    files += glob(os.path.join(datadir, f'*s004[789]-1-[34]*fits'))
-    """
-    """
-    files = glob(os.path.join(datadir, f'*s004[23456]*fits'))
-    files += glob(os.path.join(datadir, f'*s007[012]*fits'))
-    files += glob(os.path.join(datadir, f'*s004[789]-1-[34]*fits'))
-    files += glob(os.path.join(datadir, f'*s005[01456789]-1-[34]*fits'))
-    files += glob(os.path.join(datadir, f'*s006[0-6]-1-[34]*fits'))
-    files += glob(os.path.join(datadir, f'*s002[7-9]-1-[34]*fits'))
-    files += glob(os.path.join(datadir, f'*s003[0-4]-1-[34]*fits'))
-    """
-    # files += glob(os.path.join(datadir, f'*s0023-2-[12]*fits'))
-    # files += glob(os.path.join(datadir, f'*s0022-1-[12]*fits'))
-    # files += glob(os.path.join(datadir, f'*s0021*fits'))
+    files = glob(os.path.join(datadir, f'*s008[23]*fits'))
+    files += glob(os.path.join(datadir, f'*s0070-[12]*fits'))
+    files += glob(os.path.join(datadir, f'*s005[567]*fits'))
     files.sort()
 
     kepfiles = []
@@ -1216,6 +1200,22 @@ for ii, ifile in enumerate(files):
             data[:350, :400] = np.nan
         elif isec == 82 and icam == 3 and iccd == 4:
             data[:200, 1400:1900] = np.nan
+        elif isec == 83 and icam == 1 and iccd == 2:
+            data[:150, 1900:] = np.nan
+        elif isec == 83 and icam == 1 and iccd == 3:
+            data[50:300, 150:400] = np.nan
+        elif isec == 83 and icam == 1 and iccd == 4:
+            data[:150, 1800:] = np.nan
+        elif isec == 83 and icam == 2 and iccd == 4:
+            data[:100, 500:800] = np.nan
+        elif isec == 83 and icam == 2 and iccd == 1:
+            data[:600, :600] = np.nan
+        elif isec == 83 and icam == 2 and iccd == 2:
+            data[:600, -600:] = np.nan
+        elif isec == 83 and icam == 3 and iccd == 1:
+            data[:600, :600] = np.nan
+        elif isec == 83 and icam == 3 and iccd == 2:
+            data[:600, -600:] = np.nan
 
         # remove weird saturated columns that don't have obvious sources
         if isec == 26 and icam == 3 and iccd == 3:
